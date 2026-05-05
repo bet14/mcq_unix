@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Session 7 - Shell Scripting II MCQ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #333; }
+  header { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); color: white; padding: 30px 20px; text-align: center; }
+  header h1 { font-size: 2em; margin-bottom: 8px; }
+  header p { opacity: 0.85; font-size: 1em; }
+  .progress-bar-container { background: #ddd; border-radius: 10px; height: 12px; margin: 20px 40px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, #4CAF50, #81C784); border-radius: 10px; transition: width 0.4s; width: 0%; }
+  .progress-label { text-align: center; font-size: 0.9em; color: #555; margin-bottom: 10px; }
+  .quiz-container { max-width: 860px; margin: 20px auto; padding: 0 16px 60px; }
+  .question-card { background: white; border-radius: 14px; padding: 24px; margin-bottom: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); border-left: 5px solid #0f3460; transition: border-color 0.3s; }
+  .question-card.correct-card { border-left-color: #4CAF50; }
+  .question-card.wrong-card { border-left-color: #f44336; }
+  .question-card.skipped-card { border-left-color: #9e9e9e; }
+  .question-number { font-size: 0.78em; font-weight: 700; color: #0f3460; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .question-text { font-size: 1.05em; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+  .question-text code { background: #f0f4f8; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.95em; color: #c0392b; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn { background: #f7f9fc; border: 2px solid #e0e6ef; border-radius: 10px; padding: 12px 16px; text-align: left; cursor: pointer; font-size: 0.97em; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+  .option-btn:hover:not(:disabled) { background: #e8f0fe; border-color: #0f3460; }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.selected-correct { background: #e8f5e9; border-color: #4CAF50; color: #2e7d32; font-weight: 600; }
+  .option-btn.selected-wrong { background: #ffebee; border-color: #f44336; color: #c62828; font-weight: 600; }
+  .option-btn.reveal-correct { background: #e8f5e9; border-color: #4CAF50; color: #2e7d32; }
+  .option-label { font-weight: 700; min-width: 22px; }
+  .feedback { margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: 0.93em; line-height: 1.5; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #e8f5e9; border-left: 4px solid #4CAF50; color: #2e7d32; }
+  .feedback.wrong { background: #ffebee; border-left: 4px solid #f44336; color: #c62828; }
+  .feedback code { background: rgba(0,0,0,0.07); padding: 1px 5px; border-radius: 3px; font-family: monospace; }
+  .status-icon { float: right; font-size: 1.3em; }
+  .submit-section { text-align: center; margin: 30px 0; }
+  .submit-btn { background: linear-gradient(135deg, #0f3460, #1a1a2e); color: white; border: none; padding: 16px 48px; font-size: 1.1em; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(15,52,96,0.3); transition: transform 0.2s, box-shadow 0.2s; }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(15,52,96,0.4); }
+  .recap-section { background: white; border-radius: 14px; padding: 28px; margin-top: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); display: none; }
+  .recap-section.show { display: block; }
+  .recap-title { font-size: 1.5em; font-weight: 700; text-align: center; margin-bottom: 20px; color: #0f3460; }
+  .score-summary { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+  .score-box { text-align: center; padding: 16px 24px; border-radius: 12px; min-width: 110px; }
+  .score-box.total { background: #e3f2fd; color: #1565c0; }
+  .score-box.correct { background: #e8f5e9; color: #2e7d32; }
+  .score-box.wrong { background: #ffebee; color: #c62828; }
+  .score-box.skipped { background: #f5f5f5; color: #616161; }
+  .score-box .score-num { font-size: 2em; font-weight: 800; }
+  .score-box .score-lbl { font-size: 0.82em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .score-pct { text-align: center; font-size: 2.2em; font-weight: 800; color: #0f3460; margin-bottom: 24px; }
+  .recap-list { list-style: none; }
+  .recap-item { padding: 12px 16px; border-radius: 8px; margin-bottom: 8px; font-size: 0.93em; display: flex; align-items: flex-start; gap: 10px; }
+  .recap-item.r-correct { background: #e8f5e9; }
+  .recap-item.r-wrong { background: #ffebee; }
+  .recap-item.r-skipped { background: #f5f5f5; }
+  .recap-icon { font-size: 1.2em; min-width: 24px; margin-top: 1px; }
+  .recap-detail { flex: 1; }
+  .recap-q { font-weight: 600; margin-bottom: 4px; }
+  .recap-ans { font-size: 0.88em; opacity: 0.85; }
+  pre { background: #f0f4f8; padding: 10px; border-radius: 6px; font-size: 0.88em; overflow-x: auto; margin: 4px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🐧 OS Session 7 — Shell Scripting II</h1>
+  <p>Advanced Scripts · 40 Questions · Answer immediately, submit anytime</p>
+</header>
+
+<div class="progress-label" id="progressLabel">Progress: 0 / 40 answered</div>
+<div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+
+<div class="quiz-container" id="quizContainer"></div>
+
+<div class="submit-section">
+  <button class="submit-btn" onclick="submitQuiz()">📊 Submit &amp; See Results</button>
+</div>
+
+<div class="quiz-container">
+  <div class="recap-section" id="recapSection">
+    <div class="recap-title">📋 Quiz Results</div>
+    <div class="score-pct" id="scorePct"></div>
+    <div class="score-summary" id="scoreSummary"></div>
+    <ul class="recap-list" id="recapList"></ul>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "What does <code>$0</code> represent in a shell script?",
+    opts: ["The first argument passed to the script", "The name of the script itself", "The number of arguments", "The exit status of the last command"],
+    ans: 1,
+    exp: "<code>$0</code> holds the name of the script (e.g., <code>./myvar.sh</code>). It is a special positional parameter set automatically by the shell."
+  },
+  {
+    q: "Which variable holds ALL arguments passed to a shell script?",
+    opts: ["<code>$#</code>", "<code>$1</code>", "<code>$@</code>", "<code>$0</code>"],
+    ans: 2,
+    exp: "<code>$@</code> expands to all positional parameters (arguments) passed to the script, each as a separate word."
+  },
+  {
+    q: "What does <code>$#</code> store in a shell script?",
+    opts: ["The name of the script", "The last argument", "The number of arguments passed", "The exit code"],
+    ans: 2,
+    exp: "<code>$#</code> stores the count of positional parameters (arguments) passed to the script."
+  },
+  {
+    q: "Given: <code>./myvar.sh hello world earth</code> — what is the value of <code>$2</code>?",
+    opts: ["hello", "world", "earth", "./myvar.sh"],
+    ans: 1,
+    exp: "Positional parameters start at <code>$1</code>. So <code>$1=hello</code>, <code>$2=world</code>, <code>$3=earth</code>."
+  },
+  {
+    q: "If a script is called with no arguments, what does <code>$#</code> equal?",
+    opts: ["1", "-1", "0", "undefined"],
+    ans: 2,
+    exp: "When no arguments are passed, <code>$#</code> is <code>0</code>. The script name in <code>$0</code> is not counted."
+  },
+  {
+    q: "What is the valid range of numbered positional parameters accessible directly (without braces)?",
+    opts: ["$0 to $99", "$1 to $9", "$0 to $9", "$1 to $99"],
+    ans: 2,
+    exp: "Directly accessible positional parameters are <code>$0</code> through <code>$9</code>. For higher numbers, use <code>${10}</code>, etc."
+  },
+  {
+    q: "What does the <code>shift</code> command do by default?",
+    opts: ["Shifts all arguments two positions to the left", "Discards $0 and shifts remaining args", "Discards $1 and shifts all others one position left", "Adds a new argument at the beginning"],
+    ans: 2,
+    exp: "<code>shift</code> (without argument) discards <code>$1</code> and shifts all remaining positional parameters one position to the left. <code>$#</code> decreases by 1."
+  },
+  {
+    q: "What does <code>shift 3</code> do?",
+    opts: ["Shifts arguments 3 positions to the right", "Discards the first 3 arguments and shifts the rest", "Duplicates the first 3 arguments", "Sets $# to 3"],
+    ans: 1,
+    exp: "<code>shift N</code> discards the first N positional parameters, shifting the rest left by N positions. <code>$#</code> decreases by N."
+  },
+  {
+    q: "After calling <code>shift</code> once in a script called with 4 arguments, what is the new value of <code>$#</code>?",
+    opts: ["4", "3", "2", "0"],
+    ans: 1,
+    exp: "Each <code>shift</code> decreases <code>$#</code> by 1. Starting with 4 arguments, after one <code>shift</code>, <code>$#</code> becomes 3."
+  },
+  {
+    q: "Which loop is most appropriate when you do NOT know in advance how many iterations are needed?",
+    opts: ["for loop", "until loop", "while loop", "select loop"],
+    ans: 2,
+    exp: "The <code>while</code> loop is ideal when the number of iterations is unknown — it continues as long as a condition is true."
+  },
+  {
+    q: "What is the correct syntax for a while loop in bash?",
+    opts: [
+      "while (condition) { commands }",
+      "while [ condition ]; do ... done",
+      "while condition: do ... end",
+      "loop while [ condition ] do ... done"
+    ],
+    ans: 1,
+    exp: "The correct bash while loop syntax is: <code>while [ condition ]; do ... done</code>."
+  },
+  {
+    q: "What does the following loop print?<pre>count=1\nwhile [ $count -le 3 ]; do\n  echo $count\n  count=$((count + 1))\ndone</pre>",
+    opts: ["1 2 3 4", "1 2 3", "0 1 2 3", "2 3"],
+    ans: 1,
+    exp: "The loop starts at 1 and continues while count &le; 3, printing 1, 2, 3. When count becomes 4, the condition is false and the loop exits."
+  },
+  {
+    q: "In a while loop, what does <code>-le</code> mean?",
+    opts: ["Less than", "Less than or equal to", "Not equal to", "Greater than or equal to"],
+    ans: 1,
+    exp: "<code>-le</code> stands for 'less than or equal to' in shell test expressions."
+  },
+  {
+    q: "Which of the following correctly uses shift to process all arguments?",
+    opts: [
+      "for arg in $@; do echo $arg; done",
+      "while [ $# -gt 0 ]; do echo $1; shift; done",
+      "while [ $# -ne 0 ]; do echo $@; done",
+      "until [ $1 ]; do shift; echo $1; done"
+    ],
+    ans: 1,
+    exp: "The pattern <code>while [ $# -gt 0 ]; do echo $1; shift; done</code> processes each argument one by one, removing it after processing."
+  },
+  {
+    q: "What is printed when running: <code>./shift_example.sh hello world 42 earth</code> with the script using shift in a while loop?",
+    opts: [
+      "hello world 42 earth (all at once)",
+      "Argument: hello\nArgument: world\nArgument: 42\nArgument: earth",
+      "Only: Argument: hello",
+      "42 earth world hello (reversed)"
+    ],
+    ans: 1,
+    exp: "Each iteration prints the current <code>$1</code> then shifts, so each argument is printed on a separate line in order."
+  },
+  {
+    q: "What is the correct way to define a function in shell scripting?",
+    opts: [
+      "def function_name() { commands }",
+      "function_name() { commands }",
+      "func function_name { commands }",
+      "define function_name() { commands }"
+    ],
+    ans: 1,
+    exp: "Shell functions can be defined as <code>function_name() { commands }</code> or <code>function function_name { commands }</code>."
+  },
+  {
+    q: "How do you pass an argument to a shell function?",
+    opts: [
+      "function_name(arg1, arg2)",
+      "function_name --arg1 value",
+      "function_name arg1 arg2",
+      "call function_name with arg1"
+    ],
+    ans: 2,
+    exp: "Shell functions receive arguments just like scripts — by passing them after the function name: <code>function_name arg1 arg2</code>. Inside, use <code>$1</code>, <code>$2</code>, etc."
+  },
+  {
+    q: "Inside a function, what does <code>$1</code> refer to?",
+    opts: [
+      "The first argument of the script",
+      "The name of the function",
+      "The first argument passed to the function",
+      "The exit code of the function"
+    ],
+    ans: 2,
+    exp: "Inside a function, <code>$1</code> refers to the first argument passed to that function, not to the script."
+  },
+  {
+    q: "What is the output of:<pre>hello_person() {\n  echo \'Hello, $1!\'\n}\nhello_person Thomas</pre>",
+    opts: ["Hello, $1!", "Hello, Thomas!", "Hello, !", "Error: undefined variable"],
+    ans: 1,
+    exp: "The function receives \'Thomas\' as <code>$1</code> and echoes <code>Hello, Thomas!</code>."
+  },
+  {
+    q: "What is the purpose of the <code>return</code> statement in a shell function?",
+    opts: [
+      "To print a value from the function",
+      "To terminate the entire script",
+      "To indicate success or failure of the function",
+      "To pass data back to the caller as a variable"
+    ],
+    ans: 2,
+    exp: "<code>return</code> exits the function and provides a status code (0 = success, non-zero = failure). It does NOT return data values like in other languages."
+  },
+  {
+    q: "What does <code>exit 0</code> signify in a shell script?",
+    opts: ["An error occurred", "The script terminated successfully", "The script is paused", "The script will restart"],
+    ans: 1,
+    exp: "By convention, exit code 0 means success. Non-zero exit codes indicate errors."
+  },
+  {
+    q: "What does <code>$?</code> store?",
+    opts: [
+      "The process ID of the script",
+      "The number of arguments",
+      "The exit status of the last executed command",
+      "The name of the current shell"
+    ],
+    ans: 2,
+    exp: "<code>$?</code> holds the exit status (return code) of the most recently executed command or function."
+  },
+  {
+    q: "After running a command that fails, what typical value does <code>$?</code> hold?",
+    opts: ["0", "A non-zero value", "-1 always", "null"],
+    ans: 1,
+    exp: "A non-zero exit status indicates failure. The exact value depends on the command, but 0 always means success."
+  },
+  {
+    q: "What is the difference between <code>exit</code> and <code>return</code>?",
+    opts: [
+      "They are identical",
+      "exit terminates the script; return exits only the current function",
+      "return terminates the script; exit exits only the function",
+      "exit is for loops; return is for conditionals"
+    ],
+    ans: 1,
+    exp: "<code>exit</code> terminates the entire script with a status code. <code>return</code> exits only the current function and returns a status code to the caller."
+  },
+  {
+    q: "What does <code>set -x</code> do in a shell script?",
+    opts: [
+      "Exits the script on any error",
+      "Enables trace mode — prints each command before execution",
+      "Disables all debugging",
+      "Sets a variable named x"
+    ],
+    ans: 1,
+    exp: "<code>set -x</code> enables trace mode. The shell prints each command (with expanded values) before executing it, prefixed with <code>+</code>."
+  },
+  {
+    q: "How do you turn OFF trace mode in bash?",
+    opts: ["set -x", "set +x", "unset -x", "debug off"],
+    ans: 1,
+    exp: "<code>set +x</code> disables trace mode that was previously enabled with <code>set -x</code>."
+  },
+  {
+    q: "What does <code>bash -n script.sh</code> do?",
+    opts: [
+      "Runs the script in non-interactive mode",
+      "Checks for syntax errors without executing the script",
+      "Runs the script with no environment variables",
+      "Disables all built-in commands"
+    ],
+    ans: 1,
+    exp: "<code>bash -n</code> parses the script and checks for syntax errors without actually executing any commands."
+  },
+  {
+    q: "What is the purpose of <code>trap</code> in shell scripting?",
+    opts: [
+      "To capture user input",
+      "To handle signals, errors, or cleanup on script exit/interruption",
+      "To trap infinite loops",
+      "To redirect output to a file"
+    ],
+    ans: 1,
+    exp: "<code>trap</code> allows you to define actions to take when the script receives signals (like SIGINT) or exits, useful for cleanup and graceful error handling."
+  },
+  {
+    q: "Given the trace output:<pre>+ NAME=Thomas\n+ echo \'Hello, Thomas\'\nHello, Thomas\n+ set +x</pre>What command produced this?",
+    opts: [
+      "bash --verbose script.sh",
+      "set -x followed by NAME=Thomas; echo Hello, $NAME; set +x",
+      "debug=true; NAME=Thomas; print NAME",
+      "trace NAME=Thomas echo Hello"
+    ],
+    ans: 1,
+    exp: "The <code>+</code> prefix in trace output is produced by <code>set -x</code>. Each line shows a command as it is about to be executed."
+  },
+  {
+    q: "Which of the following is a common use case for <code>while</code> loops?",
+    opts: [
+      "Iterating over a fixed list of files",
+      "Reading a file line by line",
+      "Executing a command exactly 3 times",
+      "Defining functions"
+    ],
+    ans: 1,
+    exp: "While loops are especially useful for reading files line by line, waiting for processes to finish, or any scenario where the iteration count is unknown."
+  },
+  {
+    q: "What is the output of:<pre>#!/bin/bash\ncheck() {\n  if [ &quot;$1&quot; -gt 10 ]; then\n    return 0\n  else\n    return 1\n  fi\n}\ncheck 15\necho $?</pre>",
+    opts: ["1", "0", "15", "Error"],
+    ans: 1,
+    exp: "15 &gt; 10, so the function returns 0 (success). <code>$?</code> captures this return value and echoes 0."
+  },
+  {
+    q: "What is the output of:<pre>check_number 5\necho &quot;Return code was: $?&quot;</pre>(using the same check_number function where &gt;10 returns 0, else returns 1)",
+    opts: ["Return code was: 0", "Return code was: 1", "Return code was: 5", "Return code was: -1"],
+    ans: 1,
+    exp: "5 is NOT greater than 10, so the function returns 1 (failure). <code>$?</code> = 1."
+  },
+  {
+    q: "How can you source (load) a function file in a shell script?",
+    opts: [
+      "import ./hello_func.sh",
+      ". hello_func.sh  (or source hello_func.sh)",
+      "load hello_func.sh",
+      "include hello_func.sh"
+    ],
+    ans: 1,
+    exp: "Use <code>. filename</code> or <code>source filename</code> to load (source) a file containing function definitions into the current shell session."
+  },
+  {
+    q: "Which keyword can also be used to define a function in bash?",
+    opts: ["def", "func", "function", "sub"],
+    ans: 2,
+    exp: "In bash, you can use the <code>function</code> keyword: <code>function my_func { commands; }</code>. This is equivalent to <code>my_func() { commands; }</code>."
+  },
+  {
+    q: "What happens to <code>$1</code> after calling <code>shift</code>?",
+    opts: [
+      "$1 is deleted and becomes empty",
+      "$1 takes the value that was in $2",
+      "$1 takes the value that was in $0",
+      "$1 remains unchanged"
+    ],
+    ans: 1,
+    exp: "After <code>shift</code>, <code>$1</code> gets the value that was previously in <code>$2</code>, <code>$2</code> gets what was in <code>$3</code>, and so on."
+  },
+  {
+    q: "What is a key benefit of using functions in shell scripts?",
+    opts: [
+      "Functions run faster than inline code",
+      "Functions allow reusability and reduce code repetition",
+      "Functions automatically handle errors",
+      "Functions can only be used once per script"
+    ],
+    ans: 1,
+    exp: "Functions promote reusability, reduce repetition, and improve readability and maintainability of shell scripts."
+  },
+  {
+    q: "In the script:<pre>if [ ! -f myfile.txt ]; then\n  echo \'File not found!\'\n  exit 1\nfi</pre>What does <code>exit 1</code> indicate?",
+    opts: [
+      "The script succeeded",
+      "The script encountered an error and terminates with code 1",
+      "The script will retry once",
+      "The script pauses for 1 second"
+    ],
+    ans: 1,
+    exp: "<code>exit 1</code> terminates the script with a non-zero exit code, conventionally indicating an error or failure condition."
+  },
+  {
+    q: "Which debugging approach lets you manually inspect variable values?",
+    opts: [
+      "set -x",
+      "bash -n",
+      "echo statements",
+      "trap"
+    ],
+    ans: 2,
+    exp: "Using <code>echo</code> to print variable values at key points in the script is a simple and effective manual debugging technique."
+  },
+  {
+    q: "What does <code>-gt</code> mean in shell test conditions?",
+    opts: ["Greater than or equal", "Greater than", "Not greater than", "Get total"],
+    ans: 1,
+    exp: "<code>-gt</code> means 'greater than' in shell arithmetic test expressions, e.g., <code>[ $a -gt $b ]</code>."
+  },
+  {
+    q: "Which statement about positional parameters is TRUE?",
+    opts: [
+      "$0 counts as one of the arguments in $#",
+      "You can assign values to $0 directly",
+      "$@ contains all arguments excluding $0",
+      "$# includes $0 in its count"
+    ],
+    ans: 2,
+    exp: "<code>$@</code> expands to all positional parameters starting from <code>$1</code>, NOT including <code>$0</code> (the script name). <code>$#</code> also does not count <code>$0</code>."
+  },
+  {
+    q: "What is the correct arithmetic syntax to increment a variable in bash?",
+    opts: [
+      "count = count + 1",
+      "count=$((count + 1))",
+      "count=count+1",
+      "let count++"
+    ],
+    ans: 1,
+    exp: "<code>count=$((count + 1))</code> uses bash arithmetic expansion. While <code>let count++</code> also works, the <code>$(( ))</code> syntax is the standard shown in the lecture."
+  }
+];
+
+let answered = {};
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+
+    const labels = ['A', 'B', 'C', 'D'];
+    let optsHTML = q.opts.map((opt, j) => `
+      <button class="option-btn" id="opt-${i}-${j}" onclick="selectAnswer(${i}, ${j})">
+        <span class="option-label">${labels[j]}</span>
+        <span>${opt}</span>
+      </button>`).join('');
+
+    card.innerHTML = `
+      <div class="question-number">Question ${i+1} of ${questions.length}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options" id="opts-${i}">${optsHTML}</div>
+      <div class="feedback" id="fb-${i}"></div>`;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qIndex, optIndex) {
+  if (answered[qIndex] !== undefined) return;
+  answered[qIndex] = optIndex;
+
+  const q = questions[qIndex];
+  const isCorrect = optIndex === q.ans;
+  const labels = ['A', 'B', 'C', 'D'];
+
+  for (let j = 0; j < q.opts.length; j++) {
+    const btn = document.getElementById(`opt-${qIndex}-${j}`);
+    btn.disabled = true;
+    if (j === q.ans) btn.classList.add('reveal-correct');
+  }
+
+  const selectedBtn = document.getElementById(`opt-${qIndex}-${optIndex}`);
+  if (isCorrect) {
+    selectedBtn.classList.add('selected-correct');
+  } else {
+    selectedBtn.classList.add('selected-wrong');
+  }
+
+  const fb = document.getElementById(`fb-${qIndex}`);
+  fb.className = `feedback show ${isCorrect ? 'correct' : 'wrong'}`;
+  fb.innerHTML = `${isCorrect ? '&#x2705; <strong>Correct!</strong>' : '&#x274C; <strong>Incorrect.</strong>'} ${q.exp}`;
+
+  const card = document.getElementById(`card-${qIndex}`);
+  card.classList.add(isCorrect ? 'correct-card' : 'wrong-card');
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const count = Object.keys(answered).length;
+  const pct = (count / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Progress: ${count} / ${questions.length} answered`;
+}
+
+function submitQuiz() {
+  const total = questions.length;
+  const answeredCount = Object.keys(answered).length;
+  const skippedCount = total - answeredCount;
+  let correctCount = 0, wrongCount = 0;
+
+  questions.forEach((q, i) => {
+    if (answered[i] !== undefined) {
+      if (answered[i] === q.ans) correctCount++;
+      else wrongCount++;
+    }
+  });
+
+  const pct = Math.round((correctCount / total) * 100);
+  const labels = ['A', 'B', 'C', 'D'];
+
+  document.getElementById('scorePct').textContent = `Score: ${correctCount} / ${total} (${pct}%)`;
+  document.getElementById('scoreSummary').innerHTML = `
+    <div class="score-box total"><div class="score-num">${total}</div><div class="score-lbl">Total</div></div>
+    <div class="score-box correct"><div class="score-num">${correctCount}</div><div class="score-lbl">&#x2705; Correct</div></div>
+    <div class="score-box wrong"><div class="score-num">${wrongCount}</div><div class="score-lbl">&#x274C; Wrong</div></div>
+    <div class="score-box skipped"><div class="score-num">${skippedCount}</div><div class="score-lbl">&#x23ED; Skipped</div></div>`;
+
+  const recapList = document.getElementById('recapList');
+  recapList.innerHTML = '';
+  questions.forEach((q, i) => {
+    const li = document.createElement('li');
+    let cls, icon, ansText;
+    if (answered[i] === undefined) {
+      cls = 'r-skipped'; icon = '&#x23ED;';
+      ansText = `<em>Not answered.</em> Correct answer: <strong>${labels[q.ans]}. ${q.opts[q.ans]}</strong>`;
+    } else if (answered[i] === q.ans) {
+      cls = 'r-correct'; icon = '&#x2705;';
+      ansText = `Your answer: <strong>${labels[answered[i]]}. ${q.opts[answered[i]]}</strong>`;
+    } else {
+      cls = 'r-wrong'; icon = '&#x274C;';
+      ansText = `Your answer: <strong>${labels[answered[i]]}. ${q.opts[answered[i]]}</strong> | Correct: <strong>${labels[q.ans]}. ${q.opts[q.ans]}</strong>`;
+    }
+    li.className = `recap-item ${cls}`;
+    li.innerHTML = `<span class="recap-icon">${icon}</span>
+      <div class="recap-detail">
+        <div class="recap-q">Q${i+1}: ${q.q}</div>
+        <div class="recap-ans">${ansText}</div>
+      </div>`;
+    recapList.appendChild(li);
+  });
+
+  const recap = document.getElementById('recapSection');
+  recap.classList.add('show');
+  recap.scrollIntoView({ behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

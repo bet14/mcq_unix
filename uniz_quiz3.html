@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OS Session 3 – Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 30px 16px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      text-align: center;
+      color: #94a3b8;
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+    .progress-bar-wrap {
+      background: #1e293b;
+      border-radius: 99px;
+      height: 8px;
+      margin-bottom: 30px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .progress-bar {
+      height: 8px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .quiz-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .question-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+      transition: border-color 0.3s;
+    }
+    .question-card:hover { border-color: #38bdf8; }
+    .question-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .q-number {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 0.8rem;
+      border-radius: 8px;
+      padding: 4px 10px;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+    .q-text {
+      font-size: 1rem;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .option-label:hover { border-color: #38bdf8; background: #162032; }
+    .option-label input[type="radio"] { display: none; }
+    .option-letter {
+      font-weight: 700;
+      color: #38bdf8;
+      min-width: 22px;
+      font-size: 0.9rem;
+    }
+    .option-text { font-size: 0.93rem; line-height: 1.5; flex: 1; }
+    .explanation {
+      display: none;
+      margin-top: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .explanation.correct-exp {
+      background: #052e16;
+      border-left: 4px solid #22c55e;
+      color: #86efac;
+    }
+    .explanation.wrong-exp {
+      background: #2d0a0a;
+      border-left: 4px solid #ef4444;
+      color: #fca5a5;
+    }
+    /* After answer selected */
+    .option-label.selected-correct {
+      border-color: #22c55e !important;
+      background: #052e16 !important;
+    }
+    .option-label.selected-wrong {
+      border-color: #ef4444 !important;
+      background: #2d0a0a !important;
+    }
+    .option-label.show-correct {
+      border-color: #22c55e !important;
+      background: #052e16 !important;
+    }
+    .option-label.disabled { cursor: default; pointer-events: none; }
+    .status-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+    }
+    /* Buttons */
+    .btn-submit {
+      display: block;
+      margin: 10px auto 50px;
+      padding: 14px 48px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #0f172a;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-submit:hover { opacity: 0.9; transform: scale(1.02); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Recap */
+    #recap {
+      display: none;
+      max-width: 800px;
+      margin: 0 auto 60px;
+    }
+    .recap-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .recap-score {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .recap-label { color: #94a3b8; font-size: 1rem; margin-top: 4px; }
+    .recap-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .recap-table th {
+      background: #1e293b;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      border-bottom: 1px solid #334155;
+    }
+    .recap-table td {
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      border-bottom: 1px solid #1e293b;
+      vertical-align: top;
+    }
+    .recap-table tr:nth-child(even) td { background: #0f172a; }
+    .recap-table tr:nth-child(odd) td { background: #111827; }
+    .badge-correct {
+      background: #052e16;
+      color: #22c55e;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .badge-wrong {
+      background: #2d0a0a;
+      color: #ef4444;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .badge-skip {
+      background: #1e293b;
+      color: #94a3b8;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .correct-answer-note { color: #38bdf8; font-size: 0.82rem; margin-top: 4px; }
+    .btn-retry {
+      display: block;
+      margin: 24px auto 0;
+      padding: 12px 36px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: 2px solid #38bdf8;
+      border-radius: 12px;
+      background: transparent;
+      color: #38bdf8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-retry:hover { background: #38bdf8; color: #0f172a; }
+    @media(max-width:600px) {
+      .question-card { padding: 18px 16px; }
+      h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>🐧 OS Session 3 – Quiz</h1>
+<p class="subtitle">Linux Architecture & File Systems · Answer at your own pace · Submit anytime</p>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="quiz-container" id="quizContainer"></div>
+
+<button class="btn-submit" id="submitBtn" onclick="submitQuiz()">Submit Quiz</button>
+
+<div id="recap">
+  <div class="recap-header">
+    <div class="recap-score" id="recapScore"></div>
+    <div class="recap-label" id="recapLabel"></div>
+  </div>
+  <table class="recap-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Question</th>
+        <th>Result</th>
+        <th>Detail</th>
+      </tr>
+    </thead>
+    <tbody id="recapBody"></tbody>
+  </table>
+  <button class="btn-retry" onclick="retryQuiz()">🔄 Retry Quiz</button>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "What is the primary role of the Linux kernel?",
+    options: [
+      "Provide a graphical user interface to users",
+      "Act as the core software that interfaces with computer hardware",
+      "Manage user applications and web browsers",
+      "Store configuration files for the system"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ The GUI is handled by user-space applications (like GNOME, KDE), not the kernel.",
+      "✅ Correct! The kernel is the core software that talks to hardware, manages memory, time, and I/O.",
+      "❌ User applications run on top of the kernel in user-space.",
+      "❌ Configuration files are stored in /etc, managed by user-space tools."
+    ]
+  },
+  {
+    q: "What does BASH stand for?",
+    options: [
+      "Basic Automated Shell Handler",
+      "Binary Application Shell Host",
+      "Bourne Again SHell",
+      "Built-in Advanced Shell Hub"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ This is not the correct expansion.",
+      "❌ This is not the correct expansion.",
+      "✅ Correct! BASH = Bourne Again SHell, successor to the original Bourne Shell (sh).",
+      "❌ This is not the correct expansion."
+    ]
+  },
+  {
+    q: "Which command shows the current shell you are using?",
+    options: [
+      "cat /etc/shells",
+      "echo $SHELL",
+      "ls /bin/bash",
+      "pwd"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ cat /etc/shells lists ALL available shells on the system, not the current one.",
+      "✅ Correct! echo $SHELL prints the path of your current shell (e.g., /bin/bash). echo $0 also works.",
+      "❌ ls /bin/bash just checks if the file exists, it doesn't show your current shell.",
+      "❌ pwd prints the current working directory, not the shell."
+    ]
+  },
+  {
+    q: "What file can you edit to customize your bash environment (aliases, PATH, etc.)?",
+    options: [
+      "/etc/profile",
+      "/etc/bashrc",
+      "~/.bashrc",
+      "/bin/bash.conf"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ /etc/profile is system-wide and runs at login, but ~/.bashrc is the user-specific customization file.",
+      "❌ /etc/bashrc is system-wide defaults; ~/.bashrc is the personal user file.",
+      "✅ Correct! ~/.bashrc in your home directory is where you add personal aliases, PATH changes, etc.",
+      "❌ This file does not exist."
+    ]
+  },
+  {
+    q: "What is the correct boot sequence order?",
+    options: [
+      "POST → BIOS → GRUB → Kernel → Init",
+      "BIOS → POST → MBR/GRUB → Kernel → Init",
+      "Kernel → BIOS → GRUB → Init → POST",
+      "GRUB → BIOS → POST → Kernel → Init"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ POST is part of BIOS initialization, not before it.",
+      "✅ Correct! Power On → BIOS/UEFI → POST → finds bootable device → MBR → GRUB → Kernel → Init.",
+      "❌ The kernel is loaded after GRUB, not before BIOS.",
+      "❌ GRUB comes after BIOS/POST, not before."
+    ]
+  },
+  {
+    q: "What does POST stand for and what does it do?",
+    options: [
+      "Power-On Self-Test: checks critical hardware before booting",
+      "Pre-OS Startup Tool: initializes the bootloader",
+      "Primary OS Storage Test: verifies disk integrity",
+      "Power-Off Safety Test: ensures safe shutdown"
+    ],
+    correct: 0,
+    explanations: [
+      "✅ Correct! POST = Power-On Self-Test. It checks RAM, CPU, storage devices by sending electric pulses.",
+      "❌ POST does not initialize the bootloader; BIOS/UEFI does that after POST.",
+      "❌ POST is not specifically about disk integrity.",
+      "❌ POST happens at power-ON, not power-off."
+    ]
+  },
+  {
+    q: "What is the MBR and where is it located?",
+    options: [
+      "Master Boot Record, located in /boot/grub/",
+      "Main Binary Repository, located in /bin/",
+      "Master Boot Record, located in the 1st sector of the bootable disk",
+      "Memory Boot Register, stored in RAM"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ The MBR is not a file in /boot/grub/; GRUB's config is there, but MBR is on disk sector.",
+      "❌ MBR is not a repository.",
+      "✅ Correct! MBR = Master Boot Record, only 512 bytes, located in the 1st sector of /dev/sda (or /dev/hda).",
+      "❌ MBR is on disk, not in RAM."
+    ]
+  },
+  {
+    q: "What is GRUB?",
+    options: [
+      "A Linux text editor",
+      "The GRand Unified Bootloader that loads the kernel into memory",
+      "A shell scripting language",
+      "A filesystem type used by Linux"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ GRUB is not a text editor.",
+      "✅ Correct! GRUB (GRand Unified Bootloader) presents a menu, lets you select a kernel, and loads it into memory.",
+      "❌ GRUB is not a scripting language.",
+      "❌ ext4 is a Linux filesystem; GRUB is a bootloader."
+    ]
+  },
+  {
+    q: "Where is the GRUB configuration file typically located?",
+    options: [
+      "/etc/grub/grub.cfg or /boot/grub/grub.cfg",
+      "/usr/bin/grub.conf",
+      "/home/grub/config",
+      "/sbin/grub.cfg"
+    ],
+    correct: 0,
+    explanations: [
+      "✅ Correct! GRUB config is at /boot/grub/grub.cfg or /etc/grub.conf depending on the distro.",
+      "❌ /usr/bin/ contains user binaries, not GRUB config.",
+      "❌ GRUB config is not in /home/.",
+      "❌ /sbin/ contains system admin binaries, not GRUB config."
+    ]
+  },
+  {
+    q: "What is the PID of the init process?",
+    options: [
+      "0",
+      "1",
+      "100",
+      "It varies each boot"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ PID 0 is the idle/swapper process in the kernel.",
+      "✅ Correct! init always has PID 1 — it is the first user-space process started by the kernel.",
+      "❌ PID 100 is assigned to later processes.",
+      "❌ init always gets PID 1, it never varies."
+    ]
+  },
+  {
+    q: "On modern Linux systems, what has replaced the traditional init?",
+    options: [
+      "GRUB",
+      "bash",
+      "systemd",
+      "cron"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ GRUB is the bootloader, not a replacement for init.",
+      "❌ bash is a shell, not an init system.",
+      "✅ Correct! systemd has replaced traditional init on most modern Linux distributions.",
+      "❌ cron is a job scheduler, not an init replacement."
+    ]
+  },
+  {
+    q: "What does runlevel 5 correspond to in traditional Linux?",
+    options: [
+      "Halt the system",
+      "Single-user rescue mode",
+      "Multi-user without GUI",
+      "Multi-user with GUI"
+    ],
+    correct: 3,
+    explanations: [
+      "❌ Runlevel 0 = Halt.",
+      "❌ Runlevel 1 = Single-user rescue mode.",
+      "❌ Runlevel 3 = Multi-user without GUI.",
+      "✅ Correct! Runlevel 5 = Multi-user with GUI (graphical.target in systemd)."
+    ]
+  },
+  {
+    q: "What is the systemd equivalent of runlevel 3?",
+    options: [
+      "poweroff.target",
+      "rescue.target",
+      "multi-user.target",
+      "graphical.target"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ poweroff.target = runlevel 0 (halt).",
+      "❌ rescue.target = runlevel 1 (single-user).",
+      "✅ Correct! multi-user.target = runlevel 3 (full multi-user, no GUI).",
+      "❌ graphical.target = runlevel 5 (with GUI)."
+    ]
+  },
+  {
+    q: "In Linux, what is the philosophy 'Everything is a file' referring to?",
+    options: [
+      "All data must be stored in text format",
+      "Directories, devices, and links are all represented as files",
+      "Only regular files can be accessed by users",
+      "The kernel is stored as a single file"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ Files don't have to be text; binary files exist too.",
+      "✅ Correct! In Linux, everything — regular files, directories (d), devices, links (l) — is treated as a file.",
+      "❌ Devices and directories are also accessible as files.",
+      "❌ The kernel is a program, but the philosophy is broader than that."
+    ]
+  },
+  {
+    q: "What type of file is /dev/sda?",
+    options: [
+      "A regular text file",
+      "A directory",
+      "A device file representing a disk",
+      "A symbolic link"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ /dev/sda is not a text file.",
+      "❌ /dev/sda is not a directory.",
+      "✅ Correct! /dev/sda is a device file representing a hard disk (block device).",
+      "❌ /dev/sda is a device file, not a symbolic link."
+    ]
+  },
+  {
+    q: "What is the difference between a hard link and a symbolic (soft) link?",
+    options: [
+      "A hard link is a shortcut; a symbolic link is a second name for the same file",
+      "A hard link is a second name for a file; a symbolic link is a shortcut pointing to another file",
+      "Both are identical in behavior",
+      "Hard links work across filesystems; symbolic links do not"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ You have it reversed.",
+      "✅ Correct! A hard link is a second name pointing to the same inode. A symbolic link is like a shortcut/pointer.",
+      "❌ They behave differently, especially across filesystems.",
+      "❌ It's actually the opposite: symbolic links can cross filesystems; hard links generally cannot."
+    ]
+  },
+  {
+    q: "What is the root directory in Linux?",
+    options: [
+      "/root",
+      "/home/root",
+      "/",
+      "/bin"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ /root is the home directory of the root USER, not the root of the filesystem.",
+      "❌ /home/root does not exist by default.",
+      "✅ Correct! / (a single slash) is the top-level root directory of the entire Linux filesystem hierarchy.",
+      "❌ /bin contains essential binaries, it is not the root directory."
+    ]
+  },
+  {
+    q: "What is stored in the /etc directory?",
+    options: [
+      "Executable binaries for all users",
+      "System-wide configuration files",
+      "Temporary files deleted on reboot",
+      "Home directories for users"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ Binaries are in /bin, /usr/bin, /sbin.",
+      "✅ Correct! /etc contains system-wide configuration files like /etc/passwd, /etc/hostname, /etc/fstab.",
+      "❌ Temporary files are in /tmp.",
+      "❌ User home directories are in /home."
+    ]
+  },
+  {
+    q: "What is the purpose of /tmp?",
+    options: [
+      "Store permanent system templates",
+      "Hold temporary files, often cleared on reboot",
+      "Store terminal configuration",
+      "Mount external filesystems"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ /tmp is not for permanent storage.",
+      "✅ Correct! /tmp holds temporary files that are typically cleared on reboot.",
+      "❌ Terminal config is not stored in /tmp.",
+      "❌ External filesystems are mounted under /mnt or /media."
+    ]
+  },
+  {
+    q: "What is the difference between /mnt and /media?",
+    options: [
+      "/mnt is for permanent mounts; /media is for temporary mounts",
+      "/mnt is for manually mounting filesystems; /media is for auto-mounted devices like USB sticks",
+      "They are identical in purpose",
+      "/media is for network shares; /mnt is for local disks only"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ Neither is strictly 'permanent'.",
+      "✅ Correct! /mnt is for manually mounting filesystems; /media is used for auto-mounted removable devices (USB, CD).",
+      "❌ They serve different purposes.",
+      "❌ Network shares can be mounted under /mnt as well."
+    ]
+  },
+  {
+    q: "What does /dev/null do?",
+    options: [
+      "Stores null-byte files for testing",
+      "Represents the system's null pointer",
+      "Discards any data written to it (the Linux 'black hole')",
+      "Stores deleted files before permanent removal"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ /dev/null does not store anything.",
+      "❌ /dev/null is not a pointer concept.",
+      "✅ Correct! /dev/null discards all data written to it. It's used to suppress output (e.g., echo 'Hello' > /dev/null).",
+      "❌ Deleted files in Linux are not moved to /dev/null; they are unlinked."
+    ]
+  },
+  {
+    q: "What is the purpose of /sbin?",
+    options: [
+      "Stores scripts written by users",
+      "Contains system administration binaries used by root (e.g., reboot, fsck)",
+      "Stores shared libraries for applications",
+      "Contains source code for the kernel"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ User scripts are usually in home directories or /usr/local/bin.",
+      "✅ Correct! /sbin contains essential system admin commands like reboot, shutdown, fsck, mount — typically run by root.",
+      "❌ Shared libraries are in /lib.",
+      "❌ Kernel source is not in /sbin."
+    ]
+  },
+  {
+    q: "What does the /boot directory contain?",
+    options: [
+      "Boot scripts written by the user",
+      "Bootloader files and kernel images (e.g., vmlinuz, initrd)",
+      "Configuration files for services",
+      "Log files from the boot process"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ User scripts are not in /boot.",
+      "✅ Correct! /boot contains the kernel, initrd (initial RAM disk), and GRUB bootloader files.",
+      "❌ Service config files are in /etc.",
+      "❌ Boot logs are in /var/log/."
+    ]
+  },
+  {
+    q: "What is an absolute path?",
+    options: [
+      "A path relative to the current directory",
+      "A path that starts from the root directory /",
+      "A path using only directory names without slashes",
+      "A path stored in an environment variable"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ That describes a relative path.",
+      "✅ Correct! An absolute path always starts from / (root) and specifies the full location regardless of current directory.",
+      "❌ Paths use / as separator.",
+      "❌ Environment variables can contain paths, but that's not the definition of absolute path."
+    ]
+  },
+  {
+    q: "What command prints your current working directory?",
+    options: [
+      "ls",
+      "cd",
+      "pwd",
+      "whoami"
+    ],
+    correct: 2,
+    explanations: [
+      "❌ ls lists files in the current directory.",
+      "❌ cd changes directory.",
+      "✅ Correct! pwd = Print Working Directory. It shows your current location in the filesystem.",
+      "❌ whoami shows the current logged-in username."
+    ]
+  },
+  {
+    q: "How do you go to your home directory? (select the best answer)",
+    options: [
+      "cd /home",
+      "cd ~ or just cd",
+      "cd /root",
+      "cd $HOME_DIR"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ cd /home takes you to the /home directory, not your personal home.",
+      "✅ Correct! cd ~ or simply cd (no argument) takes you to your personal home directory.",
+      "❌ /root is the home of the root user, not regular users.",
+      "❌ The correct variable is $HOME, not $HOME_DIR."
+    ]
+  },
+  {
+    q: "What does the command 'df -h' do?",
+    options: [
+      "Shows disk structure without usage",
+      "Displays mounted filesystems with used/free space in human-readable format",
+      "Lists all files in the current directory",
+      "Shows kernel version"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ lsblk shows disk structure without usage.",
+      "✅ Correct! df -h shows mounted filesystems and their disk usage in human-readable format (KB, MB, GB).",
+      "❌ ls lists files.",
+      "❌ uname -r shows the kernel version."
+    ]
+  },
+  {
+    q: "What is the difference between BIOS and UEFI?",
+    options: [
+      "BIOS is newer and supports larger drives; UEFI is older",
+      "UEFI supports larger drives (up to 9.4 ZB), faster boot, and improved security compared to BIOS",
+      "They are identical in functionality",
+      "BIOS supports Secure Boot; UEFI does not"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ UEFI is the newer standard, not BIOS.",
+      "✅ Correct! UEFI removes BIOS size limits (supports up to 9.4 zettabytes), boots faster, and has improved security features.",
+      "❌ They have significant differences.",
+      "❌ It's UEFI that supports Secure Boot, not BIOS."
+    ]
+  },
+  {
+    q: "What does 'lsblk' show?",
+    options: [
+      "Mounted filesystems with disk usage",
+      "Physical and virtual block devices and disk structure (without usage)",
+      "List of running processes",
+      "Network block devices only"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ That's df -h.",
+      "✅ Correct! lsblk shows physical and virtual block devices and their structure, but does NOT show disk usage.",
+      "❌ ps or top shows running processes.",
+      "❌ lsblk shows all block devices, not just network ones."
+    ]
+  },
+  {
+    q: "What is stored in /etc/passwd?",
+    options: [
+      "Encrypted passwords for all users",
+      "User account information (public part: username, UID, home dir, shell)",
+      "The root password only",
+      "SSH public keys for remote access"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ Encrypted passwords are in /etc/shadow.",
+      "✅ Correct! /etc/passwd contains public user account info: username, UID, GID, home directory, and default shell.",
+      "❌ /etc/passwd contains all user accounts, not just root.",
+      "❌ SSH keys are in ~/.ssh/authorized_keys."
+    ]
+  },
+  {
+    q: "What does 'uname -r' display?",
+    options: [
+      "The current username",
+      "The Linux kernel version currently running",
+      "The system runlevel",
+      "The release date of the OS"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ whoami displays the current username.",
+      "✅ Correct! uname -r displays the running kernel version (e.g., 5.15.0-91-generic).",
+      "❌ runlevel or systemctl get-default shows the runlevel/target.",
+      "❌ uname -r is specifically about the kernel version."
+    ]
+  },
+  {
+    q: "What is the kernel ring buffer and how do you view it?",
+    options: [
+      "A circular memory buffer storing kernel messages; viewed with dmesg",
+      "A hardware buffer on the CPU; viewed with lscpu",
+      "A log file in /var/log/kernel; viewed with cat",
+      "A GRUB configuration buffer; viewed with grub-info"
+    ],
+    correct: 0,
+    explanations: [
+      "✅ Correct! The kernel ring buffer stores boot/kernel messages in memory. Use 'sudo dmesg' to view it.",
+      "❌ It's a software buffer in memory, not a hardware CPU buffer.",
+      "❌ Boot logs are in /var/log/boot.log, but the ring buffer is in memory and accessed via dmesg.",
+      "❌ GRUB has its own config, not related to the kernel ring buffer."
+    ]
+  },
+  {
+    q: "What is the /lib directory used for?",
+    options: [
+      "Storing user libraries and personal scripts",
+      "Containing system libraries and kernel modules/device drivers needed by /bin and /sbin",
+      "Storing log files for the system",
+      "Holding optional third-party software"
+    ],
+    correct: 1,
+    explanations: [
+      "❌ User libraries are typically in /usr/lib.",
+      "✅ Correct! /lib contains essential system libraries and kernel modules/drivers required by binaries in /bin and /sbin.",
+      "❌ Log files are in /var/log.",
+      "❌ Optional third-party software goes in /opt."
+    ]
+  }
+];
+
+let answered = {};
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  answered = {};
+  updateProgress();
+
+  questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + qi;
+
+    const letters = ['A','B','C','D'];
+    let optionsHTML = q.options.map((opt, oi) => `
+      <label class="option-label" id="opt-${qi}-${oi}" onclick="selectOption(${qi}, ${oi})">
+        <input type="radio" name="q${qi}" value="${oi}"/>
+        <span class="option-letter">${letters[oi]}</span>
+        <span class="option-text">${opt}</span>
+      </label>
+      <div class="explanation" id="exp-${qi}-${oi}">${q.explanations[oi]}</div>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="question-header">
+        <span class="q-number">Q${qi+1}</span>
+        <span class="q-text">${q.q}</span>
+      </div>
+      <div class="options">${optionsHTML}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectOption(qi, oi) {
+  if (answered[qi] !== undefined) return; // already answered
+  answered[qi] = oi;
+  updateProgress();
+
+  const q = questions[qi];
+  const letters = ['A','B','C','D'];
+
+  // Disable all options for this question
+  q.options.forEach((_, idx) => {
+    const lbl = document.getElementById(`opt-${qi}-${idx}`);
+    lbl.classList.add('disabled');
+
+    // Show explanation
+    const exp = document.getElementById(`exp-${qi}-${idx}`);
+    exp.style.display = 'block';
+    exp.classList.add(idx === q.correct ? 'correct-exp' : 'wrong-exp');
+  });
+
+  // Style selected
+  const selectedLbl = document.getElementById(`opt-${qi}-${oi}`);
+  if (oi === q.correct) {
+    selectedLbl.classList.add('selected-correct');
+    selectedLbl.innerHTML += '<span class="status-icon">✅</span>';
+  } else {
+    selectedLbl.classList.add('selected-wrong');
+    selectedLbl.innerHTML += '<span class="status-icon">❌</span>';
+    // Highlight correct
+    const correctLbl = document.getElementById(`opt-${qi}-${q.correct}`);
+    correctLbl.classList.add('show-correct');
+    correctLbl.innerHTML += '<span class="status-icon">✅</span>';
+  }
+}
+
+function updateProgress() {
+  const pct = (Object.keys(answered).length / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function submitQuiz() {
+  // Build recap
+  const tbody = document.getElementById('recapBody');
+  tbody.innerHTML = '';
+  let correct = 0, wrong = 0, skipped = 0;
+
+  questions.forEach((q, qi) => {
+    const userAns = answered[qi];
+    const letters = ['A','B','C','D'];
+    let badge, detail;
+
+    if (userAns === undefined) {
+      skipped++;
+      badge = '<span class="badge-skip">⏭ Skipped</span>';
+      detail = `<span class="correct-answer-note">Correct: ${letters[q.correct]}. ${q.options[q.correct]}</span>`;
+    } else if (userAns === q.correct) {
+      correct++;
+      badge = '<span class="badge-correct">✅ Correct</span>';
+      detail = `<span style="color:#86efac;font-size:0.82rem;">Your answer: ${letters[userAns]}. ${q.options[userAns]}</span>`;
+    } else {
+      wrong++;
+      badge = '<span class="badge-wrong">❌ Wrong</span>';
+      detail = `<span style="color:#fca5a5;font-size:0.82rem;">Your answer: ${letters[userAns]}. ${q.options[userAns]}</span><br>
+                <span class="correct-answer-note">Correct: ${letters[q.correct]}. ${q.options[q.correct]}</span>`;
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:#94a3b8;font-weight:700;">Q${qi+1}</td>
+      <td>${q.q}</td>
+      <td>${badge}</td>
+      <td>${detail}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const answered_count = correct + wrong;
+  const scoreText = answered_count > 0 ? `${correct} / ${answered_count}` : '0 / 0';
+  document.getElementById('recapScore').textContent = scoreText;
+
+  let pct = answered_count > 0 ? Math.round((correct/answered_count)*100) : 0;
+  let emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+  document.getElementById('recapLabel').textContent =
+    `${emoji} ${correct} correct · ${wrong} wrong · ${skipped} skipped — ${pct}% accuracy`;
+
+  document.getElementById('recap').style.display = 'block';
+  document.getElementById('recap').scrollIntoView({behavior:'smooth'});
+}
+
+function retryQuiz() {
+  document.getElementById('recap').style.display = 'none';
+  buildQuiz();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

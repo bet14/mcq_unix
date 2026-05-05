@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Session 8 - Processes & Init Systems Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #16213e, #0f3460); padding: 24px 32px; border-bottom: 2px solid #e94560; }
+  header h1 { font-size: 1.8rem; color: #e94560; }
+  header p { color: #a8b2d8; margin-top: 6px; font-size: 0.95rem; }
+  .container { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+  .progress-bar-wrap { background: #16213e; border-radius: 8px; height: 10px; margin: 16px 0 24px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, #e94560, #f5a623); border-radius: 8px; transition: width 0.4s; }
+  .progress-text { text-align: right; font-size: 0.82rem; color: #a8b2d8; margin-top: -18px; margin-bottom: 20px; }
+  .question-card { background: #16213e; border-radius: 12px; padding: 22px 24px; margin-bottom: 22px; border: 1.5px solid #0f3460; transition: border-color 0.3s; }
+  .question-card.answered-correct { border-color: #2ecc71; }
+  .question-card.answered-wrong { border-color: #e74c3c; }
+  .question-card.answered-skip { border-color: #f39c12; }
+  .q-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  .q-num { background: #e94560; color: #fff; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; }
+  .q-text { font-size: 1rem; line-height: 1.5; color: #dde; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn { background: #0f3460; border: 1.5px solid #1a4a8a; color: #ccd; padding: 11px 16px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 0.93rem; transition: all 0.2s; }
+  .option-btn:hover:not(:disabled) { background: #1a5a9a; border-color: #4a8adf; color: #fff; }
+  .option-btn.correct { background: #1a4a2a; border-color: #2ecc71; color: #2ecc71; }
+  .option-btn.wrong { background: #4a1a1a; border-color: #e74c3c; color: #e74c3c; }
+  .option-btn.reveal-correct { background: #1a4a2a; border-color: #2ecc71; color: #2ecc71; }
+  .option-btn:disabled { cursor: default; }
+  .feedback { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; line-height: 1.5; }
+  .feedback.correct { background: #1a3a2a; border-left: 4px solid #2ecc71; color: #7defa7; }
+  .feedback.wrong { background: #3a1a1a; border-left: 4px solid #e74c3c; color: #f08080; }
+  .status-icon { font-size: 1.1rem; margin-right: 6px; }
+  .sticky-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1b2a; border-top: 2px solid #e94560; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; z-index: 100; }
+  .score-live { font-size: 1rem; color: #a8b2d8; }
+  .score-live span { color: #f5a623; font-weight: bold; font-size: 1.1rem; }
+  .submit-btn { background: linear-gradient(135deg, #e94560, #c0392b); color: #fff; border: none; padding: 12px 28px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+  .submit-btn:hover { opacity: 0.88; }
+  /* Recap */
+  #recap { display: none; background: #16213e; border-radius: 12px; padding: 28px; margin-top: 24px; border: 2px solid #e94560; }
+  #recap h2 { color: #e94560; font-size: 1.5rem; margin-bottom: 6px; }
+  .recap-summary { display: flex; gap: 20px; flex-wrap: wrap; margin: 16px 0 24px; }
+  .recap-stat { background: #0f3460; border-radius: 10px; padding: 14px 20px; text-align: center; flex: 1; min-width: 100px; }
+  .recap-stat .val { font-size: 2rem; font-weight: bold; }
+  .recap-stat .lbl { font-size: 0.8rem; color: #a8b2d8; margin-top: 4px; }
+  .val.c { color: #2ecc71; } .val.w { color: #e74c3c; } .val.s { color: #f39c12; } .val.sc { color: #f5a623; }
+  .recap-item { background: #0f3460; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; border-left: 4px solid #555; }
+  .recap-item.rc { border-left-color: #2ecc71; }
+  .recap-item.rw { border-left-color: #e74c3c; }
+  .recap-item.rs { border-left-color: #f39c12; }
+  .recap-item .ri-q { font-size: 0.93rem; color: #ccd; margin-bottom: 6px; }
+  .recap-item .ri-ans { font-size: 0.85rem; margin-top: 4px; }
+  .ri-correct { color: #2ecc71; } .ri-wrong { color: #e74c3c; } .ri-skip { color: #f39c12; }
+  .ri-exp { font-size: 0.82rem; color: #a8b2d8; margin-top: 6px; line-height: 1.4; }
+  code { background: #0a1628; padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 0.88em; color: #7ec8e3; }
+  @media(max-width:600px){ .recap-summary { gap: 10px; } .sticky-bar { flex-direction: column; gap: 10px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🖥️ OS Session 8 – Processes &amp; Init Systems</h1>
+  <p>40 Questions &bull; Click an option to see instant feedback &bull; Submit anytime</p>
+</header>
+<div class="container">
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="progress-text" id="progressText">0 / 40 answered</div>
+  <div id="quiz"></div>
+  <div id="recap"></div>
+</div>
+<div class="sticky-bar">
+  <div class="score-live">Score: <span id="liveScore">0</span> / <span id="liveTotal">0</span> answered</div>
+  <button class="submit-btn" onclick="submitQuiz()">📊 Submit &amp; See Results</button>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "What is the PID of the first process launched by the Linux kernel after boot?",
+    opts: ["0","1","100","255"],
+    ans: 1,
+    exp: "systemd (or init) is always assigned PID 1 — it is the very first process started by the Linux kernel."
+  },
+  {
+    q: "What does systemd replace in modern Linux distributions?",
+    opts: ["bash","cron","SysV init","GRUB"],
+    ans: 2,
+    exp: "systemd replaces the older SysV init system, offering faster boot times, better logging, and cleaner service control."
+  },
+  {
+    q: "Which file type does systemd use to define and manage a resource or service?",
+    opts: ["config file","unit file","daemon file","init script"],
+    ans: 1,
+    exp: "systemd uses unit files to define what to start, how to start it, when to start it, and what dependencies exist."
+  },
+  {
+    q: "Which systemd unit type is used for running services or daemons?",
+    opts: [".timer",".mount",".service",".target"],
+    ans: 2,
+    exp: ".service unit files are used for running services or daemons, e.g., nginx.service."
+  },
+  {
+    q: "Which systemd unit type is used for scheduling tasks (similar to cron)?",
+    opts: [".service",".timer",".mount",".socket"],
+    ans: 1,
+    exp: ".timer units are used for scheduling tasks, functioning similarly to cron jobs."
+  },
+  {
+    q: "Which systemd unit type is used for managing mounted filesystems?",
+    opts: [".service",".timer",".mount",".device"],
+    ans: 2,
+    exp: ".mount unit files are used to manage mounted filesystems, e.g., home.mount."
+  },
+  {
+    q: "Which command shows the detailed status of a specific service?",
+    opts: ["systemctl list-units","systemctl status <service>","systemctl inspect <service>","systemctl info <service>"],
+    ans: 1,
+    exp: "'systemctl status <service>' shows detailed status including active state, PID, memory usage, and recent logs."
+  },
+  {
+    q: "Which command enables a service to start automatically at boot?",
+    opts: ["systemctl start <service>","systemctl activate <service>","systemctl enable <service>","systemctl boot <service>"],
+    ans: 2,
+    exp: "'systemctl enable <service>' creates the necessary symlinks so the service starts automatically at boot."
+  },
+  {
+    q: "Which command lists all currently active services?",
+    opts: ["systemctl list-units --type=service","systemctl show --all","ps aux | grep service","systemctl status --all"],
+    ans: 0,
+    exp: "'systemctl list-units --type=service' displays all currently active (loaded) service units."
+  },
+  {
+    q: "After modifying or creating a unit file, which command must you run before starting the service?",
+    opts: ["systemctl restart","systemctl reload","systemctl daemon-reload","systemctl refresh"],
+    ans: 2,
+    exp: "'systemctl daemon-reload' tells systemd to re-read all unit files, necessary after creating or modifying them."
+  },
+  {
+    q: "What does PPID stand for in process information?",
+    opts: ["Primary Process ID","Parent Process ID","Parallel Process ID","Process Priority ID"],
+    ans: 1,
+    exp: "PPID stands for Parent Process ID — the PID of the process that spawned the current process."
+  },
+  {
+    q: "Which command shows a one-time snapshot of all running processes?",
+    opts: ["top","htop","ps aux","jobs"],
+    ans: 2,
+    exp: "'ps aux' provides a one-time snapshot of all running processes with detailed information."
+  },
+  {
+    q: "Which command provides a real-time, continuously updating view of processes?",
+    opts: ["ps aux","ps -f","top","jobs"],
+    ans: 2,
+    exp: "'top' provides a real-time, auto-refreshing (every 1-3 seconds) interactive view of running processes."
+  },
+  {
+    q: "In 'ps aux' output, what does the %MEM column represent?",
+    opts: ["Virtual memory size","Resident memory size","Memory usage percentage","Memory limit"],
+    ans: 2,
+    exp: "%MEM shows the percentage of physical RAM the process is currently using."
+  },
+  {
+    q: "What does the STAT code 'Z' mean for a process?",
+    opts: ["Process is sleeping","Process is stopped","Zombie: completed but not cleaned up by parent","Process is running"],
+    ans: 2,
+    exp: "Z (Zombie) means the process has completed execution but has not been cleaned up by its parent process."
+  },
+  {
+    q: "What does the STAT code 'R' mean for a process?",
+    opts: ["Resting (idle)","Running: currently using CPU","Ready but waiting","Resuming from sleep"],
+    ans: 1,
+    exp: "R means the process is currently Running and actively using the CPU."
+  },
+  {
+    q: "What does the STAT code 'S' mean for a process?",
+    opts: ["Stopped by signal","Sleeping: waiting for an event","System process","Suspended"],
+    ans: 1,
+    exp: "S means the process is Sleeping — it is waiting for an event such as input or a timer."
+  },
+  {
+    q: "What does the STAT code 'D' mean for a process?",
+    opts: ["Dead process","Daemon process","Uninterruptible sleep (usually waiting for I/O)","Detached from terminal"],
+    ans: 2,
+    exp: "D means Uninterruptible sleep — the process is usually waiting for disk or network I/O and cannot be interrupted."
+  },
+  {
+    q: "What does the STAT code 'T' mean for a process?",
+    opts: ["Terminated","Threaded","Stopped (paused, e.g., via Ctrl+Z)","Timed out"],
+    ans: 2,
+    exp: "T means the process is Stopped/paused, typically because it received SIGSTOP or the user pressed Ctrl+Z."
+  },
+  {
+    q: "What does the flag '+' in the STAT column indicate?",
+    opts: ["Process has elevated privileges","Process is in the foreground process group","Process is multi-threaded","Process is a session leader"],
+    ans: 1,
+    exp: "The '+' flag indicates the process is in the foreground process group of its terminal."
+  },
+  {
+    q: "What does the flag 's' in the STAT column indicate?",
+    opts: ["Process is sleeping","Session leader (usually a shell)","Process uses swap memory","Scheduled process"],
+    ans: 1,
+    exp: "The 's' flag means the process is a Session leader, which is typically a shell process."
+  },
+  {
+    q: "Which command forcefully kills a process immediately?",
+    opts: ["kill -15 PID","kill -2 PID","kill -9 PID","kill -18 PID"],
+    ans: 2,
+    exp: "'kill -9 PID' sends SIGKILL which forcefully and immediately terminates the process — it cannot be caught or ignored."
+  },
+  {
+    q: "Which command kills all processes with a given name?",
+    opts: ["kill -all name","pkill name","killall name","kill --name name"],
+    ans: 2,
+    exp: "'killall name' sends a signal (default SIGTERM) to all processes matching the given name."
+  },
+  {
+    q: "What does the '&' symbol do when appended to a command?",
+    opts: ["Runs the command as root","Runs the command in the background","Chains two commands together","Redirects output to a file"],
+    ans: 1,
+    exp: "Appending '&' to a command runs it in the background, freeing the terminal for other use."
+  },
+  {
+    q: "Which command lists current background and stopped jobs?",
+    opts: ["ps","bg","jobs","fg"],
+    ans: 2,
+    exp: "'jobs' lists all current background and stopped jobs with their job numbers (e.g., [1], [2])."
+  },
+  {
+    q: "Which command brings job number 1 to the foreground?",
+    opts: ["bg %1","fg %1","resume %1","jobs %1"],
+    ans: 1,
+    exp: "'fg %1' brings job number 1 from the background/stopped state to the foreground."
+  },
+  {
+    q: "Which keyboard shortcut suspends (pauses) the current foreground process?",
+    opts: ["Ctrl+C","Ctrl+D","Ctrl+Z","Ctrl+S"],
+    ans: 2,
+    exp: "Ctrl+Z sends SIGSTOP to the foreground process, pausing it. You can resume it with 'fg' or 'bg'."
+  },
+  {
+    q: "Which keyboard shortcut terminates the current foreground process?",
+    opts: ["Ctrl+Z","Ctrl+D","Ctrl+X","Ctrl+C"],
+    ans: 3,
+    exp: "Ctrl+C sends SIGINT (signal 2) to the foreground process, requesting it to terminate."
+  },
+  {
+    q: "What signal number corresponds to SIGTERM?",
+    opts: ["2","9","15","19"],
+    ans: 2,
+    exp: "SIGTERM is signal number 15. It requests graceful termination — the process can handle it and clean up."
+  },
+  {
+    q: "What signal number corresponds to SIGKILL?",
+    opts: ["2","9","15","18"],
+    ans: 1,
+    exp: "SIGKILL is signal number 9. It forcefully kills the process immediately and cannot be caught or ignored."
+  },
+  {
+    q: "What signal is sent when you press Ctrl+C in the terminal?",
+    opts: ["SIGTERM","SIGKILL","SIGSTOP","SIGINT"],
+    ans: 3,
+    exp: "Ctrl+C sends SIGINT (signal 2 — Interrupt signal) to the foreground process."
+  },
+  {
+    q: "Which signal resumes a paused process?",
+    opts: ["SIGTERM","SIGSTOP","SIGCONT","SIGINT"],
+    ans: 2,
+    exp: "SIGCONT (signal 18) resumes a process that was paused by SIGSTOP or Ctrl+Z."
+  },
+  {
+    q: "What does the 'trap' command do in a shell script?",
+    opts: ["Traps syntax errors in the script","Catches or reacts to signals in a script","Traps background processes","Monitors CPU usage"],
+    ans: 1,
+    exp: "'trap' allows a script to catch signals and execute specified commands when those signals are received."
+  },
+  {
+    q: "What is the nice value range for process priorities in Linux?",
+    opts: ["0 to 100","-10 to 10","-20 to 19","1 to 99"],
+    ans: 2,
+    exp: "Nice values range from -20 (highest priority) to 19 (lowest priority). Default is 0 for most user processes."
+  },
+  {
+    q: "Which command sets the priority of a process when launching it?",
+    opts: ["renice","priority","nice","setpri"],
+    ans: 2,
+    exp: "'nice' sets the scheduling priority when launching a new process, e.g., 'nice -n 10 sleep 1000 &'."
+  },
+  {
+    q: "Which command changes the priority of an already-running process?",
+    opts: ["nice","priority","setnice","renice"],
+    ans: 3,
+    exp: "'renice' changes the nice value (priority) of an already-running process by its PID."
+  },
+  {
+    q: "In a systemd service unit file, which section contains 'ExecStart'?",
+    opts: ["[Unit]","[Install]","[Service]","[Exec]"],
+    ans: 2,
+    exp: "ExecStart is placed in the [Service] section and specifies the command to run when the service starts."
+  },
+  {
+    q: "What does 'Restart=always' in a systemd unit file do?",
+    opts: ["Restarts the service every 30 seconds","Restarts the service only on failure","Restarts the service whenever it stops for any reason","Restarts the system after the service stops"],
+    ans: 2,
+    exp: "'Restart=always' tells systemd to restart the service whenever it stops, regardless of the exit code."
+  },
+  {
+    q: "What does 'WantedBy=multi-user.target' mean in the [Install] section?",
+    opts: ["The service requires multiple users to be logged in","Enable this service when the system reaches multi-user mode","The service can only be used by multiple users simultaneously","The service targets multiple CPUs"],
+    ans: 1,
+    exp: "'WantedBy=multi-user.target' means the service should be enabled (started) when the system reaches multi-user mode (normal operation)."
+  },
+  {
+    q: "Which command can you use to view logs of a systemd service?",
+    opts: ["syslog <service>","cat /var/log/service.log","journalctl -u <service>","dmesg | grep service"],
+    ans: 2,
+    exp: "'journalctl -u <service>' shows the logs collected by systemd's journal for a specific service unit."
+  }
+];
+
+// State
+const state = questions.map(() => ({ chosen: null, correct: null }));
+
+function buildQuiz() {
+  const container = document.getElementById('quiz');
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+    let optsHtml = q.opts.map((o, j) => `<button class="option-btn" id="opt-${i}-${j}" onclick="choose(${i},${j})">${String.fromCharCode(65+j)}. ${o}</button>`).join('');
+    card.innerHTML = `
+      <div class="q-header">
+        <div class="q-num">${i+1}</div>
+        <div class="q-text">${q.q}</div>
+      </div>
+      <div class="options">${optsHtml}</div>
+      <div class="feedback" id="fb-${i}" style="display:none"></div>
+    `;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function choose(qi, oi) {
+  if (state[qi].chosen !== null) return;
+  state[qi].chosen = oi;
+  state[qi].correct = (oi === questions[qi].ans);
+  const card = document.getElementById(`card-${qi}`);
+  const fb = document.getElementById(`fb-${qi}`);
+  questions[qi].opts.forEach((_, j) => {
+    const btn = document.getElementById(`opt-${qi}-${j}`);
+    btn.disabled = true;
+    if (j === questions[qi].ans) btn.classList.add('correct');
+    else if (j === oi) btn.classList.add('wrong');
+  });
+  if (state[qi].correct) {
+    card.classList.add('answered-correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `<span class="status-icon">✅</span><strong>Correct!</strong> ${questions[qi].exp}`;
+  } else {
+    card.classList.add('answered-wrong');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `<span class="status-icon">❌</span><strong>Incorrect.</strong> The correct answer is <strong>${String.fromCharCode(65+questions[qi].ans)}. ${questions[qi].opts[questions[qi].ans]}</strong>. ${questions[qi].exp}`;
+  }
+  fb.style.display = 'block';
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = state.filter(s => s.chosen !== null).length;
+  const correct = state.filter(s => s.correct === true).length;
+  document.getElementById('progressBar').style.width = (answered/questions.length*100) + '%';
+  document.getElementById('progressText').textContent = `${answered} / ${questions.length} answered`;
+  document.getElementById('liveScore').textContent = correct;
+  document.getElementById('liveTotal').textContent = answered;
+}
+
+function submitQuiz() {
+  const answered = state.filter(s => s.chosen !== null).length;
+  const correct = state.filter(s => s.correct === true).length;
+  const wrong = state.filter(s => s.chosen !== null && s.correct === false).length;
+  const skipped = state.filter(s => s.chosen === null).length;
+  const pct = Math.round(correct / questions.length * 100);
+  let grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
+  let gradeColor = pct >= 70 ? '#2ecc71' : pct >= 60 ? '#f39c12' : '#e74c3c';
+
+  let itemsHtml = questions.map((q, i) => {
+    const s = state[i];
+    if (s.chosen === null) {
+      return `<div class="recap-item rs">
+        <div class="ri-q"><strong>Q${i+1}:</strong> ${q.q}</div>
+        <div class="ri-ans ri-skip">⏭️ Skipped — Correct answer: <strong>${String.fromCharCode(65+q.ans)}. ${q.opts[q.ans]}</strong></div>
+        <div class="ri-exp">${q.exp}</div>
+      </div>`;
+    } else if (s.correct) {
+      return `<div class="recap-item rc">
+        <div class="ri-q"><strong>Q${i+1}:</strong> ${q.q}</div>
+        <div class="ri-ans ri-correct">✅ Your answer: <strong>${String.fromCharCode(65+s.chosen)}. ${q.opts[s.chosen]}</strong></div>
+        <div class="ri-exp">${q.exp}</div>
+      </div>`;
+    } else {
+      return `<div class="recap-item rw">
+        <div class="ri-q"><strong>Q${i+1}:</strong> ${q.q}</div>
+        <div class="ri-ans ri-wrong">❌ Your answer: <strong>${String.fromCharCode(65+s.chosen)}. ${q.opts[s.chosen]}</strong></div>
+        <div class="ri-ans ri-correct" style="margin-top:4px">✅ Correct: <strong>${String.fromCharCode(65+q.ans)}. ${q.opts[q.ans]}</strong></div>
+        <div class="ri-exp">${q.exp}</div>
+      </div>`;
+    }
+  }).join('');
+
+  const recap = document.getElementById('recap');
+  recap.style.display = 'block';
+  recap.innerHTML = `
+    <h2>📊 Quiz Results</h2>
+    <p style="color:#a8b2d8; margin-top:6px;">Session 8 – Processes &amp; Init Systems</p>
+    <div class="recap-summary">
+      <div class="recap-stat"><div class="val sc">${pct}%</div><div class="lbl">Score</div></div>
+      <div class="recap-stat"><div class="val sc" style="color:${gradeColor}">${grade}</div><div class="lbl">Grade</div></div>
+      <div class="recap-stat"><div class="val c">${correct}</div><div class="lbl">Correct</div></div>
+      <div class="recap-stat"><div class="val w">${wrong}</div><div class="lbl">Wrong</div></div>
+      <div class="recap-stat"><div class="val s">${skipped}</div><div class="lbl">Skipped</div></div>
+      <div class="recap-stat"><div class="val" style="color:#a8b2d8">${questions.length}</div><div class="lbl">Total</div></div>
+    </div>
+    <h3 style="color:#e94560; margin-bottom:14px;">Detailed Review</h3>
+    ${itemsHtml}
+  `;
+  recap.scrollIntoView({ behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

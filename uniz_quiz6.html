@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Session 6 - Shell Scripting Quiz</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.hdr{background:linear-gradient(135deg,#1e3a5f,#0f172a);padding:30px 20px;text-align:center;border-bottom:2px solid #334155}
+.hdr h1{font-size:1.8rem;color:#38bdf8;margin-bottom:8px}.hdr p{color:#94a3b8}
+.pbc{background:#1e293b;padding:12px 25px;position:sticky;top:0;z-index:100;border-bottom:1px solid #334155;display:flex;align-items:center;gap:15px}
+.pb{flex:1;height:10px;background:#334155;border-radius:10px;overflow:hidden}
+.pf{height:100%;background:linear-gradient(90deg,#38bdf8,#818cf8);border-radius:10px;transition:width .4s;width:0%}
+.pt{color:#94a3b8;font-size:.85rem;white-space:nowrap}
+.qc{max-width:860px;margin:25px auto;padding:0 20px 60px}
+.st{background:linear-gradient(90deg,#1e3a5f,#1e293b);border-left:4px solid #38bdf8;padding:10px 18px;margin:28px 0 14px;border-radius:0 8px 8px 0;font-size:1rem;color:#38bdf8;font-weight:700}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:15px;transition:border-color .3s}
+.card.ok{border-color:#22c55e}.card.ng{border-color:#ef4444}
+.qn{font-size:.72rem;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.qbadge{font-size:.7rem;padding:2px 8px;border-radius:20px;font-weight:700;display:none}
+.qbadge.bc{background:#052e16;color:#22c55e;border:1px solid #22c55e;display:inline-block}
+.qbadge.bw{background:#2d0a0a;color:#ef4444;border:1px solid #ef4444;display:inline-block}
+.qt{font-size:.97rem;color:#e2e8f0;margin-bottom:14px;line-height:1.65}
+.qt code{background:#0f172a;color:#f59e0b;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.88em}
+.opts{display:flex;flex-direction:column;gap:9px}
+.ob{background:#0f172a;border:1.5px solid #334155;color:#cbd5e1;padding:11px 15px;border-radius:8px;cursor:pointer;text-align:left;font-size:.93rem;transition:all .2s;display:flex;align-items:flex-start;gap:10px;width:100%}
+.ob:hover:not(:disabled){border-color:#38bdf8;color:#e2e8f0;background:#1e3a5f}
+.ob .ol{font-weight:700;color:#38bdf8;min-width:20px;flex-shrink:0}
+.ob.cor{border-color:#22c55e!important;background:#052e16!important;color:#86efac!important}
+.ob.cor .ol{color:#22c55e!important}
+.ob.wrg{border-color:#ef4444!important;background:#2d0a0a!important;color:#fca5a5!important}
+.ob.wrg .ol{color:#ef4444!important}
+.ob.rev{border-color:#22c55e!important;background:#052e16!important;color:#86efac!important}
+.ob.rev .ol{color:#22c55e!important}
+.ob:disabled{cursor:default;opacity:.9}
+.exp{margin-top:12px;padding:11px 15px;border-radius:8px;font-size:.88rem;line-height:1.6;display:none}
+.exp.show{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.exp.ce{background:#052e16;border-left:3px solid #22c55e;color:#86efac}
+.exp.we{background:#2d0a0a;border-left:3px solid #ef4444;color:#fca5a5}
+.sub{text-align:center;margin:35px 0}
+.sb{background:linear-gradient(135deg,#38bdf8,#818cf8);color:#0f172a;border:none;padding:15px 48px;font-size:1.05rem;font-weight:700;border-radius:50px;cursor:pointer;box-shadow:0 4px 20px rgba(56,189,248,.3);transition:transform .2s}
+.sb:hover{transform:translateY(-2px)}
+#recap{display:none;max-width:860px;margin:0 auto;padding:0 20px 60px}
+.rh{text-align:center;padding:35px 20px}
+.sc{width:140px;height:140px;border-radius:50%;margin:0 auto 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2.3rem;font-weight:700;border:6px solid}
+.sc.gr{border-color:#22c55e;color:#22c55e;background:#052e16}
+.sc.ok2{border-color:#f59e0b;color:#f59e0b;background:#1c1003}
+.sc.po{border-color:#ef4444;color:#ef4444;background:#2d0a0a}
+.sc span{font-size:.8rem;font-weight:400;color:#94a3b8}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.sb2{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:14px;text-align:center}
+.sb2 .sn{font-size:1.9rem;font-weight:700}.sb2 .sl{font-size:.78rem;color:#94a3b8;margin-top:3px}
+.sb2.sc2 .sn{color:#22c55e}.sb2.sw .sn{color:#ef4444}.sb2.ss .sn{color:#f59e0b}.sb2.st2 .sn{color:#38bdf8}
+.rs{margin:22px 0}
+.rst{font-size:.95rem;font-weight:700;padding:9px 15px;border-radius:8px;margin-bottom:10px}
+.rst.wt{background:#2d0a0a;color:#ef4444;border-left:4px solid #ef4444}
+.rst.ct{background:#052e16;color:#22c55e;border-left:4px solid #22c55e}
+.rst.skt{background:#1c1003;color:#f59e0b;border-left:4px solid #f59e0b}
+.ri{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:14px;margin-bottom:10px}
+.ri.rw{border-left:4px solid #ef4444}.ri.rc{border-left:4px solid #22c55e}.ri.rsk{border-left:4px solid #f59e0b}
+.ri .riq{font-size:.88rem;color:#e2e8f0;margin-bottom:8px;line-height:1.5;font-weight:600}
+.riy{color:#fca5a5;font-size:.84rem;margin-bottom:3px}
+.ric{color:#86efac;font-size:.84rem;margin-bottom:3px}
+.rie{color:#94a3b8;margin-top:5px;line-height:1.5;font-size:.83rem;border-top:1px solid #334155;padding-top:6px}
+.rtb{background:#1e293b;border:2px solid #38bdf8;color:#38bdf8;padding:13px 38px;font-size:.97rem;font-weight:600;border-radius:50px;cursor:pointer;margin-top:18px;transition:all .2s}
+.rtb:hover{background:#38bdf8;color:#0f172a}
+@media(max-width:600px){.sg{grid-template-columns:repeat(2,1fr)}.hdr h1{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>&#x1F427; OS Session 6 &mdash; Shell Scripting I</h1>
+  <p>Review Quiz &middot; 42 questions &middot; <strong>Instant feedback on each click</strong> &middot; Submit whenever ready</p>
+</div>
+<div class="pbc">
+  <div class="pb"><div class="pf" id="pf"></div></div>
+  <div class="pt" id="pt">0 / 42 answered</div>
+</div>
+<div class="qc" id="qc">
+<div class="st">&#x1F4CC; Section 1 &mdash; What is a Shell Script?</div>
+
+<div class="card" id="q1">
+<div class="qn">Question 1 <span class="qbadge" id="b1"></span></div>
+<div class="qt">What is a shell script?</div>
+<div class="opts">
+<button class="ob" onclick="ans(1,'A')"><span class="ol">A</span><span>A compiled binary file executed by the Linux kernel</span></button>
+<button class="ob" onclick="ans(1,'B')"><span class="ol">B</span><span>A plain text file containing commands executed sequentially by the shell</span></button>
+<button class="ob" onclick="ans(1,'C')"><span class="ol">C</span><span>A program written in C and compiled with gcc</span></button>
+<button class="ob" onclick="ans(1,'D')"><span class="ol">D</span><span>An operating system configuration file</span></button>
+</div>
+<div class="exp" id="e1"></div>
+</div>
+
+<div class="card" id="q2">
+<div class="qn">Question 2 <span class="qbadge" id="b2"></span></div>
+<div class="qt">In what order are commands in a shell script executed?</div>
+<div class="opts">
+<button class="ob" onclick="ans(2,'A')"><span class="ol">A</span><span>In random order</span></button>
+<button class="ob" onclick="ans(2,'B')"><span class="ol">B</span><span>In parallel simultaneously</span></button>
+<button class="ob" onclick="ans(2,'C')"><span class="ol">C</span><span>Sequentially, line by line</span></button>
+<button class="ob" onclick="ans(2,'D')"><span class="ol">D</span><span>From bottom to top</span></button>
+</div>
+<div class="exp" id="e2"></div>
+</div>
+
+<div class="card" id="q3">
+<div class="qn">Question 3 <span class="qbadge" id="b3"></span></div>
+<div class="qt">Which of the following is a typical use case for a shell script?</div>
+<div class="opts">
+<button class="ob" onclick="ans(3,'A')"><span class="ol">A</span><span>Creating complex graphical user interfaces</span></button>
+<button class="ob" onclick="ans(3,'B')"><span class="ol">B</span><span>File manipulation, program execution and text display</span></button>
+<button class="ob" onclick="ans(3,'C')"><span class="ol">C</span><span>Compiling C++ code</span></button>
+<button class="ob" onclick="ans(3,'D')"><span class="ol">D</span><span>Managing RAM directly</span></button>
+</div>
+<div class="exp" id="e3"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 2 &mdash; The Shebang (#!)</div>
+
+<div class="card" id="q4">
+<div class="qn">Question 4 <span class="qbadge" id="b4"></span></div>
+<div class="qt">What does <code>#!/bin/bash</code> at the beginning of a script mean?</div>
+<div class="opts">
+<button class="ob" onclick="ans(4,'A')"><span class="ol">A</span><span>It is a comment describing the script</span></button>
+<button class="ob" onclick="ans(4,'B')"><span class="ol">B</span><span>It indicates that the script should be executed by the bash interpreter</span></button>
+<button class="ob" onclick="ans(4,'C')"><span class="ol">C</span><span>It defines the working directory of the script</span></button>
+<button class="ob" onclick="ans(4,'D')"><span class="ol">D</span><span>It imports bash libraries</span></button>
+</div>
+<div class="exp" id="e4"></div>
+</div>
+
+<div class="card" id="q5">
+<div class="qn">Question 5 <span class="qbadge" id="b5"></span></div>
+<div class="qt">What is the difference between <code>#!/bin/bash</code> and <code>#!/bin/zsh</code>?</div>
+<div class="opts">
+<button class="ob" onclick="ans(5,'A')"><span class="ol">A</span><span>No difference, they are identical</span></button>
+<button class="ob" onclick="ans(5,'B')"><span class="ol">B</span><span><code>#!/bin/bash</code> is faster than <code>#!/bin/zsh</code></span></button>
+<button class="ob" onclick="ans(5,'C')"><span class="ol">C</span><span>They specify different interpreters (bash vs Z shell), each with its own syntax</span></button>
+<button class="ob" onclick="ans(5,'D')"><span class="ol">D</span><span><code>#!/bin/zsh</code> only works on macOS</span></button>
+</div>
+<div class="exp" id="e5"></div>
+</div>
+
+<div class="card" id="q6">
+<div class="qn">Question 6 <span class="qbadge" id="b6"></span></div>
+<div class="qt">What happens if you run <code>bash hello.sh</code> instead of <code>./hello.sh</code>?</div>
+<div class="opts">
+<button class="ob" onclick="ans(6,'A')"><span class="ol">A</span><span>The script does not execute</span></button>
+<button class="ob" onclick="ans(6,'B')"><span class="ol">B</span><span>The shebang is ignored and bash is used as the interpreter</span></button>
+<button class="ob" onclick="ans(6,'C')"><span class="ol">C</span><span>A permission error is generated</span></button>
+<button class="ob" onclick="ans(6,'D')"><span class="ol">D</span><span>The shebang is read and applied normally</span></button>
+</div>
+<div class="exp" id="e6"></div>
+</div>
+
+<div class="card" id="q7">
+<div class="qn">Question 7 <span class="qbadge" id="b7"></span></div>
+<div class="qt">Why is it important to specify the interpreter in the shebang?</div>
+<div class="opts">
+<button class="ob" onclick="ans(7,'A')"><span class="ol">A</span><span>To make the script run faster</span></button>
+<button class="ob" onclick="ans(7,'B')"><span class="ol">B</span><span>Because different shells have different syntaxes</span></button>
+<button class="ob" onclick="ans(7,'C')"><span class="ol">C</span><span>To avoid compilation errors</span></button>
+<button class="ob" onclick="ans(7,'D')"><span class="ol">D</span><span>To define environment variables</span></button>
+</div>
+<div class="exp" id="e7"></div>
+</div>
+
+<div class="card" id="q8">
+<div class="qn">Question 8 <span class="qbadge" id="b8"></span></div>
+<div class="qt">What is the correct position of the shebang in a script?</div>
+<div class="opts">
+<button class="ob" onclick="ans(8,'A')"><span class="ol">A</span><span>Anywhere in the file</span></button>
+<button class="ob" onclick="ans(8,'B')"><span class="ol">B</span><span>On the last line of the script</span></button>
+<button class="ob" onclick="ans(8,'C')"><span class="ol">C</span><span>Mandatory on the very first line of the file</span></button>
+<button class="ob" onclick="ans(8,'D')"><span class="ol">D</span><span>After the header comments</span></button>
+</div>
+<div class="exp" id="e8"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 3 &mdash; Comments</div>
+
+<div class="card" id="q9">
+<div class="qn">Question 9 <span class="qbadge" id="b9"></span></div>
+<div class="qt">How do you write a comment in a bash shell script?</div>
+<div class="opts">
+<button class="ob" onclick="ans(9,'A')"><span class="ol">A</span><span><code>// This is a comment</code></span></button>
+<button class="ob" onclick="ans(9,'B')"><span class="ol">B</span><span><code>/* This is a comment */</code></span></button>
+<button class="ob" onclick="ans(9,'C')"><span class="ol">C</span><span><code># This is a comment</code></span></button>
+<button class="ob" onclick="ans(9,'D')"><span class="ol">D</span><span><code>-- This is a comment</code></span></button>
+</div>
+<div class="exp" id="e9"></div>
+</div>
+
+<div class="card" id="q10">
+<div class="qn">Question 10 <span class="qbadge" id="b10"></span></div>
+<div class="qt">Which statement about comments in a bash script is TRUE?</div>
+<div class="opts">
+<button class="ob" onclick="ans(10,'A')"><span class="ol">A</span><span>Comments are executed but ignored by the shell</span></button>
+<button class="ob" onclick="ans(10,'B')"><span class="ol">B</span><span>Comments slow down script execution</span></button>
+<button class="ob" onclick="ans(10,'C')"><span class="ol">C</span><span>Comments are ignored at runtime but are important for readability and collaboration</span></button>
+<button class="ob" onclick="ans(10,'D')"><span class="ol">D</span><span>Comments can only appear at the beginning of the file</span></button>
+</div>
+<div class="exp" id="e10"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 4 &mdash; Creating and Running a Script</div>
+
+<div class="card" id="q11">
+<div class="qn">Question 11 <span class="qbadge" id="b11"></span></div>
+<div class="qt">What extension is conventionally used for shell scripts?</div>
+<div class="opts">
+<button class="ob" onclick="ans(11,'A')"><span class="ol">A</span><span><code>.bash</code></span></button>
+<button class="ob" onclick="ans(11,'B')"><span class="ol">B</span><span><code>.sh</code></span></button>
+<button class="ob" onclick="ans(11,'C')"><span class="ol">C</span><span><code>.script</code></span></button>
+<button class="ob" onclick="ans(11,'D')"><span class="ol">D</span><span><code>.txt</code></span></button>
+</div>
+<div class="exp" id="e11"></div>
+</div>
+
+<div class="card" id="q12">
+<div class="qn">Question 12 <span class="qbadge" id="b12"></span></div>
+<div class="qt">Which command makes a script executable?</div>
+<div class="opts">
+<button class="ob" onclick="ans(12,'A')"><span class="ol">A</span><span><code>exec hello.sh</code></span></button>
+<button class="ob" onclick="ans(12,'B')"><span class="ol">B</span><span><code>run +x hello.sh</code></span></button>
+<button class="ob" onclick="ans(12,'C')"><span class="ol">C</span><span><code>chmod +x hello.sh</code></span></button>
+<button class="ob" onclick="ans(12,'D')"><span class="ol">D</span><span><code>perm +x hello.sh</code></span></button>
+</div>
+<div class="exp" id="e12"></div>
+</div>
+
+<div class="card" id="q13">
+<div class="qn">Question 13 <span class="qbadge" id="b13"></span></div>
+<div class="qt">How do you execute <code>hello.sh</code> from the current directory?</div>
+<div class="opts">
+<button class="ob" onclick="ans(13,'A')"><span class="ol">A</span><span><code>run hello.sh</code></span></button>
+<button class="ob" onclick="ans(13,'B')"><span class="ol">B</span><span><code>execute hello.sh</code></span></button>
+<button class="ob" onclick="ans(13,'C')"><span class="ol">C</span><span><code>./hello.sh</code></span></button>
+<button class="ob" onclick="ans(13,'D')"><span class="ol">D</span><span><code>open hello.sh</code></span></button>
+</div>
+<div class="exp" id="e13"></div>
+</div>
+
+<div class="card" id="q14">
+<div class="qn">Question 14 <span class="qbadge" id="b14"></span></div>
+<div class="qt">What is the output of: <code>#!/bin/bash</code> then <code>echo "Hello, world!"</code> then <code>date</code>?</div>
+<div class="opts">
+<button class="ob" onclick="ans(14,'A')"><span class="ol">A</span><span>Displays only "Hello, world!"</span></button>
+<button class="ob" onclick="ans(14,'B')"><span class="ol">B</span><span>Displays "Hello, world!" then the current date and time</span></button>
+<button class="ob" onclick="ans(14,'C')"><span class="ol">C</span><span>Generates an error because <code>date</code> is not valid</span></button>
+<button class="ob" onclick="ans(14,'D')"><span class="ol">D</span><span>Displays only the date</span></button>
+</div>
+<div class="exp" id="e14"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 5 &mdash; Variables</div>
+
+<div class="card" id="q15">
+<div class="qn">Question 15 <span class="qbadge" id="b15"></span></div>
+<div class="qt">What is the correct syntax to declare a variable in bash?</div>
+<div class="opts">
+<button class="ob" onclick="ans(15,'A')"><span class="ol">A</span><span><code>name = "Thomas"</code></span></button>
+<button class="ob" onclick="ans(15,'B')"><span class="ol">B</span><span><code>var name = "Thomas"</code></span></button>
+<button class="ob" onclick="ans(15,'C')"><span class="ol">C</span><span><code>name="Thomas"</code></span></button>
+<button class="ob" onclick="ans(15,'D')"><span class="ol">D</span><span><code>$name="Thomas"</code></span></button>
+</div>
+<div class="exp" id="e15"></div>
+</div>
+
+<div class="card" id="q16">
+<div class="qn">Question 16 <span class="qbadge" id="b16"></span></div>
+<div class="qt">How do you reference the value of a variable <code>name</code> in bash?</div>
+<div class="opts">
+<button class="ob" onclick="ans(16,'A')"><span class="ol">A</span><span><code>@name</code></span></button>
+<button class="ob" onclick="ans(16,'B')"><span class="ol">B</span><span><code>%name%</code></span></button>
+<button class="ob" onclick="ans(16,'C')"><span class="ol">C</span><span><code>&amp;name</code></span></button>
+<button class="ob" onclick="ans(16,'D')"><span class="ol">D</span><span><code>$name</code></span></button>
+</div>
+<div class="exp" id="e16"></div>
+</div>
+
+<div class="card" id="q17">
+<div class="qn">Question 17 <span class="qbadge" id="b17"></span></div>
+<div class="qt">What happens if you write <code>name = "Thomas"</code> (with spaces around =)?</div>
+<div class="opts">
+<button class="ob" onclick="ans(17,'A')"><span class="ol">A</span><span>The variable is created normally</span></button>
+<button class="ob" onclick="ans(17,'B')"><span class="ol">B</span><span>Bash generates an error because spaces around = are not allowed</span></button>
+<button class="ob" onclick="ans(17,'C')"><span class="ol">C</span><span>The value is assigned with spaces included</span></button>
+<button class="ob" onclick="ans(17,'D')"><span class="ol">D</span><span>Bash ignores the spaces and creates the variable</span></button>
+</div>
+<div class="exp" id="e17"></div>
+</div>
+
+<div class="card" id="q18">
+<div class="qn">Question 18 <span class="qbadge" id="b18"></span></div>
+<div class="qt">Which syntax displays the number of lines in <code>errors.txt</code> inside a sentence?</div>
+<div class="opts">
+<button class="ob" onclick="ans(18,'A')"><span class="ol">A</span><span><code>echo "Lines: wc -l errors.txt"</code></span></button>
+<button class="ob" onclick="ans(18,'B')"><span class="ol">B</span><span><code>echo "Lines: $(wc -l errors.txt)"</code></span></button>
+<button class="ob" onclick="ans(18,'C')"><span class="ol">C</span><span><code>echo "Lines: {wc -l errors.txt}"</code></span></button>
+<button class="ob" onclick="ans(18,'D')"><span class="ol">D</span><span><code>print("Lines: " + wc -l errors.txt)</code></span></button>
+</div>
+<div class="exp" id="e18"></div>
+</div>
+
+<div class="card" id="q19">
+<div class="qn">Question 19 <span class="qbadge" id="b19"></span></div>
+<div class="qt">What is the result of: <code>MY_MESSAGE="Hello World"</code> then <code>echo $MY_MESSAGE</code>?</div>
+<div class="opts">
+<button class="ob" onclick="ans(19,'A')"><span class="ol">A</span><span><code>$MY_MESSAGE</code></span></button>
+<button class="ob" onclick="ans(19,'B')"><span class="ol">B</span><span><code>MY_MESSAGE</code></span></button>
+<button class="ob" onclick="ans(19,'C')"><span class="ol">C</span><span><code>Hello World</code></span></button>
+<button class="ob" onclick="ans(19,'D')"><span class="ol">D</span><span>An error is generated</span></button>
+</div>
+<div class="exp" id="e19"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 6 &mdash; Curly Braces {} and Variable Boundaries</div>
+
+<div class="card" id="q20">
+<div class="qn">Question 20 <span class="qbadge" id="b20"></span></div>
+<div class="qt">Why use <code>${USER_NAME}_final.txt</code> rather than <code>$USER_NAME_final.txt</code>?</div>
+<div class="opts">
+<button class="ob" onclick="ans(20,'A')"><span class="ol">A</span><span>Curly braces are required for all variables</span></button>
+<button class="ob" onclick="ans(20,'B')"><span class="ol">B</span><span>Without braces, bash looks for a variable called <code>USER_NAME_final</code> which does not exist</span></button>
+<button class="ob" onclick="ans(20,'C')"><span class="ol">C</span><span>Curly braces make the script run faster</span></button>
+<button class="ob" onclick="ans(20,'D')"><span class="ol">D</span><span>It is just a stylistic convention with no effect</span></button>
+</div>
+<div class="exp" id="e20"></div>
+</div>
+
+<div class="card" id="q21">
+<div class="qn">Question 21 <span class="qbadge" id="b21"></span></div>
+<div class="qt">What does <code>touch "${USER_NAME}.txt"</code> do?</div>
+<div class="opts">
+<button class="ob" onclick="ans(21,'A')"><span class="ol">A</span><span>Creates a file literally named <code>${USER_NAME}.txt</code></span></button>
+<button class="ob" onclick="ans(21,'B')"><span class="ol">B</span><span>Creates a file whose name is the value of USER_NAME followed by <code>.txt</code></span></button>
+<button class="ob" onclick="ans(21,'C')"><span class="ol">C</span><span>Generates a syntax error</span></button>
+<button class="ob" onclick="ans(21,'D')"><span class="ol">D</span><span>Creates a directory named USER_NAME</span></button>
+</div>
+<div class="exp" id="e21"></div>
+</div>
+
+<div class="card" id="q22">
+<div class="qn">Question 22 <span class="qbadge" id="b22"></span></div>
+<div class="qt">In which case are curly braces <code>{}</code> particularly necessary?</div>
+<div class="opts">
+<button class="ob" onclick="ans(22,'A')"><span class="ol">A</span><span>When the variable is used alone on a line</span></button>
+<button class="ob" onclick="ans(22,'B')"><span class="ol">B</span><span>When the variable is immediately followed by other characters (letters, digits, _)</span></button>
+<button class="ob" onclick="ans(22,'C')"><span class="ol">C</span><span>Only inside for loops</span></button>
+<button class="ob" onclick="ans(22,'D')"><span class="ol">D</span><span>Only with numeric variables</span></button>
+</div>
+<div class="exp" id="e22"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 7 &mdash; Reading User Input &amp; Environment Variables</div>
+
+<div class="card" id="q23">
+<div class="qn">Question 23 <span class="qbadge" id="b23"></span></div>
+<div class="qt">Which command reads user input and stores it in <code>MY_NAME</code>?</div>
+<div class="opts">
+<button class="ob" onclick="ans(23,'A')"><span class="ol">A</span><span><code>input MY_NAME</code></span></button>
+<button class="ob" onclick="ans(23,'B')"><span class="ol">B</span><span><code>scan MY_NAME</code></span></button>
+<button class="ob" onclick="ans(23,'C')"><span class="ol">C</span><span><code>read MY_NAME</code></span></button>
+<button class="ob" onclick="ans(23,'D')"><span class="ol">D</span><span><code>get MY_NAME</code></span></button>
+</div>
+<div class="exp" id="e23"></div>
+</div>
+
+<div class="card" id="q24">
+<div class="qn">Question 24 <span class="qbadge" id="b24"></span></div>
+<div class="qt">You set <code>MYVAR="hello"</code> WITHOUT export, then run <code>./myvar.sh</code>. The script does: <code>echo $MYVAR</code>, then <code>MYVAR="hi there"</code>, then <code>echo $MYVAR</code>. What is the output?</div>
+<div class="opts">
+<button class="ob" onclick="ans(24,'A')"><span class="ol">A</span><span>MYVAR is: hello / MYVAR is: hi there</span></button>
+<button class="ob" onclick="ans(24,'B')"><span class="ol">B</span><span>MYVAR is: (empty) / MYVAR is: hi there</span></button>
+<button class="ob" onclick="ans(24,'C')"><span class="ol">C</span><span>MYVAR is: hi there / MYVAR is: hi there</span></button>
+<button class="ob" onclick="ans(24,'D')"><span class="ol">D</span><span>An error is generated</span></button>
+</div>
+<div class="exp" id="e24"></div>
+</div>
+
+<div class="card" id="q25">
+<div class="qn">Question 25 <span class="qbadge" id="b25"></span></div>
+<div class="qt">What does the command <code>export MY_NAME</code> do?</div>
+<div class="opts">
+<button class="ob" onclick="ans(25,'A')"><span class="ol">A</span><span>Deletes the variable MY_NAME</span></button>
+<button class="ob" onclick="ans(25,'B')"><span class="ol">B</span><span>Makes the variable available in sub-shells and child scripts</span></button>
+<button class="ob" onclick="ans(25,'C')"><span class="ol">C</span><span>Saves the variable to a file</span></button>
+<button class="ob" onclick="ans(25,'D')"><span class="ol">D</span><span>Copies the variable to /etc/environment</span></button>
+</div>
+<div class="exp" id="e25"></div>
+</div>
+
+<div class="card" id="q26">
+<div class="qn">Question 26 <span class="qbadge" id="b26"></span></div>
+<div class="qt">After <code>export MYVAR="hello"</code> and running <code>./myvar.sh</code>, what is the value of <code>MYVAR</code> in the parent shell?</div>
+<div class="opts">
+<button class="ob" onclick="ans(26,'A')"><span class="ol">A</span><span><code>hi there</code> (modified by the script)</span></button>
+<button class="ob" onclick="ans(26,'B')"><span class="ol">B</span><span>Empty (destroyed at the end of the script)</span></button>
+<button class="ob" onclick="ans(26,'C')"><span class="ol">C</span><span><code>hello</code> (unchanged, the script has its own environment)</span></button>
+<button class="ob" onclick="ans(26,'D')"><span class="ol">D</span><span><code>hello hi there</code> (concatenated)</span></button>
+</div>
+<div class="exp" id="e26"></div>
+</div>
+
+<div class="card" id="q27">
+<div class="qn">Question 27 <span class="qbadge" id="b27"></span></div>
+<div class="qt">Why does <code>./myvar.sh</code> create a new shell environment?</div>
+<div class="opts">
+<button class="ob" onclick="ans(27,'A')"><span class="ol">A</span><span>Because the script uses <code>#!/bin/sh</code></span></button>
+<button class="ob" onclick="ans(27,'B')"><span class="ol">B</span><span>Because every script launched with <code>./</code> starts a new child shell process</span></button>
+<button class="ob" onclick="ans(27,'C')"><span class="ol">C</span><span>Because bash variables are always local</span></button>
+<button class="ob" onclick="ans(27,'D')"><span class="ol">D</span><span>Because Linux isolates all processes by default</span></button>
+</div>
+<div class="exp" id="e27"></div>
+</div>
+
+<div class="card" id="q28">
+<div class="qn">Question 28 <span class="qbadge" id="b28"></span></div>
+<div class="qt">With <code>export MYVAR="hello"</code> then <code>./myvar.sh</code>, what does the first <code>echo</code> display?</div>
+<div class="opts">
+<button class="ob" onclick="ans(28,'A')"><span class="ol">A</span><span><code>MYVAR is:</code> (empty)</span></button>
+<button class="ob" onclick="ans(28,'B')"><span class="ol">B</span><span><code>MYVAR is: hi there</code></span></button>
+<button class="ob" onclick="ans(28,'C')"><span class="ol">C</span><span><code>MYVAR is: hello</code></span></button>
+<button class="ob" onclick="ans(28,'D')"><span class="ol">D</span><span>An error</span></button>
+</div>
+<div class="exp" id="e28"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 8 &mdash; Conditional Statements if/elif/else</div>
+
+<div class="card" id="q29">
+<div class="qn">Question 29 <span class="qbadge" id="b29"></span></div>
+<div class="qt">Which operator tests if a file exists and is a regular file?</div>
+<div class="opts">
+<button class="ob" onclick="ans(29,'A')"><span class="ol">A</span><span><code>-d</code></span></button>
+<button class="ob" onclick="ans(29,'B')"><span class="ol">B</span><span><code>-x</code></span></button>
+<button class="ob" onclick="ans(29,'C')"><span class="ol">C</span><span><code>-f</code></span></button>
+<button class="ob" onclick="ans(29,'D')"><span class="ol">D</span><span><code>-r</code></span></button>
+</div>
+<div class="exp" id="e29"></div>
+</div>
+
+<div class="card" id="q30">
+<div class="qn">Question 30 <span class="qbadge" id="b30"></span></div>
+<div class="qt">Which numeric operator tests if <code>a</code> is strictly greater than <code>b</code>?</div>
+<div class="opts">
+<button class="ob" onclick="ans(30,'A')"><span class="ol">A</span><span><code>-eq</code> (equal)</span></button>
+<button class="ob" onclick="ans(30,'B')"><span class="ol">B</span><span><code>-lt</code> (less than)</span></button>
+<button class="ob" onclick="ans(30,'C')"><span class="ol">C</span><span><code>-ge</code> (greater or equal)</span></button>
+<button class="ob" onclick="ans(30,'D')"><span class="ol">D</span><span><code>-gt</code> (greater than)</span></button>
+</div>
+<div class="exp" id="e30"></div>
+</div>
+
+<div class="card" id="q31">
+<div class="qn">Question 31 <span class="qbadge" id="b31"></span></div>
+<div class="qt">How does an <code>if</code> structure end in bash?</div>
+<div class="opts">
+<button class="ob" onclick="ans(31,'A')"><span class="ol">A</span><span><code>end</code></span></button>
+<button class="ob" onclick="ans(31,'B')"><span class="ol">B</span><span><code>endif</code></span></button>
+<button class="ob" onclick="ans(31,'C')"><span class="ol">C</span><span><code>fi</code></span></button>
+<button class="ob" onclick="ans(31,'D')"><span class="ol">D</span><span><code>done</code></span></button>
+</div>
+<div class="exp" id="e31"></div>
+</div>
+
+<div class="card" id="q32">
+<div class="qn">Question 32 <span class="qbadge" id="b32"></span></div>
+<div class="qt">What does <code>$(( ... ))</code> do in bash?</div>
+<div class="opts">
+<button class="ob" onclick="ans(32,'A')"><span class="ol">A</span><span>Executes a command and captures its output</span></button>
+<button class="ob" onclick="ans(32,'B')"><span class="ol">B</span><span>Performs arithmetic expansion (integer calculation)</span></button>
+<button class="ob" onclick="ans(32,'C')"><span class="ol">C</span><span>Defines an array</span></button>
+<button class="ob" onclick="ans(32,'D')"><span class="ol">D</span><span>Creates a sub-shell</span></button>
+</div>
+<div class="exp" id="e32"></div>
+</div>
+
+<div class="card" id="q33">
+<div class="qn">Question 33 <span class="qbadge" id="b33"></span></div>
+<div class="qt">Which operator tests if a string equals "root" inside an <code>if [ ]</code> in bash?</div>
+<div class="opts">
+<button class="ob" onclick="ans(33,'A')"><span class="ol">A</span><span><code>-eq</code></span></button>
+<button class="ob" onclick="ans(33,'B')"><span class="ol">B</span><span><code>==</code></span></button>
+<button class="ob" onclick="ans(33,'C')"><span class="ol">C</span><span><code>-str</code></span></button>
+<button class="ob" onclick="ans(33,'D')"><span class="ol">D</span><span><code>-match</code></span></button>
+</div>
+<div class="exp" id="e33"></div>
+</div>
+
+<div class="card" id="q34">
+<div class="qn">Question 34 <span class="qbadge" id="b34"></span></div>
+<div class="qt">Which operator tests if a directory exists?</div>
+<div class="opts">
+<button class="ob" onclick="ans(34,'A')"><span class="ol">A</span><span><code>-f</code></span></button>
+<button class="ob" onclick="ans(34,'B')"><span class="ol">B</span><span><code>-d</code></span></button>
+<button class="ob" onclick="ans(34,'C')"><span class="ol">C</span><span><code>-r</code></span></button>
+<button class="ob" onclick="ans(34,'D')"><span class="ol">D</span><span><code>-w</code></span></button>
+</div>
+<div class="exp" id="e34"></div>
+</div>
+
+<div class="card" id="q35">
+<div class="qn">Question 35 <span class="qbadge" id="b35"></span></div>
+<div class="qt">What is the correct syntax for an <code>if</code> with <code>elif</code> in bash?</div>
+<div class="opts">
+<button class="ob" onclick="ans(35,'A')"><span class="ol">A</span><span><code>if [...] then ... else if [...] then ... fi</code></span></button>
+<button class="ob" onclick="ans(35,'B')"><span class="ol">B</span><span><code>if [ ... ]; then ... elif [ ... ]; then ... else ... fi</code></span></button>
+<button class="ob" onclick="ans(35,'C')"><span class="ol">C</span><span><code>if { ... } { ... } elseif { ... } { ... }</code></span></button>
+<button class="ob" onclick="ans(35,'D')"><span class="ol">D</span><span><code>if (...) {...} elif (...) {...}</code></span></button>
+</div>
+<div class="exp" id="e35"></div>
+</div>
+
+<div class="card" id="q36">
+<div class="qn">Question 36 <span class="qbadge" id="b36"></span></div>
+<div class="qt">Which operator tests if a file is executable?</div>
+<div class="opts">
+<button class="ob" onclick="ans(36,'A')"><span class="ol">A</span><span><code>-e</code></span></button>
+<button class="ob" onclick="ans(36,'B')"><span class="ol">B</span><span><code>-r</code></span></button>
+<button class="ob" onclick="ans(36,'C')"><span class="ol">C</span><span><code>-x</code></span></button>
+<button class="ob" onclick="ans(36,'D')"><span class="ol">D</span><span><code>-w</code></span></button>
+</div>
+<div class="exp" id="e36"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 9 &mdash; The case Structure</div>
+
+<div class="card" id="q37">
+<div class="qn">Question 37 <span class="qbadge" id="b37"></span></div>
+<div class="qt">How does each block in a <code>case</code> statement end in bash?</div>
+<div class="opts">
+<button class="ob" onclick="ans(37,'A')"><span class="ol">A</span><span><code>break</code></span></button>
+<button class="ob" onclick="ans(37,'B')"><span class="ol">B</span><span><code>;;</code></span></button>
+<button class="ob" onclick="ans(37,'C')"><span class="ol">C</span><span><code>end</code></span></button>
+<button class="ob" onclick="ans(37,'D')"><span class="ol">D</span><span><code>done</code></span></button>
+</div>
+<div class="exp" id="e37"></div>
+</div>
+
+<div class="card" id="q38">
+<div class="qn">Question 38 <span class="qbadge" id="b38"></span></div>
+<div class="qt">How does a <code>case</code> structure close in bash?</div>
+<div class="opts">
+<button class="ob" onclick="ans(38,'A')"><span class="ol">A</span><span><code>fi</code></span></button>
+<button class="ob" onclick="ans(38,'B')"><span class="ol">B</span><span><code>end case</code></span></button>
+<button class="ob" onclick="ans(38,'C')"><span class="ol">C</span><span><code>esac</code></span></button>
+<button class="ob" onclick="ans(38,'D')"><span class="ol">D</span><span><code>done</code></span></button>
+</div>
+<div class="exp" id="e38"></div>
+</div>
+
+<div class="card" id="q39">
+<div class="qn">Question 39 <span class="qbadge" id="b39"></span></div>
+<div class="qt">In a <code>case</code> structure, what does the pattern <code>*)</code> represent?</div>
+<div class="opts">
+<button class="ob" onclick="ans(39,'A')"><span class="ol">A</span><span>It matches only numeric values</span></button>
+<button class="ob" onclick="ans(39,'B')"><span class="ol">B</span><span>It matches any unmatched value (default case)</span></button>
+<button class="ob" onclick="ans(39,'C')"><span class="ol">C</span><span>It matches only empty strings</span></button>
+<button class="ob" onclick="ans(39,'D')"><span class="ol">D</span><span>It multiplies the variable by itself</span></button>
+</div>
+<div class="exp" id="e39"></div>
+</div>
+
+<div class="card" id="q40">
+<div class="qn">Question 40 <span class="qbadge" id="b40"></span></div>
+<div class="qt">When should you prefer <code>case</code> over <code>if/elif</code>?</div>
+<div class="opts">
+<button class="ob" onclick="ans(40,'A')"><span class="ol">A</span><span>When comparing files</span></button>
+<button class="ob" onclick="ans(40,'B')"><span class="ol">B</span><span>When comparing a single variable against many possible values</span></button>
+<button class="ob" onclick="ans(40,'C')"><span class="ol">C</span><span>When dealing with complex numeric conditions</span></button>
+<button class="ob" onclick="ans(40,'D')"><span class="ol">D</span><span>Only for interactive menus</span></button>
+</div>
+<div class="exp" id="e40"></div>
+</div>
+
+<div class="card" id="q41">
+<div class="qn">Question 41 <span class="qbadge" id="b41"></span></div>
+<div class="qt">How is <code>|</code> used inside a <code>case</code> structure?</div>
+<div class="opts">
+<button class="ob" onclick="ans(41,'A')"><span class="ol">A</span><span>To redirect output to a file</span></button>
+<button class="ob" onclick="ans(41,'B')"><span class="ol">B</span><span>To separate alternative patterns within the same block</span></button>
+<button class="ob" onclick="ans(41,'C')"><span class="ol">C</span><span>To combine two case structures</span></button>
+<button class="ob" onclick="ans(41,'D')"><span class="ol">D</span><span>To create a pipe between two commands</span></button>
+</div>
+<div class="exp" id="e41"></div>
+</div>
+
+<div class="st">&#x1F4CC; Section 10 &mdash; Best Practices &amp; Miscellaneous</div>
+
+<div class="card" id="q42">
+<div class="qn">Question 42 <span class="qbadge" id="b42"></span></div>
+<div class="qt">Which statement about <code>$(( ... ))</code> is CORRECT?</div>
+<div class="opts">
+<button class="ob" onclick="ans(42,'A')"><span class="ol">A</span><span>It works with floating-point (decimal) numbers</span></button>
+<button class="ob" onclick="ans(42,'B')"><span class="ol">B</span><span>It only works with integers</span></button>
+<button class="ob" onclick="ans(42,'C')"><span class="ol">C</span><span>It is identical to <code>$( ... )</code></span></button>
+<button class="ob" onclick="ans(42,'D')"><span class="ol">D</span><span>It is only available in zsh</span></button>
+</div>
+<div class="exp" id="e42"></div>
+</div>
+
+<div class="sub">
+  <button class="sb" onclick="submitQuiz()">&#x1F4CA; Submit and see results</button>
+  <p style="color:#64748b;margin-top:10px;font-size:.85rem;">You can submit without answering all questions</p>
+</div>
+</div>
+
+<div id="recap">
+  <div class="rh">
+    <div class="sc" id="sc"><div id="sp">0%</div><span id="sl">Score</span></div>
+    <h2 style="color:#e2e8f0;margin-bottom:6px;">Results Summary</h2>
+    <p style="color:#94a3b8;">Detailed breakdown of your answers</p>
+  </div>
+  <div class="sg">
+    <div class="sb2 st2"><div class="sn" id="stTotal">0</div><div class="sl">Answered</div></div>
+    <div class="sb2 sc2"><div class="sn" id="stCorrect">0</div><div class="sl">&#x2705; Correct</div></div>
+    <div class="sb2 sw"><div class="sn" id="stWrong">0</div><div class="sl">&#x274C; Incorrect</div></div>
+    <div class="sb2 ss"><div class="sn" id="stSkip">0</div><div class="sl">&#x23ED; Skipped</div></div>
+  </div>
+  <div id="recapWrong" class="rs"></div>
+  <div id="recapSkip" class="rs"></div>
+  <div id="recapCorrect" class="rs"></div>
+  <div style="text-align:center;margin-top:25px;">
+    <button class="rtb" onclick="retryQuiz()">&#x1F504; Restart the quiz</button>
+  </div>
+</div>
+
+<script>
+var TOTAL = 42;
+var userAns = {};
+var CA = {1:'B',2:'C',3:'B',4:'B',5:'C',6:'B',7:'B',8:'C',9:'C',10:'C',11:'B',12:'C',13:'C',14:'B',15:'C',16:'D',17:'B',18:'B',19:'C',20:'B',21:'B',22:'B',23:'C',24:'B',25:'B',26:'C',27:'B',28:'C',29:'C',30:'D',31:'C',32:'B',33:'B',34:'B',35:'B',36:'C',37:'B',38:'C',39:'B',40:'B',41:'B',42:'B'};
+var EXP_C = {1:'Correct! A shell script is a plain TEXT file containing Linux commands executed sequentially by the shell.',2:'Correct! Commands in a script are executed sequentially, from top to bottom, line by line.',3:'Correct! Shell scripts are typically used for file manipulation, program execution and text display.',4:'Correct! The shebang #!/bin/bash tells the system to use bash as the interpreter to execute this script.',5:'Correct! #!/bin/bash uses bash and #!/bin/zsh uses the Z shell. Each shell has its own syntax.',6:"Correct! When running 'bash hello.sh', bash is forced as the interpreter and the shebang is ignored.",7:'Correct! Different shells (bash, zsh, sh...) have different syntaxes. The shebang ensures the correct interpreter is used.',8:'Correct! The shebang MUST be on the very first line of the file, with no lines before it.',9:'Correct! In bash, comments start with # (except the first line if it is the shebang).',10:'Correct! Comments are completely ignored at runtime, but they are essential for documenting code and helping collaborators.',11:'Correct! The convention is to use the .sh extension for shell scripts.',12:'Correct! chmod +x hello.sh adds the execute bit to the file, making it executable.',13:'Correct! ./hello.sh executes the script from the current directory. The ./ indicates the current directory.',14:'Correct! The script executes commands sequentially: first echo displays Hello world then date shows the current date and time.',15:'Correct! In bash, variable assignment uses no spaces: name=Thomas.',16:'Correct! In bash, the $ prefix is used to reference a variable value: $name.',17:"Correct! Bash interprets 'name = Thomas' as trying to run a command called 'name' with '=' as an argument, generating an error.",18:'Correct! $(...) is command substitution: it executes the command and inserts its output into the string.',19:'Correct! echo $MY_MESSAGE displays the value of the variable, which is Hello World.',20:'Correct! Without braces, bash tries to expand the variable USER_NAME_final (the full string), which is undefined.',21:'Correct! The braces delimit the variable name, so bash correctly substitutes the value of USER_NAME before appending .txt.',22:'Correct! Curly braces are essential when the variable is immediately followed by characters that could be part of the variable name (letters, digits, underscore).',23:'Correct! The read command reads a line from standard input and stores it in the specified variable.',24:"Correct! Without export, MYVAR is not passed to the child script. The script starts with an empty MYVAR, then assigns 'hi there' locally.",25:'Correct! export makes the variable available to all child processes (sub-shells, scripts launched from the current shell).',26:"Correct! Even with export, changes made inside a child script do NOT propagate back to the parent shell. The parent MYVAR remains 'hello'.",27:'Correct! Running ./myvar.sh creates a new child process (fork). This child has its own copy of the environment.',28:'Correct! With export, the child script inherits MYVAR=hello, so the first echo displays MYVAR is: hello.',29:'Correct! -f tests if the path exists AND is a regular file (not a directory or special file).',30:'Correct! -gt (greater than) tests if a is strictly greater than b in numeric comparisons.',31:"Correct! In bash, an if block is closed with 'fi' (if spelled backwards).",32:'Correct! $(( )) performs arithmetic expansion: it evaluates integer expressions and returns the result.',33:'Correct! For string comparison inside [ ], use == (or = which also works). -eq is for numeric comparisons only.',34:'Correct! -d tests if the path exists and is a directory.',35:'Correct! The correct bash syntax is: if [ condition ]; then ... elif [ condition ]; then ... else ... fi',36:'Correct! -x tests if the file exists and has execute permission.',37:'Correct! Each case block ends with ;; (double semicolon) in bash.',38:"Correct! A case structure closes with 'esac' (case spelled backwards), just like if closes with fi.",39:"Correct! The *) pattern is a wildcard that matches anything, acting as the default case (like 'default' in C switch).",40:'Correct! case is ideal when you need to compare one variable against multiple specific values. It is cleaner and more readable than many elif chains.',41:'Correct! Inside a case pattern, | acts as OR, allowing multiple patterns to trigger the same block: e.g., yes|y|YES)',42:'Correct! $(( )) only handles integer arithmetic. For floating-point calculations, you need external tools like bc or awk.'};
+var EXP_W = {1:'Incorrect. A shell script is NOT a compiled binary. It is a simple text file interpreted line by line by the shell.',2:'Incorrect. Execution is sequential (line by line), not parallel or random.',3:'Incorrect. Shell scripts are not designed for complex GUIs, C++ compilation or direct RAM management.',4:'Incorrect. The shebang is NOT an ordinary comment. It specifies the interpreter to use to run the script.',5:'Incorrect. These two shebangs specify different interpreters with different syntaxes. It is not a matter of speed or OS compatibility.',6:"Incorrect. 'bash hello.sh' works and executes the script, but the shebang is ignored because bash was explicitly specified.",7:'Incorrect. The importance of the shebang is related to syntax differences between shells, not speed or compilation.',8:'Incorrect. The shebang must be on the FIRST line of the file. If placed elsewhere, it will be treated as an ordinary comment.',9:'Incorrect. In bash, comments use #. The // and /* */ syntaxes are for C/C++/Java, and -- is for SQL.',10:'Incorrect. Comments are NOT executed and do NOT slow down the script. They can appear anywhere in the file.',11:'Incorrect. The standard convention is .sh. Technically a script can work without an extension, but .sh is the norm.',12:"Incorrect. The correct command is 'chmod +x'. chmod means change mode and +x adds execute permission.",13:'Incorrect. To execute a script in the current directory, use ./hello.sh. The ./ is necessary because the current directory is generally not in the PATH.',14:'Incorrect. The script executes both commands in order: echo then date. The date command is perfectly valid.',15:'Incorrect. In bash, there must be NO spaces around =. name = Thomas would cause an error.',16:'Incorrect. In bash, variables are referenced with $. The @ syntax is for arrays, %var% is Windows CMD, and & is not used for variables.',17:"Incorrect. Bash does NOT ignore spaces around =. It generates an error because it tries to run 'name' as a command.",18:'Incorrect. To embed a command output in a string, you must use $(...). Without it, the command text is displayed literally.',19:'Incorrect. $MY_MESSAGE is replaced by the variable value. The output is Hello World, not the variable name.',20:'Incorrect. Curly braces are not required for all variables, but they ARE necessary when the variable name is immediately followed by other characters.',21:'Incorrect. The quotes and braces ensure the variable is properly expanded. The result is a file named with the value of USER_NAME + .txt.',22:'Incorrect. Curly braces are needed specifically when the variable name is immediately followed by other characters that bash might include in the variable name.',23:"Incorrect. In bash, the command to read user input is 'read'. The commands 'input', 'scan' and 'get' do not exist in bash.",24:"Incorrect. Without export, the parent shell variable is NOT visible in the child script. The first echo shows empty, the second shows 'hi there'.",25:'Incorrect. export does NOT delete, save to file, or copy to /etc/environment. It marks the variable for inheritance by child processes.',26:"Incorrect. Changes in a child script never affect the parent shell. The parent MYVAR stays 'hello' regardless of what the script does.",27:'Incorrect. The creation of a new environment is due to the fork mechanism: every script launched with ./ creates a new child process with its own environment.',28:"Incorrect. With export, the variable IS passed to the child script. The first echo correctly displays the inherited value 'hello'.",29:'Incorrect. -d tests for a directory, -x tests for executable permission, -r tests for read permission. Only -f tests for a regular file.',30:'Incorrect. -eq is equal, -lt is less than, -ge is greater or equal. Only -gt tests strictly greater than.',31:"Incorrect. In bash, if ends with 'fi'. 'end' and 'endif' are not valid bash syntax. 'done' closes loops (for, while).",32:'Incorrect. $(( )) is for arithmetic, not command substitution (that is $( )). It does not define arrays or create sub-shells.',33:'Incorrect. -eq is for numeric comparisons. For strings, use == inside [ ]. -str and -match do not exist as bash operators.',34:'Incorrect. -f tests for a regular file, -r tests for read permission, -w tests for write permission. Only -d tests for a directory.',35:'Incorrect. Bash uses a specific syntax with semicolons, then, elif and fi. C-style braces and parentheses are not valid bash if syntax.',36:'Incorrect. -e tests existence only, -r tests read permission, -w tests write permission. Only -x tests execute permission.',37:"Incorrect. In bash case, each block ends with ;;. 'break' is used in loops, 'end' and 'done' are not valid here.",38:"Incorrect. case closes with 'esac'. 'fi' closes if, 'end case' is not valid bash, 'done' closes loops.",39:'Incorrect. *) is a wildcard matching ANY value not matched by previous patterns. It is the default/catch-all case.',40:'Incorrect. case is best when comparing a single variable against many values. For file comparisons or complex numeric conditions, if/elif is more appropriate.',41:'Incorrect. Inside case patterns, | is used as OR between alternative patterns, not as a pipe or file redirection.',42:'Incorrect. $(( )) is NOT identical to $( ) (which is command substitution), does NOT support floats, and is available in bash (not only zsh).'};
+var QT = {1:'What is a shell script?',2:'In what order are commands in a shell script executed?',3:'Which of the following is a typical use case for a shell script?',4:'What does <code>#!/bin/bash</code> at the beginning of a script mean?',5:'What is the difference between <code>#!/bin/bash</code> and <code>#!/bin/zsh</code>?',6:'What happens if you run <code>bash hello.sh</code> instead of <code>./hello.sh</code>?',7:'Why is it important to specify the interpreter in the shebang?',8:'What is the correct position of the shebang in a script?',9:'How do you write a comment in a bash shell script?',10:'Which statement about comments in a bash script is TRUE?',11:'What extension is conventionally used for shell scripts?',12:'Which command makes a script executable?',13:'How do you execute <code>hello.sh</code> from the current directory?',14:'What is the output of: <code>#!/bin/bash</code> then <code>echo "Hello, world!"</code> then <code>date</code>?',15:'What is the correct syntax to declare a variable in bash?',16:'How do you reference the value of a variable <code>name</code> in bash?',17:'What happens if you write <code>name = "Thomas"</code> (with spaces around =)?',18:'Which syntax displays the number of lines in <code>errors.txt</code> inside a sentence?',19:'What is the result of: <code>MY_MESSAGE="Hello World"</code> then <code>echo $MY_MESSAGE</code>?',20:'Why use <code>${USER_NAME}_final.txt</code> rather than <code>$USER_NAME_final.txt</code>?',21:'What does <code>touch "${USER_NAME}.txt"</code> do?',22:'In which case are curly braces <code>{}</code> particularly necessary?',23:'Which command reads user input and stores it in <code>MY_NAME</code>?',24:'You set <code>MYVAR="hello"</code> WITHOUT export, then run <code>./myvar.sh</code>. The script does: <code>echo $MYVAR</code>, then <code>MYVAR="hi there"</code>, then <code>echo $MYVAR</code>. What is the output?',25:'What does the command <code>export MY_NAME</code> do?',26:'After <code>export MYVAR="hello"</code> and running <code>./myvar.sh</code>, what is the value of <code>MYVAR</code> in the parent shell?',27:'Why does <code>./myvar.sh</code> create a new shell environment?',28:'With <code>export MYVAR="hello"</code> then <code>./myvar.sh</code>, what does the first <code>echo</code> display?',29:'Which operator tests if a file exists and is a regular file?',30:'Which numeric operator tests if <code>a</code> is strictly greater than <code>b</code>?',31:'How does an <code>if</code> structure end in bash?',32:'What does <code>$(( ... ))</code> do in bash?',33:'Which operator tests if a string equals "root" inside an <code>if [ ]</code> in bash?',34:'Which operator tests if a directory exists?',35:'What is the correct syntax for an <code>if</code> with <code>elif</code> in bash?',36:'Which operator tests if a file is executable?',37:'How does each block in a <code>case</code> statement end in bash?',38:'How does a <code>case</code> structure close in bash?',39:'In a <code>case</code> structure, what does the pattern <code>*)</code> represent?',40:'When should you prefer <code>case</code> over <code>if/elif</code>?',41:'How is <code>|</code> used inside a <code>case</code> structure?',42:'Which statement about <code>$(( ... ))</code> is CORRECT?'};
+
+function ans(qnum, choice) {
+  if (userAns[qnum] !== undefined) return;
+  userAns[qnum] = choice;
+
+  var card = document.getElementById('q' + qnum);
+  var expDiv = document.getElementById('e' + qnum);
+  var badge = document.getElementById('b' + qnum);
+  var btns = card.querySelectorAll('.ob');
+  var correct = CA[qnum];
+  var isCorrect = (choice === correct);
+
+  // Disable all buttons
+  btns.forEach(function(btn) { btn.disabled = true; });
+
+  // Style chosen button
+  var labels = ['A','B','C','D'];
+  btns.forEach(function(btn, idx) {
+    var lbl = labels[idx];
+    if (lbl === correct) {
+      btn.classList.add('cor');
+    } else if (lbl === choice && !isCorrect) {
+      btn.classList.add('wrg');
+    }
+  });
+
+  // Card border
+  card.classList.add(isCorrect ? 'ok' : 'ng');
+
+  // Badge
+  badge.textContent = isCorrect ? '\u2705 Correct' : '\u274C Incorrect';
+  badge.className = 'qbadge ' + (isCorrect ? 'bc' : 'bw');
+
+  // Explanation
+  expDiv.textContent = isCorrect ? EXP_C[qnum] : EXP_W[qnum];
+  expDiv.className = 'exp show ' + (isCorrect ? 'ce' : 'we');
+
+  // Progress bar
+  updateProgress();
+}
+
+function updateProgress() {
+  var answered = Object.keys(userAns).length;
+  var pct = Math.round(answered / TOTAL * 100);
+  document.getElementById('pf').style.width = pct + '%';
+  document.getElementById('pt').textContent = answered + ' / ' + TOTAL + ' answered';
+}
+
+function submitQuiz() {
+  var answered = Object.keys(userAns).length;
+  var correct = 0;
+  var wrong = 0;
+  var skipped = TOTAL - answered;
+
+  for (var q in userAns) {
+    if (userAns[q] === CA[q]) correct++;
+    else wrong++;
+  }
+
+  var pct = answered > 0 ? Math.round(correct / TOTAL * 100) : 0;
+
+  // Score circle
+  var sc = document.getElementById('sc');
+  sc.className = 'sc ' + (pct >= 80 ? 'gr' : pct >= 50 ? 'ok2' : 'po');
+  document.getElementById('sp').textContent = pct + '%';
+  document.getElementById('sl').textContent = correct + ' / ' + TOTAL + ' correct';
+
+  document.getElementById('stTotal').textContent = answered;
+  document.getElementById('stCorrect').textContent = correct;
+  document.getElementById('stWrong').textContent = wrong;
+  document.getElementById('stSkip').textContent = skipped;
+
+  // Build recap sections
+  var wrongHTML = '';
+  var skipHTML = '';
+  var correctHTML = '';
+
+  for (var i = 1; i <= TOTAL; i++) {
+    var ua = userAns[i];
+    var ca = CA[i];
+    var qt = QT[i];
+
+    if (ua === undefined) {
+      // Skipped
+      skipHTML += '<div class="ri rsk"><div class="riq">Q' + i + '. ' + qt + '</div>';
+      skipHTML += '<div style="color:#f59e0b;font-size:.84rem">&#x23ED; Skipped &mdash; Correct answer: <strong>' + ca + '</strong></div>';
+      skipHTML += '<div class="rie">' + EXP_C[i] + '</div></div>';
+    } else if (ua === ca) {
+      correctHTML += '<div class="ri rc"><div class="riq">Q' + i + '. ' + qt + '</div>';
+      correctHTML += '<div class="ric">&#x2705; Your answer: <strong>' + ua + '</strong> &mdash; Correct!</div>';
+      correctHTML += '</div>';
+    } else {
+      wrongHTML += '<div class="ri rw"><div class="riq">Q' + i + '. ' + qt + '</div>';
+      wrongHTML += '<div class="riy">&#x274C; Your answer: <strong>' + ua + '</strong> &mdash; Correct was: <strong>' + ca + '</strong></div>';
+      wrongHTML += '<div class="rie">' + EXP_W[i] + '</div></div>';
+    }
+  }
+
+  var recapWrongDiv = document.getElementById('recapWrong');
+  var recapSkipDiv = document.getElementById('recapSkip');
+  var recapCorrectDiv = document.getElementById('recapCorrect');
+
+  recapWrongDiv.innerHTML = wrong > 0 ? '<div class="rst wt">&#x274C; Incorrect answers (' + wrong + ')</div>' + wrongHTML : '';
+  recapSkipDiv.innerHTML = skipped > 0 ? '<div class="rst skt">&#x23ED; Skipped questions (' + skipped + ')</div>' + skipHTML : '';
+  recapCorrectDiv.innerHTML = correct > 0 ? '<div class="rst ct">&#x2705; Correct answers (' + correct + ')</div>' + correctHTML : '';
+
+  document.getElementById('qc').style.display = 'none';
+  document.getElementById('recap').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function retryQuiz() {
+  location.reload();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OS Session 4 – CLI Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      padding: 30px 20px 10px;
+      background: linear-gradient(135deg, #1e3a5f, #0f172a);
+      border-radius: 16px;
+      margin-bottom: 30px;
+      border: 1px solid #334155;
+    }
+    header h1 { font-size: 2rem; color: #38bdf8; }
+    header p { color: #94a3b8; margin-top: 6px; font-size: 0.95rem; }
+    .progress-bar-wrap {
+      background: #1e293b;
+      border-radius: 8px;
+      height: 10px;
+      margin: 10px 0 20px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .progress-text { text-align: right; font-size: 0.8rem; color: #64748b; margin-bottom: 4px; }
+
+    .question-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: border-color 0.3s;
+    }
+    .question-card.answered { border-color: #475569; }
+    .question-number {
+      font-size: 0.78rem;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .question-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      line-height: 1.5;
+      color: #f1f5f9;
+    }
+    .question-text code {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fbbf24;
+      font-family: monospace;
+      font-size: 0.95em;
+    }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      border-radius: 10px;
+      padding: 12px 16px;
+      text-align: left;
+      cursor: pointer;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: #38bdf8;
+      background: #1e3a5f;
+      color: #f1f5f9;
+    }
+    .option-btn .opt-label {
+      font-weight: 700;
+      color: #38bdf8;
+      min-width: 22px;
+    }
+    .option-btn.correct {
+      border-color: #22c55e;
+      background: #052e16;
+      color: #bbf7d0;
+    }
+    .option-btn.correct .opt-label { color: #22c55e; }
+    .option-btn.wrong {
+      border-color: #ef4444;
+      background: #2d0a0a;
+      color: #fca5a5;
+    }
+    .option-btn.wrong .opt-label { color: #ef4444; }
+    .option-btn.dimmed {
+      opacity: 0.45;
+    }
+    .explanation {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .explanation.correct-exp {
+      background: #052e16;
+      border-left: 4px solid #22c55e;
+      color: #bbf7d0;
+    }
+    .explanation.wrong-exp {
+      background: #2d0a0a;
+      border-left: 4px solid #ef4444;
+      color: #fca5a5;
+    }
+    .explanation code {
+      background: #0f172a;
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #fbbf24;
+      font-family: monospace;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .submit-wrap {
+      text-align: center;
+      margin: 30px 0 20px;
+    }
+    .submit-btn {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #0f172a;
+      border: none;
+      padding: 14px 48px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 4px 20px rgba(56,189,248,0.3);
+    }
+    .submit-btn:hover { opacity: 0.9; transform: scale(1.03); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* RECAP */
+    #recap {
+      display: none;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 30px;
+      margin-top: 30px;
+      animation: fadeIn 0.5s ease;
+    }
+    #recap h2 {
+      font-size: 1.6rem;
+      color: #38bdf8;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .score-display {
+      text-align: center;
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 16px 0;
+    }
+    .score-display span { color: #22c55e; }
+    .score-display small { font-size: 1.2rem; color: #64748b; }
+    .score-bar-wrap {
+      background: #0f172a;
+      border-radius: 8px;
+      height: 14px;
+      margin: 10px auto 24px;
+      max-width: 400px;
+      overflow: hidden;
+    }
+    .score-bar {
+      height: 100%;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #22c55e, #38bdf8);
+      transition: width 1s ease;
+    }
+    .recap-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .recap-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .recap-item.r-correct { background: #052e16; border-left: 4px solid #22c55e; }
+    .recap-item.r-wrong { background: #2d0a0a; border-left: 4px solid #ef4444; }
+    .recap-item.r-skipped { background: #1c1917; border-left: 4px solid #78716c; }
+    .recap-icon { font-size: 1.1rem; min-width: 20px; }
+    .recap-item strong { color: #f1f5f9; }
+    .recap-item .r-detail { color: #94a3b8; font-size: 0.82rem; margin-top: 2px; }
+    .recap-item .r-correct-ans { color: #86efac; font-size: 0.82rem; }
+
+    .retry-btn {
+      display: block;
+      margin: 24px auto 0;
+      background: #334155;
+      color: #e2e8f0;
+      border: none;
+      padding: 12px 36px;
+      border-radius: 50px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .retry-btn:hover { background: #475569; }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .tag-cli { background: #1e3a5f; color: #7dd3fc; }
+    .tag-cmd { background: #1e1b4b; color: #a5b4fc; }
+    .tag-pattern { background: #1a1a2e; color: #c4b5fd; }
+    .tag-shortcut { background: #0d2d1a; color: #6ee7b7; }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.4rem; }
+      .question-text { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🖥️ OS Session 4 – CLI Quiz</h1>
+  <p>CLI Basics: Commands & Navigation &nbsp;|&nbsp; 30 questions</p>
+  <div class="progress-text" id="progressText">0 / 30 answered</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+</header>
+
+<div id="quiz-container"></div>
+
+<div class="submit-wrap">
+  <button class="submit-btn" id="submitBtn" onclick="submitQuiz()">📊 Submit & See Results</button>
+</div>
+
+<div id="recap">
+  <h2>📋 Récapitulatif</h2>
+  <div class="score-display" id="scoreDisplay"></div>
+  <div class="score-bar-wrap"><div class="score-bar" id="scoreBar"></div></div>
+  <ul class="recap-list" id="recapList"></ul>
+  <button class="retry-btn" onclick="retryQuiz()">🔄 Recommencer</button>
+</div>
+
+<script>
+const questions = [
+  {
+    tag: "cli", tagLabel: "CLI Concept",
+    q: "What does CLI stand for?",
+    options: ["Command Line Interface", "Computer Language Input", "Central Logic Interface", "Command Logic Interpreter"],
+    answer: 0,
+    exp: ["✅ Correct! CLI = <code>Command Line Interface</code>. It allows users to communicate with a program by typing text commands.", "❌ Wrong. CLI stands for <strong>Command Line Interface</strong>, not Computer Language Input.", "❌ Wrong. CLI stands for <strong>Command Line Interface</strong>.", "❌ Wrong. CLI stands for <strong>Command Line Interface</strong>."]
+  },
+  {
+    tag: "cli", tagLabel: "CLI Concept",
+    q: "Which of the following is an <strong>advantage</strong> of CLI over GUI?",
+    options: ["Easier for beginners", "Requires more network resources", "Allows automation of repetitive tasks via scripts", "Cannot access remote servers"],
+    answer: 2,
+    exp: ["❌ Wrong. CLI has a steep learning curve — it is NOT easier for beginners.", "❌ Wrong. CLI requires <strong>fewer</strong> network resources than GUI.", "✅ Correct! CLI allows you to write scripts to automate repetitive tasks, which is a major advantage.", "❌ Wrong. CLI is actually <strong>ideal</strong> for remote server access."]
+  },
+  {
+    tag: "cli", tagLabel: "CLI Concept",
+    q: "Which is a <strong>disadvantage</strong> of CLI?",
+    options: ["It is very efficient for batch operations", "Commands cannot be undone easily", "It supports remote access well", "It consumes fewer resources"],
+    answer: 1,
+    exp: ["❌ Wrong. Efficiency for batch operations is an <strong>advantage</strong>, not a disadvantage.", "✅ Correct! Most CLI commands are irreversible — once executed, they cannot be undone, which is a major risk.", "❌ Wrong. Remote access support is an <strong>advantage</strong> of CLI.", "❌ Wrong. Low resource consumption is an <strong>advantage</strong> of CLI."]
+  },
+  {
+    tag: "cli", tagLabel: "CLI Concept",
+    q: "Why is CLI suitable for 'power users'?",
+    options: ["Because it has a colorful graphical interface", "Because it allows executing commands not available in GUI", "Because it is easier to learn than GUI", "Because it automatically corrects errors"],
+    answer: 1,
+    exp: ["❌ Wrong. CLI has no graphical interface.", "✅ Correct! CLI allows power users to execute advanced commands that are simply not available through a GUI.", "❌ Wrong. CLI has a steeper learning curve than GUI.", "❌ Wrong. CLI does NOT auto-correct errors — in fact, errors can be destructive."]
+  },
+  {
+    tag: "cmd", tagLabel: "Linux Commands",
+    q: "Linux commands are:",
+    options: ["Case-insensitive", "Case-sensitive", "Only uppercase", "Only lowercase"],
+    answer: 1,
+    exp: ["❌ Wrong. Linux commands ARE case-sensitive.", "✅ Correct! Linux commands are case-sensitive. For example, <code>ls</code> ≠ <code>LS</code>.", "❌ Wrong. Commands are typically lowercase, and case matters.", "❌ Wrong. While most commands are lowercase, the key point is that case matters."]
+  },
+  {
+    tag: "cmd", tagLabel: "Linux Commands",
+    q: "What is the correct way to pass a long-form option to a Linux command?",
+    options: ["<code>ls -reverse</code>", "<code>ls --reverse</code>", "<code>ls /reverse</code>", "<code>ls reverse</code>"],
+    answer: 1,
+    exp: ["❌ Wrong. A single dash is used for short options like <code>-r</code>.", "✅ Correct! Long-form options use double dashes: <code>ls --reverse</code>.", "❌ Wrong. The slash <code>/</code> is used for paths, not options.", "❌ Wrong. Without a dash, 'reverse' would be treated as an argument (filename), not an option."]
+  },
+  {
+    tag: "cmd", tagLabel: "Linux Commands",
+    q: "How do you run two commands on the same line in Linux?",
+    options: ["Separate them with <code>&amp;</code>", "Separate them with <code>|</code>", "Separate them with <code>;</code>", "Separate them with <code>,</code>"],
+    answer: 2,
+    exp: ["❌ Wrong. <code>&amp;</code> runs a command in the background.", "❌ Wrong. <code>|</code> is a pipe — it passes the output of one command to another.", "✅ Correct! Use a semicolon <code>;</code> to run multiple commands sequentially on the same line. Example: <code>ls;date</code>", "❌ Wrong. A comma has no special meaning as a command separator in bash."]
+  },
+  {
+    tag: "cmd", tagLabel: "Linux Commands",
+    q: "What command gives you the manual/documentation for another command?",
+    options: ["<code>help</code>", "<code>info</code>", "<code>man</code>", "<code>doc</code>"],
+    answer: 2,
+    exp: ["❌ Wrong. <code>help</code> is a bash built-in for shell built-ins, not the standard manual.", "❌ Wrong. <code>info</code> exists but <code>man</code> is the standard manual command.", "✅ Correct! <code>man &lt;command&gt;</code> displays the manual page for any command. Example: <code>man uname</code>", "❌ Wrong. <code>doc</code> is not a standard Linux command."]
+  },
+  {
+    tag: "cmd", tagLabel: "Info Commands",
+    q: "Which command displays the <strong>hostname</strong> of the machine?",
+    options: ["<code>whoami</code>", "<code>hostname</code>", "<code>uname</code>", "<code>who</code>"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>whoami</code> displays the <strong>current user's login name</strong>.", "✅ Correct! <code>hostname</code> displays the unique name of the machine on the network.", "❌ Wrong. <code>uname</code> shows OS/kernel information, not the hostname (though <code>uname -n</code> can show it).", "❌ Wrong. <code>who</code> shows login details of all connected users."]
+  },
+  {
+    tag: "cmd", tagLabel: "Info Commands",
+    q: "What does the command <code>date +%T</code> display?",
+    options: ["The current date only", "The current time only", "Both date and time", "The timezone"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>date +%D</code> displays the date only.", "✅ Correct! <code>date +%T</code> displays the <strong>time only</strong> (T = Time).", "❌ Wrong. Running <code>date</code> without format shows both, but <code>+%T</code> is time only.", "❌ Wrong. <code>%T</code> is for time, not timezone."]
+  },
+  {
+    tag: "cmd", tagLabel: "Info Commands",
+    q: "What does <code>whoami</code> display?",
+    options: ["All logged-in users", "The current user's login name", "The machine hostname", "Environment variables"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>who</code> displays all logged-in users.", "✅ Correct! <code>whoami</code> displays the login name of the <strong>current user</strong>.", "❌ Wrong. <code>hostname</code> displays the machine name.", "❌ Wrong. <code>env</code> displays environment variables."]
+  },
+  {
+    tag: "cmd", tagLabel: "Info Commands",
+    q: "Which command shows <strong>environment variables</strong> and their values?",
+    options: ["<code>uname</code>", "<code>uptime</code>", "<code>env</code>", "<code>who</code>"],
+    answer: 2,
+    exp: ["❌ Wrong. <code>uname</code> shows OS/kernel information.", "❌ Wrong. <code>uptime</code> shows how long the machine has been running.", "✅ Correct! <code>env</code> displays all environment variables such as PATH, SHELL, USER, HOSTNAME, etc.", "❌ Wrong. <code>who</code> shows currently logged-in users."]
+  },
+  {
+    tag: "cmd", tagLabel: "Info Commands",
+    q: "What does <code>uptime</code> display?",
+    options: ["Current CPU usage", "How long the machine has been running", "Network uptime statistics", "Current user session time"],
+    answer: 1,
+    exp: ["❌ Wrong. CPU usage is shown by commands like <code>top</code> or <code>htop</code>.", "✅ Correct! <code>uptime</code> displays the duration the machine has been turned on.", "❌ Wrong. <code>uptime</code> is about system uptime, not network.", "❌ Wrong. <code>uptime</code> shows machine uptime, not individual session time."]
+  },
+  {
+    tag: "cmd", tagLabel: "Info Commands",
+    q: "What does <code>uname -r</code> display?",
+    options: ["The domain name of the server", "The version number of the OS kernel", "The current username", "The machine architecture"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>uname -n</code> shows the domain/node name.", "✅ Correct! <code>uname -r</code> displays the <strong>kernel release/version number</strong>.", "❌ Wrong. Use <code>whoami</code> for the username.", "❌ Wrong. <code>uname -m</code> shows the machine hardware architecture."]
+  },
+  {
+    tag: "cmd", tagLabel: "Directory Commands",
+    q: "What does <code>pwd</code> stand for and what does it do?",
+    options: ["Print Working Directory — shows current location", "Password Directory — shows password file", "Print Window Display — shows GUI info", "Path Working Dir — lists PATH variable"],
+    answer: 0,
+    exp: ["✅ Correct! <code>pwd</code> = <strong>Print Working Directory</strong>. It prints the full path of the directory you are currently in.", "❌ Wrong. <code>pwd</code> has nothing to do with passwords.", "❌ Wrong. <code>pwd</code> is a filesystem navigation command.", "❌ Wrong. <code>pwd</code> shows your current directory, not the PATH variable."]
+  },
+  {
+    tag: "cmd", tagLabel: "Directory Commands",
+    q: "Which command lists the contents of a directory?",
+    options: ["<code>dir</code>", "<code>list</code>", "<code>ls</code>", "<code>show</code>"],
+    answer: 2,
+    exp: ["❌ Wrong. <code>dir</code> exists on Windows but <code>ls</code> is the standard Unix command.", "❌ Wrong. <code>list</code> is not a standard Unix command.", "✅ Correct! <code>ls</code> lists the contents of a directory.", "❌ Wrong. <code>show</code> is not a standard Unix command."]
+  },
+  {
+    tag: "cmd", tagLabel: "Directory Commands",
+    q: "What does <code>ls -a</code> do?",
+    options: ["Lists files sorted alphabetically", "Lists all files including hidden ones (starting with .)", "Lists files with their sizes", "Lists files sorted by access time"],
+    answer: 1,
+    exp: ["❌ Wrong. Alphabetical sort is the default behavior.", "✅ Correct! <code>ls -a</code> shows <strong>all files including hidden ones</strong> — files whose names start with a dot <code>.</code>.", "❌ Wrong. <code>ls -l</code> shows file sizes in long format.", "❌ Wrong. <code>ls -t</code> sorts by modification time."]
+  },
+  {
+    tag: "cmd", tagLabel: "Directory Commands",
+    q: "What does <code>ls -lrt</code> display?",
+    options: ["Files in long format, sorted by size", "Files in long format, oldest first (reverse time sort)", "Files in long format, newest first", "Hidden files in reverse order"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>-S</code> sorts by size.", "✅ Correct! <code>-l</code> = long format, <code>-r</code> = reverse, <code>-t</code> = sort by time → combined: <strong>oldest files first in detailed view</strong>.", "❌ Wrong. <code>ls -lt</code> (without -r) shows newest first.", "❌ Wrong. <code>-a</code> shows hidden files."]
+  },
+  {
+    tag: "cmd", tagLabel: "Directory Commands",
+    q: "Which command creates a new directory?",
+    options: ["<code>newdir</code>", "<code>mkdir</code>", "<code>touch</code>", "<code>mkfile</code>"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>newdir</code> is not a Unix command.", "✅ Correct! <code>mkdir &lt;name&gt;</code> creates a new directory.", "❌ Wrong. <code>touch</code> creates or updates a <strong>file</strong>, not a directory.", "❌ Wrong. <code>mkfile</code> is not a standard Unix command."]
+  },
+  {
+    tag: "cmd", tagLabel: "Directory Commands",
+    q: "What is the difference between <code>rmdir</code> and <code>rm -r</code>?",
+    options: ["They are identical", "<code>rmdir</code> removes only empty directories; <code>rm -r</code> removes directories and all their contents", "<code>rm -r</code> removes only empty directories", "<code>rmdir</code> removes files; <code>rm -r</code> removes directories"],
+    answer: 1,
+    exp: ["❌ Wrong. They behave differently.", "✅ Correct! <code>rmdir</code> only removes <strong>empty</strong> directories. <code>rm -r</code> recursively removes a directory and <strong>all its contents</strong>.", "❌ Wrong. <code>rm -r</code> is recursive and removes non-empty directories too.", "❌ Wrong. <code>rmdir</code> removes directories, not files."]
+  },
+  {
+    tag: "cmd", tagLabel: "File Commands",
+    q: "Which command copies a file?",
+    options: ["<code>mv</code>", "<code>cp</code>", "<code>copy</code>", "<code>dup</code>"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>mv</code> moves or renames a file.", "✅ Correct! <code>cp &lt;source&gt; &lt;destination&gt;</code> copies a file.", "❌ Wrong. <code>copy</code> is a Windows command, not Unix.", "❌ Wrong. <code>dup</code> is not a standard Unix command."]
+  },
+  {
+    tag: "cmd", tagLabel: "File Commands",
+    q: "What does <code>touch filename.txt</code> do?",
+    options: ["Deletes the file", "Opens the file in a text editor", "Creates an empty file or updates its timestamp", "Displays the file contents"],
+    answer: 2,
+    exp: ["❌ Wrong. Use <code>rm</code> to delete files.", "❌ Wrong. Use <code>vi</code>, <code>nano</code>, etc. to edit files.", "✅ Correct! <code>touch</code> creates an empty file if it doesn't exist, or updates the modification timestamp if it does.", "❌ Wrong. Use <code>cat</code> or <code>less</code> to display file contents."]
+  },
+  {
+    tag: "cmd", tagLabel: "File Commands",
+    q: "What does <code>rm -i</code> do?",
+    options: ["Ignores all errors", "Prompts for confirmation before each deletion", "Forces deletion without confirmation", "Recursively deletes a folder"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>-i</code> does not ignore errors.", "✅ Correct! <code>rm -i</code> prompts you with a confirmation message before deleting each file — a safer option.", "❌ Wrong. <code>rm -f</code> forces deletion without confirmation.", "❌ Wrong. <code>rm -r</code> is for recursive deletion."]
+  },
+  {
+    tag: "cmd", tagLabel: "File Commands",
+    q: "Which <code>rm</code> option forces deletion with no confirmation prompt?",
+    options: ["<code>rm -r</code>", "<code>rm -i</code>", "<code>rm -f</code>", "<code>rm -v</code>"],
+    answer: 2,
+    exp: ["❌ Wrong. <code>-r</code> is for recursive deletion of directories.", "❌ Wrong. <code>-i</code> asks for confirmation (the opposite).", "✅ Correct! <code>rm -f</code> forces deletion — no confirmation, no error if file doesn't exist.", "❌ Wrong. <code>-v</code> is verbose mode (shows what's being deleted)."]
+  },
+  {
+    tag: "cmd", tagLabel: "File Commands",
+    q: "The command <code>mv old.txt new.txt</code> does what?",
+    options: ["Copies old.txt to new.txt", "Renames old.txt to new.txt", "Deletes old.txt", "Creates a new file new.txt"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>cp</code> is used for copying.", "✅ Correct! <code>mv</code> can be used to <strong>rename</strong> a file by moving it to a new name in the same directory.", "❌ Wrong. <code>rm</code> is used for deletion.", "❌ Wrong. <code>touch</code> creates new files."]
+  },
+  {
+    tag: "shortcut", tagLabel: "Shortcuts",
+    q: "What does <code>cd ..</code> do?",
+    options: ["Goes to the home directory", "Goes up one directory level", "Goes to the previous directory", "Repeats the last command"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>cd ~</code> goes to the home directory.", "✅ Correct! <code>cd ..</code> moves up one level in the directory hierarchy.", "❌ Wrong. <code>cd -</code> goes to the previous directory.", "❌ Wrong. <code>!!</code> repeats the last command."]
+  },
+  {
+    tag: "shortcut", tagLabel: "Shortcuts",
+    q: "What does <code>cd -</code> do?",
+    options: ["Goes to the root directory", "Goes up one directory", "Goes to the previously visited directory", "Goes to the home directory"],
+    answer: 2,
+    exp: ["❌ Wrong. <code>cd /</code> goes to the root directory.", "❌ Wrong. <code>cd ..</code> goes up one level.", "✅ Correct! <code>cd -</code> switches you back to the <strong>previously visited directory</strong> — very useful for toggling between two locations.", "❌ Wrong. <code>cd ~</code> goes to the home directory."]
+  },
+  {
+    tag: "shortcut", tagLabel: "Shortcuts",
+    q: "What does <code>!!</code> do in the terminal?",
+    options: ["Exits the terminal", "Repeats the last command", "Shows command history", "Clears the screen"],
+    answer: 1,
+    exp: ["❌ Wrong. Use <code>exit</code> or <code>Ctrl+D</code> to exit.", "✅ Correct! <code>!!</code> re-executes the <strong>last command</strong> you ran. Very useful with <code>sudo !!</code>.", "❌ Wrong. <code>history</code> shows the command history.", "❌ Wrong. <code>clear</code> or <code>Ctrl+L</code> clears the screen."]
+  },
+  {
+    tag: "pattern", tagLabel: "Pattern Matching",
+    q: "What does the wildcard <code>*</code> match in shell pattern matching?",
+    options: ["Exactly one character", "Any single digit", "Any number of characters (including none)", "Only letters"],
+    answer: 2,
+    exp: ["❌ Wrong. <code>?</code> matches exactly one character.", "❌ Wrong. <code>*</code> matches any characters, not just digits.", "✅ Correct! <code>*</code> matches <strong>any number of characters</strong>, including zero characters. Example: <code>ls *.txt</code> lists all .txt files.", "❌ Wrong. <code>*</code> matches any character type."]
+  },
+  {
+    tag: "pattern", tagLabel: "Pattern Matching",
+    q: "What does <code>ls ?.sh</code> match?",
+    options: ["All .sh files", "Any .sh file with exactly one character before the dot", ".sh files starting with a question mark", "Files with unknown extensions"],
+    answer: 1,
+    exp: ["❌ Wrong. <code>ls *.sh</code> would match all .sh files.", "✅ Correct! <code>?</code> matches <strong>exactly one character</strong>. So <code>?.sh</code> matches files like <code>a.sh</code>, <code>b.sh</code>, but NOT <code>ab.sh</code>.", "❌ Wrong. <code>?</code> is a wildcard, not a literal character.", "❌ Wrong. <code>?</code> is a one-character wildcard."]
+  },
+  {
+    tag: "pattern", tagLabel: "Pattern Matching",
+    q: "What does the pattern <code>[a-p]</code> match?",
+    options: ["The literal string 'a-p'", "Any single character in the range from a to p", "All characters from a to z", "Any two-character sequence"],
+    answer: 1,
+    exp: ["❌ Wrong. Square brackets define a character class, not a literal string.", "✅ Correct! <code>[a-p]</code> matches <strong>any single character</strong> in the range from 'a' to 'p' (inclusive).", "❌ Wrong. <code>[a-z]</code> would match a to z.", "❌ Wrong. Character classes match a single character, not two."]
+  },
+  {
+    tag: "pattern", tagLabel: "Pattern Matching",
+    q: "Which command lists files named <code>file1.txt</code>, <code>file2.txt</code>, and <code>file3.txt</code>?",
+    options: ["<code>ls file*.txt</code>", "<code>ls file?.txt</code>", "<code>ls file[1-3].txt</code>", "Both B and C"],
+    answer: 3,
+    exp: ["❌ Wrong. <code>file*.txt</code> would also match <code>file123.txt</code>, <code>fileabc.txt</code>, etc.", "❌ Partially correct but not alone — <code>file?.txt</code> matches any single character, so it works, but so does C.", "❌ Partially correct but not alone — <code>file[1-3].txt</code> specifically matches 1, 2, or 3.", "✅ Correct! Both <code>ls file?.txt</code> (any single char) and <code>ls file[1-3].txt</code> (specifically 1, 2, or 3) would match those three files."]
+  }
+];
+
+let userAnswers = new Array(questions.length).fill(null);
+let answered = 0;
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+  questions.forEach((q, i) => {
+    const tagClass = q.tag === 'cli' ? 'tag-cli' : q.tag === 'cmd' ? 'tag-cmd' : q.tag === 'pattern' ? 'tag-pattern' : 'tag-shortcut';
+    let optionsHTML = q.options.map((opt, j) => {
+      const labels = ['A', 'B', 'C', 'D'];
+      return `<button class="option-btn" id="opt-${i}-${j}" onclick="selectAnswer(${i}, ${j})">
+        <span class="opt-label">${labels[j]}.</span>
+        <span>${opt}</span>
+      </button>`;
+    }).join('');
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+    card.innerHTML = `
+      <div class="question-number">
+        <span class="tag ${tagClass}">${q.tagLabel}</span>
+        &nbsp; Question ${i + 1} / ${questions.length}
+      </div>
+      <div class="question-text">${q.q}</div>
+      <div class="options" id="options-${i}">${optionsHTML}</div>
+      <div class="explanation" id="exp-${i}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qIndex, optIndex) {
+  if (userAnswers[qIndex] !== null) return;
+  userAnswers[qIndex] = optIndex;
+  answered++;
+  updateProgress();
+
+  const q = questions[qIndex];
+  const labels = ['A', 'B', 'C', 'D'];
+  for (let j = 0; j < q.options.length; j++) {
+    const btn = document.getElementById(`opt-${qIndex}-${j}`);
+    btn.disabled = true;
+    if (j === q.answer) {
+      btn.classList.add('correct');
+    } else if (j === optIndex && optIndex !== q.answer) {
+      btn.classList.add('wrong');
+    } else {
+      btn.classList.add('dimmed');
+    }
+  }
+
+  const expDiv = document.getElementById(`exp-${qIndex}`);
+  expDiv.innerHTML = q.exp[optIndex];
+  expDiv.className = 'explanation ' + (optIndex === q.answer ? 'correct-exp' : 'wrong-exp');
+  expDiv.style.display = 'block';
+
+  document.getElementById(`card-${qIndex}`).classList.add('answered');
+}
+
+function updateProgress() {
+  const pct = (answered / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${answered} / ${questions.length} answered`;
+}
+
+function submitQuiz() {
+  const correct = userAnswers.filter((a, i) => a === questions[i].answer).length;
+  const skipped = userAnswers.filter(a => a === null).length;
+  const wrong = questions.length - correct - skipped;
+  const pct = Math.round((correct / questions.length) * 100);
+
+  document.getElementById('scoreDisplay').innerHTML = `<span>${correct}</span> / ${questions.length} <small>(${pct}%)</small>`;
+  setTimeout(() => {
+    document.getElementById('scoreBar').style.width = pct + '%';
+  }, 100);
+
+  const recapList = document.getElementById('recapList');
+  recapList.innerHTML = '';
+  questions.forEach((q, i) => {
+    const ua = userAnswers[i];
+    const isCorrect = ua === q.answer;
+    const isSkipped = ua === null;
+    const labels = ['A', 'B', 'C', 'D'];
+    let cls, icon, detail;
+    if (isSkipped) {
+      cls = 'r-skipped'; icon = '⏭️';
+      detail = `<div class="r-detail">Not answered</div><div class="r-correct-ans">✅ Correct answer: ${labels[q.answer]}. ${q.options[q.answer]}</div>`;
+    } else if (isCorrect) {
+      cls = 'r-correct'; icon = '✅';
+      detail = `<div class="r-detail">Your answer: ${labels[ua]}. ${q.options[ua]}</div>`;
+    } else {
+      cls = 'r-wrong'; icon = '❌';
+      detail = `<div class="r-detail">Your answer: ${labels[ua]}. ${q.options[ua]}</div><div class="r-correct-ans">✅ Correct: ${labels[q.answer]}. ${q.options[q.answer]}</div>`;
+    }
+    const li = document.createElement('li');
+    li.className = `recap-item ${cls}`;
+    li.innerHTML = `<span class="recap-icon">${icon}</span><div><strong>Q${i+1}: ${q.q}</strong>${detail}</div>`;
+    recapList.appendChild(li);
+  });
+
+  document.getElementById('recap').style.display = 'block';
+  document.getElementById('recap').scrollIntoView({ behavior: 'smooth' });
+}
+
+function retryQuiz() {
+  userAnswers = new Array(questions.length).fill(null);
+  answered = 0;
+  updateProgress();
+  buildQuiz();
+  document.getElementById('recap').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
