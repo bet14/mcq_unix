@@ -1,13 +1,4 @@
 <!DOCTYPE html>
-
-
-<div style="margin-bottom: 20px;">
-  <a href="./index.html" style="display:inline-block;padding:10px 16px;background:#0b57d0;color:white;text-decoration:none;border-radius:8px;">
-    ← Back to index
-  </a>
-</div>
-
-
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
@@ -16,7 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 800px;
+      max-width: 900px;
       margin: 40px auto;
       padding: 0 20px;
       line-height: 1.6;
@@ -26,28 +17,38 @@
       margin-bottom: 20px;
     }
 
-    ul {
-      padding-left: 20px;
+    ul.quiz-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 24px;
     }
 
-    li {
-      margin: 8px 0;
+    ul.quiz-list li {
+      margin: 0;
     }
 
-    a {
+    ul.quiz-list a {
       text-decoration: none;
       color: #0b57d0;
     }
 
-    a:hover {
+    ul.quiz-list a:hover {
       text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      ul.quiz-list {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Quiz Unix List</h1>
-  <ul>
-
+  <h1>Danh sách quiz Unix</h1>
+  <ul class="quiz-list">
     <li><a href="./unix_quiz3.html">unix_quiz3</a></li>
     <li><a href="./unix_quiz4.html">unix_quiz4</a></li>
     <li><a href="./unix_quiz5.html">unix_quiz5</a></li>
@@ -58,11 +59,11 @@
     <li><a href="./unix_quiz10.html">unix_quiz10</a></li>
     <li><a href="./unix_quiz11.html">unix_quiz11</a></li>
     <li><a href="./unix_quiz12.html">unix_quiz12</a></li>
-    <li><a href="./unix_labquiz3.html">unix_quiz1</a></li>
-    <li><a href="./unix_labquiz4.html">unix_quiz1</a></li>
-    <li><a href="./unix_labquiz5.html">unix_quiz1</a></li>
-    <li><a href="./unix_labquiz6.html">unix_quiz1</a></li>
-    <li><a href="./unix_labquiz7.html">unix_quiz1</a></li>
+    <li><a href="./unix_labquiz3.html">unix_labquiz3</a></li>
+    <li><a href="./unix_labquiz4.html">unix_labquiz4</a></li>
+    <li><a href="./unix_labquiz5.html">unix_labquiz5</a></li>
+    <li><a href="./unix_labquiz6.html">unix_labquiz6</a></li>
+    <li><a href="./unix_labquiz7.html">unix_labquiz7</a></li>
   </ul>
 </body>
 </html>
