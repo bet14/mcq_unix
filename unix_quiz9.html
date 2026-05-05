@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OS Session 9 – Users, Groups & Permissions MCQ</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1a1a2e;padding-top:70px}
+  /* STICKY NAV */
+  #topbar{position:fixed;top:0;left:0;right:0;z-index:999;background:#0b57d0;color:#fff;
+    display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;
+    box-shadow:0 2px 8px rgba(0,0,0,.25)}
+  #topbar a{color:#fff;text-decoration:none;font-weight:600;font-size:14px;
+    background:rgba(255,255,255,.18);padding:6px 14px;border-radius:6px;transition:.2s}
+  #topbar a:hover{background:rgba(255,255,255,.32)}
+  #topbar .info{display:flex;gap:18px;align-items:center;font-size:14px}
+  #score-display{font-weight:700;font-size:15px}
+  #progress-wrap{width:160px;background:rgba(255,255,255,.25);border-radius:20px;height:10px;overflow:hidden}
+  #progress-bar{height:10px;background:#a8d8a8;border-radius:20px;width:0;transition:.3s}
+
+  /* MAIN */
+  .container{max-width:860px;margin:0 auto;padding:24px 16px 60px}
+  h1{text-align:center;font-size:1.6rem;margin-bottom:6px;color:#0b57d0}
+  .subtitle{text-align:center;color:#555;margin-bottom:28px;font-size:.95rem}
+
+  /* QUESTION CARD */
+  .q-card{background:#fff;border-radius:12px;padding:22px 24px;margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);border-left:5px solid #0b57d0}
+  .q-number{font-size:.78rem;color:#0b57d0;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+  .q-text{font-size:1rem;font-weight:600;margin-bottom:14px;line-height:1.5}
+  .q-text code{background:#eef2ff;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.93em}
+
+  /* OPTIONS */
+  .options{display:flex;flex-direction:column;gap:8px}
+  .opt-btn{text-align:left;padding:10px 14px;border:2px solid #d0d7e3;border-radius:8px;
+    background:#fafbff;cursor:pointer;font-size:.95rem;transition:.15s;line-height:1.4}
+  .opt-btn:hover:not(:disabled){border-color:#0b57d0;background:#eef2ff}
+  .opt-btn:disabled{cursor:default}
+  .opt-btn.correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600}
+  .opt-btn.wrong{border-color:#c62828;background:#ffebee;color:#b71c1c}
+  .opt-btn.reveal{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20}
+  .opt-btn code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;font-family:monospace}
+
+  /* FEEDBACK */
+  .feedback{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:.9rem;line-height:1.5;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20}
+  .feedback.bad{background:#fff3e0;border-left:4px solid #e65100;color:#bf360c}
+  .feedback code{background:rgba(0,0,0,.08);padding:1px 5px;border-radius:3px;font-family:monospace}
+
+  /* SUBMIT */
+  #submit-area{text-align:center;margin:10px 0 30px}
+  #submit-btn{background:#0b57d0;color:#fff;border:none;padding:13px 40px;border-radius:10px;
+    font-size:1.05rem;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 3px 10px rgba(11,87,208,.3)}
+  #submit-btn:hover{background:#0843a8}
+
+  /* RECAP */
+  #recap{display:none;background:#fff;border-radius:14px;padding:28px;
+    box-shadow:0 4px 16px rgba(0,0,0,.12);margin-top:10px}
+  #recap h2{color:#0b57d0;margin-bottom:16px;font-size:1.4rem}
+  .recap-stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  .stat-box{flex:1;min-width:120px;padding:14px;border-radius:10px;text-align:center}
+  .stat-box .num{font-size:2rem;font-weight:800}
+  .stat-box .lbl{font-size:.82rem;margin-top:2px}
+  .stat-correct{background:#e8f5e9;color:#2e7d32}
+  .stat-wrong{background:#ffebee;color:#c62828}
+  .stat-skip{background:#fff8e1;color:#f57f17}
+  .stat-pct{background:#e3f2fd;color:#0b57d0}
+
+  .recap-section{margin-top:18px}
+  .recap-section h3{font-size:1rem;font-weight:700;margin-bottom:10px;padding-bottom:4px;
+    border-bottom:2px solid #eee}
+  .recap-item{padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:.9rem;line-height:1.5}
+  .recap-item.ri-wrong{background:#ffebee;border-left:4px solid #c62828}
+  .recap-item.ri-skip{background:#fff8e1;border-left:4px solid #f9a825}
+  .recap-item strong{display:block;margin-bottom:4px}
+  .recap-item code{background:rgba(0,0,0,.08);padding:1px 5px;border-radius:3px;font-family:monospace}
+
+  #retry-btn{margin-top:20px;background:#0b57d0;color:#fff;border:none;padding:11px 32px;
+    border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer}
+  #retry-btn:hover{background:#0843a8}
+
+  @media(max-width:600px){
+    .recap-stats{flex-direction:column}
+    #progress-wrap{width:100px}
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY TOP BAR -->
+<div id="topbar">
+  <a href="./index.html">&#8592; Back to index</a>
+  <div class="info">
+    <span id="score-display">Score: 0 / 63</span>
+    <div id="progress-wrap"><div id="progress-bar"></div></div>
+    <span id="answered-display">0 answered</span>
+  </div>
+</div>
+
+<div class="container">
+  <h1>OS Session 9 – MCQ Quiz</h1>
+  <p class="subtitle">Users, Groups &amp; Permissions &nbsp;|&nbsp; 63 questions &nbsp;|&nbsp; Click an option to see instant feedback</p>
+
+  <div id="quiz-area"></div>
+
+  <div id="submit-area">
+    <button id="submit-btn" onclick="submitQuiz()">&#10003; Submit &amp; See Results</button>
+  </div>
+
+  <div id="recap"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: `What file stores basic user account information in Linux?`,
+    opts: [`/etc/shadow`, `/etc/group`, `/etc/passwd`, `/etc/users`],
+    ans: 2,
+    exp: `<code>/etc/passwd</code> stores username, UID, GID, home directory, and shell. Passwords are stored in <code>/etc/shadow</code>.`
+  },
+  {
+    q: `In <code>/etc/passwd</code>, what does the field containing 'x' typically represent?`,
+    opts: [`The user's real name`, `A placeholder indicating the password is stored in /etc/shadow`, `The user's UID`, `The user's shell`],
+    ans: 1,
+    exp: `'x' in the password field means the actual encrypted password is stored in <code>/etc/shadow</code>, which has restricted access.`
+  },
+  {
+    q: `What is the correct format of a line in <code>/etc/passwd</code>?`,
+    opts: [
+      `username:UID:GID:password:home:shell`,
+      `username:password:UID:GID:GECOS:home_directory:shell`,
+      `UID:username:password:GID:shell:home`,
+      `username:GID:UID:shell:home:password`
+    ],
+    ans: 1,
+    exp: `The correct format is: <code>username:password:UID:GID:GECOS:home_directory:shell</code>.`
+  },
+  {
+    q: `What does UID stand for in Linux?`,
+    opts: [`Universal Internet Domain`, `User Identity Document`, `User ID — a unique numeric identifier for the user`, `Unix Interface Definition`],
+    ans: 2,
+    exp: `UID (User ID) is a unique numeric identifier assigned to each user account on the system.`
+  },
+  {
+    q: `What does the GECOS field in <code>/etc/passwd</code> contain?`,
+    opts: [
+      `The encrypted password`,
+      `The user's default shell`,
+      `Optional info such as the user's real name or description`,
+      `The user's primary group ID`
+    ],
+    ans: 2,
+    exp: `GECOS is an optional field that often contains the user's real name or a description. It can be empty.`
+  },
+  {
+    q: `Which file stores encrypted passwords with restricted access?`,
+    opts: [`/etc/passwd`, `/etc/group`, `/etc/shadow`, `/etc/security`],
+    ans: 2,
+    exp: `<code>/etc/shadow</code> stores the encrypted passwords and is only readable by root, unlike <code>/etc/passwd</code> which is world-readable.`
+  },
+  {
+    q: `Which command changes a user's password?`,
+    opts: [`chpasswd`, `passwd`, `usermod -p`, `shadow`],
+    ans: 1,
+    exp: `The <code>passwd &lt;username&gt;</code> command is used to set or change a user's password.`
+  },
+  {
+    q: `Which command adds a new user with a home directory and bash shell?`,
+    opts: [
+      `adduser thomas_dejaeger`,
+      `useradd thomas_dejaeger`,
+      `useradd -m -s /bin/bash thomas_dejaeger`,
+      `newuser -h -b thomas_dejaeger`
+    ],
+    ans: 2,
+    exp: `<code>useradd -m -s /bin/bash thomas_dejaeger</code>: <code>-m</code> creates the home directory, <code>-s /bin/bash</code> sets the shell.`
+  },
+  {
+    q: `What does the <code>-m</code> flag do in <code>useradd -m username</code>?`,
+    opts: [
+      `Sets the user as a member of sudo group`,
+      `Creates the home directory for the user`,
+      `Marks the account as a system account`,
+      `Sets the minimum password age`
+    ],
+    ans: 1,
+    exp: `<code>-m</code> tells <code>useradd</code> to create the home directory (e.g., <code>/home/username</code>) for the new user.`
+  },
+  {
+    q: `In <code>ls -l</code> output, what does the first character of the permission string represent?`,
+    opts: [`The owner's read permission`, `The file type`, `The setuid bit`, `The sticky bit`],
+    ans: 1,
+    exp: `The first character indicates file type: <code>-</code> for regular file, <code>d</code> for directory, <code>l</code> for symlink, etc.`
+  },
+  {
+    q: `What does the permission string <code>-rwxr-xr--</code> mean for 'others'?`,
+    opts: [`read, write, execute`, `read, execute`, `read only`, `no permissions`],
+    ans: 2,
+    exp: `The last 3 characters <code>r--</code> mean others have read-only permission (no write, no execute).`
+  },
+  {
+    q: `In <code>-rwxr-xr--</code>, what permissions does the group have?`,
+    opts: [`rwx`, `rw-`, `r-x`, `r--`],
+    ans: 2,
+    exp: `The middle 3 characters (positions 4-6) are <code>r-x</code>: group can read and execute, but not write.`
+  },
+  {
+    q: `What numeric value represents the 'read' permission in Linux?`,
+    opts: [`1`, `2`, `4`, `8`],
+    ans: 2,
+    exp: `r = 4, w = 2, x = 1. These values are added together to form the octal permission digit.`
+  },
+  {
+    q: `What numeric value represents the 'write' permission?`,
+    opts: [`1`, `2`, `4`, `6`],
+    ans: 1,
+    exp: `w = 2. So rw = 4+2 = 6, rwx = 4+2+1 = 7, r-x = 4+1 = 5.`
+  },
+  {
+    q: `What does <code>chmod 755 file</code> set the permissions to?`,
+    opts: [`rwxrwxrwx`, `rwxr-xr-x`, `rw-r--r--`, `rwxrwxr-x`],
+    ans: 1,
+    exp: `7=rwx (owner), 5=r-x (group), 5=r-x (others) → <code>rwxr-xr-x</code>.`
+  },
+  {
+    q: `What does <code>chmod 644 file</code> produce?`,
+    opts: [`rwxr--r--`, `rw-rw-rw-`, `rw-r--r--`, `r--r--r--`],
+    ans: 2,
+    exp: `6=rw- (owner), 4=r-- (group), 4=r-- (others) → <code>rw-r--r--</code>. Common for regular files.`
+  },
+  {
+    q: `What does <code>chmod 600 file</code> produce?`,
+    opts: [`rw-rw-rw-`, `rw-------`, `r--------`, `rwx------`],
+    ans: 1,
+    exp: `6=rw- (owner), 0=--- (group), 0=--- (others) → <code>rw-------</code>. Only owner can read/write.`
+  },
+  {
+    q: `What is the numeric value of permission <code>rwx</code>?`,
+    opts: [`6`, `5`, `7`, `3`],
+    ans: 2,
+    exp: `r(4) + w(2) + x(1) = 7.`
+  },
+  {
+    q: `What is the numeric value of permission <code>r-x</code>?`,
+    opts: [`4`, `5`, `6`, `3`],
+    ans: 1,
+    exp: `r(4) + x(1) = 5. No write bit.`
+  },
+  {
+    q: `What does <code>chmod u+x file</code> do?`,
+    opts: [
+      `Removes execute permission from user`,
+      `Adds execute permission for the user (owner)`,
+      `Sets user permission to execute only`,
+      `Adds execute for all users`
+    ],
+    ans: 1,
+    exp: `<code>u+x</code>: u=user, +=add, x=execute. Adds execute permission for the file owner.`
+  },
+  {
+    q: `What does <code>chmod g-w file</code> do?`,
+    opts: [
+      `Adds write permission for group`,
+      `Removes write permission from group`,
+      `Sets group permission to write only`,
+      `Removes write from all`
+    ],
+    ans: 1,
+    exp: `<code>g-w</code>: g=group, -=remove, w=write. Removes write permission from the group.`
+  },
+  {
+    q: `What does <code>chmod o=r file</code> do?`,
+    opts: [
+      `Adds read to others`,
+      `Removes read from others`,
+      `Sets others' permission to read only (replacing whatever was there)`,
+      `Sets owner permission to read only`
+    ],
+    ans: 2,
+    exp: `<code>o=r</code>: o=others, = means set exactly. Others get read-only, any existing write/execute is removed.`
+  },
+  {
+    q: `In symbolic chmod notation, what does 'a' represent?`,
+    opts: [`admin`, `all (user, group, and others)`, `anonymous`, `append`],
+    ans: 1,
+    exp: `In <code>chmod</code>: u=user, g=group, o=others, a=all (equivalent to ugo).`
+  },
+  {
+    q: `What is the setuid bit used for on executable files?`,
+    opts: [
+      `Allows only the owner to delete the file`,
+      `Runs the file as the file's owner, not the executing user`,
+      `Inherits the group of the parent directory`,
+      `Prevents the file from being deleted`
+    ],
+    ans: 1,
+    exp: `setuid on an executable means it runs with the file owner's privileges. Example: <code>/usr/bin/passwd</code> runs as root.`
+  },
+  {
+    q: `What does the setgid bit do on a directory?`,
+    opts: [
+      `Prevents deletion by non-owners`,
+      `Runs all executables in it as root`,
+      `New files created in the directory inherit the directory's group`,
+      `Makes the directory read-only for others`
+    ],
+    ans: 2,
+    exp: `setgid on a directory causes new files/subdirectories to inherit the directory's group, useful for shared project folders.`
+  },
+  {
+    q: `What does the sticky bit do on a directory like <code>/tmp</code>?`,
+    opts: [
+      `Only root can write to it`,
+      `Files cannot be executed`,
+      `Only the file owner (or root) can delete their own files, even if others have write access`,
+      `The directory cannot be removed`
+    ],
+    ans: 2,
+    exp: `The sticky bit on a directory (shown as <code>t</code> in <code>ls -l</code>) means only the file's owner or root can delete it, even if the directory is world-writable.`
+  },
+  {
+    q: `In <code>ls -l</code>, what does <code>-rwsr-xr-x</code> indicate?`,
+    opts: [
+      `setgid is set`,
+      `sticky bit is set`,
+      `setuid is set and the file is executable`,
+      `setuid is set but file is not executable`
+    ],
+    ans: 2,
+    exp: `The lowercase <code>s</code> in the user execute position (<code>rws</code>) means setuid is set AND the file is executable.`
+  },
+  {
+    q: `What does uppercase <code>S</code> in <code>-rwSr--r--</code> indicate?`,
+    opts: [
+      `setuid is set and file is executable`,
+      `setuid or setgid is set but the file is NOT executable — misconfigured`,
+      `sticky bit is active`,
+      `the file is a system file`
+    ],
+    ans: 1,
+    exp: `Uppercase <code>S</code> means the setuid/setgid bit is set but the execute bit is NOT set — this is a misconfiguration.`
+  },
+  {
+    q: `What does <code>drwxrwxrwt</code> indicate?`,
+    opts: [
+      `setuid is set on this directory`,
+      `setgid is set on this directory`,
+      `sticky bit is set — only owners can delete their files`,
+      `the directory has no special permissions`
+    ],
+    ans: 2,
+    exp: `The <code>t</code> at the end means the sticky bit is set. <code>/tmp</code> typically has this permission.`
+  },
+  {
+    q: `What is the default permission for newly created files (before umask)?`,
+    opts: [`777`, `755`, `666`, `644`],
+    ans: 2,
+    exp: `Files default to 666 (rw-rw-rw-). Directories default to 777. The umask then subtracts from these.`
+  },
+  {
+    q: `What is the default permission for newly created directories (before umask)?`,
+    opts: [`666`, `755`, `777`, `700`],
+    ans: 2,
+    exp: `Directories start at 777 (rwxrwxrwx). The umask value is subtracted to get the actual permissions.`
+  },
+  {
+    q: `With a umask of <code>0022</code>, what permissions does a new file get?`,
+    opts: [`rw-rw-rw-`, `rwxr-xr-x`, `rw-r--r--`, `rwx------`],
+    ans: 2,
+    exp: `666 - 022 = 644 → <code>rw-r--r--</code>. The umask removes write from group and others.`
+  },
+  {
+    q: `With a umask of <code>0077</code>, what permissions does a new file get?`,
+    opts: [`rw-rw-rw-`, `rw-------`, `rwx------`, `r--------`],
+    ans: 1,
+    exp: `666 - 077 = 600 → <code>rw-------</code>. Only the owner can read/write. Very private.`
+  },
+  {
+    q: `With a umask of <code>0022</code>, what permissions does a new directory get?`,
+    opts: [`rwxrwxrwx`, `rwxr-xr-x`, `rw-r--r--`, `rwx------`],
+    ans: 1,
+    exp: `777 - 022 = 755 → <code>rwxr-xr-x</code>. Owner has full access; group and others can read and execute.`
+  },
+  {
+    q: `What is the first digit in a 4-digit umask (e.g., 0022) used for?`,
+    opts: [
+      `Permissions removed from the owner`,
+      `Special bits: setuid, setgid, sticky`,
+      `Permissions removed from others`,
+      `The file type indicator`
+    ],
+    ans: 1,
+    exp: `The first digit controls special bits (setuid, setgid, sticky). It is rarely used in umask and is typically 0.`
+  },
+  {
+    q: `If you set <code>umask 0111</code> and create a directory, what happens when you try to <code>cd</code> into it?`,
+    opts: [
+      `It works fine`,
+      `Permission denied — no execute bit means you cannot enter the directory`,
+      `The directory is deleted automatically`,
+      `You need to use sudo to enter`
+    ],
+    ans: 1,
+    exp: `777 - 111 = 666 → <code>drw-rw-rw-</code>. No execute bit on a directory means you cannot <code>cd</code> into it.`
+  },
+  {
+    q: `How do you fix a directory that has no execute bit?`,
+    opts: [
+      `chmod -x testdir`,
+      `chmod +x testdir`,
+      `chown root testdir`,
+      `umask 0000`
+    ],
+    ans: 1,
+    exp: `<code>chmod +x testdir</code> adds the execute bit for all, making the directory accessible.`
+  },
+  {
+    q: `What command changes the owner of a file?`,
+    opts: [`chgrp`, `chmod`, `chown`, `usermod`],
+    ans: 2,
+    exp: `<code>chown newuser file.txt</code> changes the owner. <code>chown newuser:newgroup file.txt</code> changes both owner and group.`
+  },
+  {
+    q: `What does <code>chown alice:editors demo.txt</code> do?`,
+    opts: [
+      `Changes only the group to editors`,
+      `Changes only the owner to alice`,
+      `Changes the owner to alice and the group to editors`,
+      `Adds alice to the editors group`
+    ],
+    ans: 2,
+    exp: `<code>chown user:group file</code> sets both the owner (alice) and the group (editors) of the file.`
+  },
+  {
+    q: `What command changes only the group of a file?`,
+    opts: [`chown`, `chmod`, `chgrp`, `groupmod`],
+    ans: 2,
+    exp: `<code>chgrp newgroup file.txt</code> changes only the group ownership of the file.`
+  },
+  {
+    q: `Do you need root privileges to change file ownership with chown?`,
+    opts: [
+      `No, any user can change ownership of their files`,
+      `Yes, you need root or sudo privileges`,
+      `Only for directories`,
+      `Only if the file belongs to root`
+    ],
+    ans: 1,
+    exp: `Yes, <code>chown</code> requires root (sudo) privileges. Only root can transfer ownership of files.`
+  },
+  {
+    q: `What file stores group information including group name, GID, and members?`,
+    opts: [`/etc/passwd`, `/etc/shadow`, `/etc/group`, `/etc/members`],
+    ans: 2,
+    exp: `<code>/etc/group</code> stores group info in format: <code>groupname:x:GID:member1,member2</code>.`
+  },
+  {
+    q: `What does the command <code>whoami</code> print?`,
+    opts: [`UID and GID`, `Current username`, `All groups of current user`, `Hostname`],
+    ans: 1,
+    exp: `<code>whoami</code> prints the current username (the user you are logged in as).`
+  },
+  {
+    q: `What does the <code>id</code> command show?`,
+    opts: [
+      `Only the UID`,
+      `Only the username`,
+      `UID, GID, and all groups of the current user`,
+      `The process ID`
+    ],
+    ans: 2,
+    exp: `<code>id</code> shows: <code>uid=1002(bob) gid=1002(bob) groups=1002(bob),1003(team)</code> — full identity info.`
+  },
+  {
+    q: `What does <code>groups bob</code> show?`,
+    opts: [
+      `The GID of bob's primary group`,
+      `All groups that user bob belongs to`,
+      `The number of groups bob is in`,
+      `Bob's group password`
+    ],
+    ans: 1,
+    exp: `<code>groups username</code> lists all groups (primary and secondary) that the user belongs to.`
+  },
+  {
+    q: `Which command creates a new group called 'team'?`,
+    opts: [`useradd team`, `groupadd team`, `addgroup --new team`, `newgroup team`],
+    ans: 1,
+    exp: `<code>sudo groupadd team</code> creates a new group named 'team'.`
+  },
+  {
+    q: `What does <code>sudo usermod -aG team bob</code> do?`,
+    opts: [
+      `Removes bob from the team group`,
+      `Overwrites all of bob's group memberships with just team`,
+      `Appends bob to the team group without removing existing groups`,
+      `Creates a new group called team and adds bob`
+    ],
+    ans: 2,
+    exp: `<code>-a</code> means append, <code>-G</code> specifies secondary group. Together they add bob to team without removing other groups.`
+  },
+  {
+    q: `What is the danger of running <code>sudo usermod -G team bob</code> (without -a)?`,
+    opts: [
+      `It will fail with an error`,
+      `It will overwrite ALL of bob's group memberships, leaving only team`,
+      `It will add team as primary group`,
+      `It will delete the team group`
+    ],
+    ans: 1,
+    exp: `Without <code>-a</code>, <code>-G</code> OVERWRITES all secondary group memberships. Bob would only be in 'team', losing all other groups.`
+  },
+  {
+    q: `Which command deletes user 'bob' AND removes their home directory?`,
+    opts: [
+      `sudo userdel bob`,
+      `sudo userdel -r bob`,
+      `sudo usermod --delete bob`,
+      `sudo rmuser -h bob`
+    ],
+    ans: 1,
+    exp: `<code>userdel -r bob</code>: the <code>-r</code> flag removes the home directory and mail spool along with the user account.`
+  },
+  {
+    q: `Which command deletes a group named 'team'?`,
+    opts: [`sudo userdel team`, `sudo groupdel team`, `sudo rmgroup team`, `sudo groupmod --delete team`],
+    ans: 1,
+    exp: `<code>sudo groupdel team</code> removes the group 'team' from the system.`
+  },
+  {
+    q: `What is the key difference between <code>su</code> and <code>sudo</code>?`,
+    opts: [
+      `su is more secure than sudo`,
+      `sudo requires the root password; su requires your own password`,
+      `su switches to a full root session; sudo runs a single command as root`,
+      `They are identical in function`
+    ],
+    ans: 2,
+    exp: `<code>su</code> gives a full root shell (requires root password). <code>sudo</code> runs one command as root (requires your own password) and logs it.`
+  },
+  {
+    q: `When you run <code>su Thomas</code>, what does <code>whoami</code> return?`,
+    opts: [`root`, `your original username`, `Thomas`, `sudo`],
+    ans: 2,
+    exp: `<code>su Thomas</code> switches your session to user Thomas, so <code>whoami</code> returns 'Thomas'.`
+  },
+  {
+    q: `What password does <code>sudo</code> ask for?`,
+    opts: [
+      `The root password`,
+      `Your own (current user's) password`,
+      `No password`,
+      `The target user's password`
+    ],
+    ans: 1,
+    exp: `<code>sudo</code> asks for YOUR password (the sudoer's password), not root's. This is a security advantage over <code>su</code>.`
+  },
+  {
+    q: `What additional security feature does <code>sudo</code> provide over <code>su</code>?`,
+    opts: [
+      `It encrypts the command`,
+      `It logs the command for auditing/security`,
+      `It requires two-factor authentication`,
+      `It limits commands to 60 seconds`
+    ],
+    ans: 1,
+    exp: `<code>sudo</code> logs every command executed, providing an audit trail. This is important for security on multi-user systems.`
+  },
+  {
+    q: `How do you check which users are in the sudo group?`,
+    opts: [
+      `cat /etc/sudoers`,
+      `getent group sudo`,
+      `id sudo`,
+      `groups root`
+    ],
+    ans: 1,
+    exp: `<code>getent group sudo</code> queries the group database and shows all members of the sudo group.`
+  },
+  {
+    q: `What command should you use to edit <code>/etc/sudoers</code> safely?`,
+    opts: [`nano /etc/sudoers`, `vi /etc/sudoers`, `sudo visudo`, `chmod 777 /etc/sudoers && nano /etc/sudoers`],
+    ans: 2,
+    exp: `<code>sudo visudo</code> is the safe way — it checks syntax before saving, preventing you from accidentally locking yourself out of sudo.`
+  },
+  {
+    q: `What does this sudoers line mean: <code>bob ALL=(root) /usr/bin/apt, /bin/mkdir</code>?`,
+    opts: [
+      `Bob can run any command as root`,
+      `Bob can only run apt and mkdir as root, from any host`,
+      `Bob is added to the root group`,
+      `Bob can run apt and mkdir without a password`
+    ],
+    ans: 1,
+    exp: `This restricts bob to only running <code>/usr/bin/apt</code> and <code>/bin/mkdir</code> as root, from any host. More secure than full sudo access.`
+  },
+  {
+    q: `In the sudoers format <code>username ALL=(ALL:ALL) ALL</code>, what does the first ALL mean?`,
+    opts: [
+      `Can run any command`,
+      `Can run as any user`,
+      `From any host`,
+      `Can run as any group`
+    ],
+    ans: 2,
+    exp: `The first ALL means 'from any host'. On single-host setups this is always ALL, but matters for multi-host sudo configurations.`
+  },
+  {
+    q: `In the sudoers format <code>username ALL=(ALL:ALL) ALL</code>, what does <code>(ALL:ALL)</code> mean?`,
+    opts: [
+      `Can run from any host and any terminal`,
+      `Can run commands as any user and as any group`,
+      `All commands are logged`,
+      `All users in all groups`
+    ],
+    ans: 1,
+    exp: `<code>(ALL:ALL)</code> means the user can run commands as any user (first ALL) and as any group (second ALL).`
+  },
+  {
+    q: `How do you add user 'bob' to the sudoers group?`,
+    opts: [
+      `sudo visudo bob`,
+      `sudo usermod -aG sudo bob`,
+      `sudo groupadd bob sudo`,
+      `sudo passwd -s bob`
+    ],
+    ans: 1,
+    exp: `<code>sudo usermod -aG sudo bob</code> appends bob to the sudo group, granting him sudo privileges.`
+  },
+  {
+    q: `What does <code>ls -l</code> show for a file owned by alice in the editors group?`,
+    opts: [
+      `-rw-r--r-- 1 editors alice 1234 file.txt`,
+      `-rw-r--r-- 1 alice editors 1234 file.txt`,
+      `-rw-r--r-- 1 1001 1002 1234 file.txt`,
+      `-rw-r--r-- alice:editors 1234 file.txt`
+    ],
+    ans: 1,
+    exp: `<code>ls -l</code> shows: permissions, links, owner, group, size, date, name. Owner comes before group: <code>alice editors</code>.`
+  },
+  {
+    q: `What is the numeric permission for <code>rw-r--r--</code>?`,
+    opts: [`755`, `644`, `600`, `664`],
+    ans: 1,
+    exp: `rw- = 6, r-- = 4, r-- = 4 → 644. This is the standard permission for regular files.`
+  },
+  {
+    q: `What is the numeric permission for <code>rwxr-xr-x</code>?`,
+    opts: [`755`, `777`, `644`, `711`],
+    ans: 0,
+    exp: `rwx = 7, r-x = 5, r-x = 5 → 755. Standard permission for directories and executables.`
+  },
+  {
+    q: `Which scenario is best suited for using <code>su</code> instead of <code>sudo</code>?`,
+    opts: [
+      `Running a single admin command on a multi-user secure system`,
+      `You are in the sudo group and need to run apt update`,
+      `You want a full root shell and you know the root password (e.g., rescue mode)`,
+      `You want all commands to be logged`
+    ],
+    ans: 2,
+    exp: `<code>su</code> is appropriate when you need a full root shell session and know the root password, such as in rescue/recovery mode.`
+  },
+  {
+    q: `After running <code>useradd bob</code> without any flags, which of the following is TRUE?`,
+    opts: [
+      `A home directory /home/bob is automatically created`,
+      `The shell is set to /bin/bash by default on all systems`,
+      `The home directory may NOT be created (depends on distro defaults; use -m to ensure it)`,
+      `Bob is automatically added to the sudo group`
+    ],
+    ans: 2,
+    exp: `Without <code>-m</code>, <code>useradd</code> may not create the home directory (behavior varies by distro). Always use <code>-m</code> to be sure.`
+  },
+  {
+    q: `What does the 't' in <code>drwxrwxrwt</code> represent?`,
+    opts: [`setuid`, `setgid`, `sticky bit`, `temporary directory`],
+    ans: 2,
+    exp: `Lowercase <code>t</code> in the execute position for others means the sticky bit is set. <code>/tmp</code> typically has this.`
+  },
+  {
+    q: `Which command would you use to see the format of entries in <code>/etc/group</code>?`,
+    opts: [`cat /etc/group`, `getent group`, `groups`, `id`],
+    ans: 0,
+    exp: `<code>cat /etc/group</code> directly shows the file content in format: <code>groupname:x:GID:member1,member2</code>.`
+  },
+  {
+    q: `What is a GID?`,
+    opts: [
+      `Global Internet Domain`,
+      `Group ID — a numeric identifier for a group`,
+      `General Interface Descriptor`,
+      `The group's encrypted password`
+    ],
+    ans: 1,
+    exp: `GID (Group ID) is a unique numeric identifier for a group, similar to how UID identifies users.`
+  }
+];
+
+let answered = {};
+let correct = 0;
+
+function buildQuiz() {
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = '';
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `q${i}`;
+
+    const opts = q.opts.map((o, j) => {
+      return `<button class="opt-btn" id="opt-${i}-${j}" onclick="answer(${i},${j})">${o}</button>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="q-number">Question ${i+1} of ${questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${opts}</div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+    area.appendChild(card);
+  });
+  updateTopBar();
+}
+
+function answer(qi, oi) {
+  if (answered[qi] !== undefined) return;
+  answered[qi] = oi;
+  const q = questions[qi];
+  const isCorrect = (oi === q.ans);
+  if (isCorrect) correct++;
+
+  // Style buttons
+  for (let j = 0; j < q.opts.length; j++) {
+    const btn = document.getElementById(`opt-${qi}-${j}`);
+    btn.disabled = true;
+    if (j === q.ans) btn.classList.add('reveal');
+    if (j === oi && !isCorrect) btn.classList.add('wrong');
+    if (j === oi && isCorrect) btn.classList.add('correct');
+  }
+
+  // Show feedback
+  const fb = document.getElementById(`fb-${qi}`);
+  fb.className = `feedback show ${isCorrect ? 'ok' : 'bad'}`;
+  fb.innerHTML = `${isCorrect ? '✅ Correct!' : '❌ Incorrect.'} ${q.exp}`;
+
+  updateTopBar();
+}
+
+function updateTopBar() {
+  const total = questions.length;
+  const done = Object.keys(answered).length;
+  document.getElementById('score-display').textContent = `Score: ${correct} / ${total}`;
+  document.getElementById('answered-display').textContent = `${done} answered`;
+  document.getElementById('progress-bar').style.width = `${(done/total)*100}%`;
+}
+
+function submitQuiz() {
+  // Mark unanswered
+  questions.forEach((q, i) => {
+    if (answered[i] === undefined) {
+      for (let j = 0; j < q.opts.length; j++) {
+        document.getElementById(`opt-${i}-${j}`).disabled = true;
+      }
+      const fb = document.getElementById(`fb-${i}`);
+      fb.className = 'feedback show bad';
+      fb.innerHTML = `⏭️ Skipped. Correct answer: <strong>${q.opts[q.ans]}</strong>. ${q.exp}`;
+    }
+  });
+
+  const total = questions.length;
+  const done = Object.keys(answered).length;
+  const skipped = total - done;
+  const wrong = done - correct;
+  const pct = Math.round((correct / total) * 100);
+
+  let grade = '';
+  if (pct >= 90) grade = '🏆 Excellent!';
+  else if (pct >= 75) grade = '👍 Good job!';
+  else if (pct >= 50) grade = '📚 Keep studying!';
+  else grade = '💪 Needs more practice!';
+
+  // Build wrong/skip list
+  let wrongItems = '';
+  let skipItems = '';
+  questions.forEach((q, i) => {
+    if (answered[i] !== undefined && answered[i] !== q.ans) {
+      wrongItems += `<div class="recap-item ri-wrong">
+        <strong>Q${i+1}: ${q.q}</strong>
+        Your answer: <em>${q.opts[answered[i]]}</em><br>
+        Correct: <strong>${q.opts[q.ans]}</strong><br>
+        ${q.exp}
+      </div>`;
+    } else if (answered[i] === undefined) {
+      skipItems += `<div class="recap-item ri-skip">
+        <strong>Q${i+1}: ${q.q}</strong>
+        Correct answer: <strong>${q.opts[q.ans]}</strong><br>
+        ${q.exp}
+      </div>`;
+    }
+  });
+
+  const recap = document.getElementById('recap');
+  recap.style.display = 'block';
+  recap.innerHTML = `
+    <h2>📊 Results ${grade}</h2>
+    <div class="recap-stats">
+      <div class="stat-box stat-correct"><div class="num">${correct}</div><div class="lbl">Correct</div></div>
+      <div class="stat-box stat-wrong"><div class="num">${wrong}</div><div class="lbl">Wrong</div></div>
+      <div class="stat-box stat-skip"><div class="num">${skipped}</div><div class="lbl">Skipped</div></div>
+      <div class="stat-box stat-pct"><div class="num">${pct}%</div><div class="lbl">Score</div></div>
+    </div>
+    ${wrongItems ? `<div class="recap-section"><h3>❌ Questions to Review (Wrong)</h3>${wrongItems}</div>` : '<p style="color:#2e7d32;font-weight:600">✅ No wrong answers!</p>'}
+    ${skipItems ? `<div class="recap-section"><h3>⏭️ Skipped Questions</h3>${skipItems}</div>` : ''}
+    <button id="retry-btn" onclick="retryQuiz()">🔄 Retry Quiz</button>
+  `;
+  recap.scrollIntoView({behavior:'smooth'});
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('submit-btn').style.opacity = '0.5';
+}
+
+function retryQuiz() {
+  answered = {};
+  correct = 0;
+  document.getElementById('recap').style.display = 'none';
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('submit-btn').style.opacity = '1';
+  buildQuiz();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

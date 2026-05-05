@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OS Session 12 - MCQ Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a1a2e; }
+  #sticky-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: #0b57d0; color: white;
+    padding: 10px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  #sticky-header a {
+    color: white; text-decoration: none; font-weight: 600;
+    background: rgba(255,255,255,0.2); padding: 6px 14px;
+    border-radius: 6px; font-size: 14px; transition: background 0.2s;
+  }
+  #sticky-header a:hover { background: rgba(255,255,255,0.35); }
+  #sticky-header .title { font-size: 16px; font-weight: 700; }
+  #sticky-header .progress-text { font-size: 13px; opacity: 0.9; }
+  .main-wrap { max-width: 860px; margin: 0 auto; padding: 90px 16px 40px; }
+  .quiz-header {
+    background: white; border-radius: 12px; padding: 28px 32px;
+    margin-bottom: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+  }
+  .quiz-header h1 { font-size: 24px; color: #0b57d0; margin-bottom: 8px; }
+  .quiz-header p { color: #555; font-size: 15px; }
+  .progress-bar-wrap {
+    background: white; border-radius: 12px; padding: 16px 24px;
+    margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .progress-bar-bg { background: #e0e7ff; border-radius: 20px; height: 10px; overflow: hidden; }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #0b57d0, #4285f4);
+    border-radius: 20px; transition: width 0.4s ease; width: 0%;
+  }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 8px; }
+  .question-card {
+    background: white; border-radius: 12px; padding: 24px 28px;
+    margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-left: 4px solid #e0e7ff; transition: border-color 0.3s;
+  }
+  .question-card.correct { border-left-color: #22c55e; }
+  .question-card.incorrect { border-left-color: #ef4444; }
+  .question-card.skipped { border-left-color: #f59e0b; }
+  .q-number { font-size: 12px; font-weight: 700; color: #0b57d0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .q-text { font-size: 15px; font-weight: 600; line-height: 1.6; margin-bottom: 16px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    background: #f8faff; border: 2px solid #e0e7ff;
+    border-radius: 8px; padding: 11px 16px;
+    text-align: left; cursor: pointer; font-size: 14px;
+    transition: all 0.2s; color: #1a1a2e;
+  }
+  .option-btn:hover:not(:disabled) { background: #e8f0fe; border-color: #4285f4; }
+  .option-btn.selected-correct { background: #dcfce7; border-color: #22c55e; color: #166534; font-weight: 600; }
+  .option-btn.selected-wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; font-weight: 600; }
+  .option-btn.reveal-correct { background: #dcfce7; border-color: #22c55e; color: #166534; font-weight: 600; }
+  .option-btn:disabled { cursor: default; }
+  .feedback {
+    margin-top: 14px; padding: 12px 16px; border-radius: 8px;
+    font-size: 14px; line-height: 1.6; display: none;
+  }
+  .feedback.correct { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .feedback.incorrect { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .feedback-icon { font-size: 16px; margin-right: 6px; }
+  .submit-wrap { text-align: center; margin: 32px 0; }
+  #submit-btn {
+    background: #0b57d0; color: white; border: none;
+    padding: 14px 48px; border-radius: 10px; font-size: 16px;
+    font-weight: 700; cursor: pointer; transition: background 0.2s;
+    box-shadow: 0 4px 12px rgba(11,87,208,0.3);
+  }
+  #submit-btn:hover { background: #0842a0; }
+  #recap {
+    display: none; background: white; border-radius: 12px;
+    padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-bottom: 40px;
+  }
+  #recap h2 { font-size: 22px; color: #0b57d0; margin-bottom: 20px; text-align: center; }
+  .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .score-box { border-radius: 10px; padding: 18px; text-align: center; }
+  .score-box .num { font-size: 32px; font-weight: 800; }
+  .score-box .lbl { font-size: 13px; margin-top: 4px; }
+  .score-box.total { background: #e8f0fe; color: #0b57d0; }
+  .score-box.correct-box { background: #dcfce7; color: #166534; }
+  .score-box.wrong-box { background: #fee2e2; color: #991b1b; }
+  .score-box.skip-box { background: #fef9c3; color: #854d0e; }
+  .score-box.pct-box { background: #f3e8ff; color: #6b21a8; }
+  .grade-bar-wrap { margin-bottom: 24px; }
+  .grade-bar-bg { background: #e5e7eb; border-radius: 20px; height: 18px; overflow: hidden; }
+  .grade-bar-fill { height: 100%; border-radius: 20px; transition: width 1s ease; }
+  .grade-label { text-align: center; font-size: 14px; color: #555; margin-top: 6px; }
+  .needs-work { margin-top: 24px; }
+  .needs-work h3 { font-size: 17px; font-weight: 700; color: #dc2626; margin-bottom: 14px; }
+  .needs-work-item {
+    background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 12px;
+  }
+  .needs-work-item .nw-q { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
+  .needs-work-item .nw-your { font-size: 13px; color: #dc2626; margin-bottom: 3px; }
+  .needs-work-item .nw-ans { font-size: 13px; color: #166534; margin-bottom: 6px; }
+  .needs-work-item .nw-exp { font-size: 13px; color: #555; }
+  .all-correct-msg {
+    text-align: center; padding: 24px; background: #dcfce7;
+    border-radius: 10px; color: #166534; font-size: 18px; font-weight: 700;
+  }
+  #restart-btn {
+    display: block; margin: 24px auto 0;
+    background: #0b57d0; color: white; border: none;
+    padding: 12px 36px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  #restart-btn:hover { background: #0842a0; }
+  @media (max-width: 600px) {
+    .main-wrap { padding: 80px 10px 30px; }
+    .question-card { padding: 18px 16px; }
+    #sticky-header .title { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="sticky-header">
+  <a href="./index.html">&#8592; Back to index</a>
+  <span class="title">OS Session 12 &mdash; MCQ</span>
+  <span class="progress-text" id="header-progress">0 / 60 answered</span>
+</div>
+
+<div class="main-wrap">
+  <div class="quiz-header">
+    <h1>&#128187; Operating System &mdash; Session 12</h1>
+    <p>Remote Access, Downloads &amp; Shell Customization &nbsp;|&nbsp; 60 Questions</p>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span>Progress</span>
+      <span id="progress-count">0 / 60</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+  </div>
+  <div id="quiz-container"></div>
+  <div class="submit-wrap">
+    <button id="submit-btn" onclick="submitQuiz()">&#9654; Submit &amp; See Results</button>
+  </div>
+  <div id="recap"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "What does SSH stand for?",
+    opts: ["Secure Shell","Simple Shell Handler","System Shell Host","Secure Socket Hub"],
+    ans: 0,
+    exp: "SSH stands for Secure Shell. It is a cryptographic network protocol for secure communication between two machines."
+  },
+  {
+    q: "Which best describes the primary purpose of SSH?",
+    opts: ["Transfer files without encryption","Secure remote login and communication over untrusted networks","Monitor network traffic","Manage disk partitions"],
+    ans: 1,
+    exp: "SSH is primarily used for secure remote login to servers, safe file transfers, and running commands on remote systems over untrusted networks."
+  },
+  {
+    q: "What is the correct syntax to SSH into a remote server?",
+    opts: ["ssh [hostname]@[username]","ssh [username]@[hostname or IP]","ssh --connect [username] [hostname]","ssh login [hostname] [username]"],
+    ans: 1,
+    exp: "The correct syntax is: ssh [username]@[hostname or IP address]. Example: ssh thomas@192.168.56.1"
+  },
+  {
+    q: "On Windows, which PowerShell command checks if OpenSSH Server is available as an optional feature?",
+    opts: ["Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*'","Install-WindowsFeature OpenSSH","Enable-SSHServer -Online","Check-SSH -Name OpenSSH"],
+    ans: 0,
+    exp: "The command Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*' checks if the OpenSSH Server optional feature is available on Windows."
+  },
+  {
+    q: "Which command installs OpenSSH Server on Windows via PowerShell?",
+    opts: ["Install-OpenSSH -Name OpenSSH.Server","Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0","Enable-WindowsFeature -Name OpenSSH","Set-Service sshd -StartupType Automatic"],
+    ans: 1,
+    exp: "The correct command is: Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0"
+  },
+  {
+    q: "Which command starts the SSH service on Windows?",
+    opts: ["Start-Service ssh","Start-Service sshd","Enable-Service sshd","net start OpenSSH"],
+    ans: 1,
+    exp: "On Windows, you use Start-Service sshd to start the SSH daemon service."
+  },
+  {
+    q: "Which command adds a new user 'thomas' with password 'thomaspwd' on Windows?",
+    opts: ["adduser thomas thomaspwd","net user thomas thomaspwd /add","useradd thomas --password thomaspwd","New-LocalUser thomas thomaspwd"],
+    ans: 1,
+    exp: "On Windows, 'net user thomas thomaspwd /add' creates a new local user account."
+  },
+  {
+    q: "Which command activates/enables the user account 'thomas' on Windows?",
+    opts: ["net user thomas /enable","net user thomas /active:yes","Enable-LocalUser thomas","usermod -U thomas"],
+    ans: 1,
+    exp: "'net user thomas /active:yes' enables the user account thomas on Windows, allowing login."
+  },
+  {
+    q: "Which command installs the OpenSSH server on a Debian/Ubuntu Linux system?",
+    opts: ["yum install ssh-server","apt install openssh-server","dnf install openssh","pacman -S openssh-server"],
+    ans: 1,
+    exp: "On Debian/Ubuntu-based systems, 'apt install openssh-server' installs the OpenSSH server package."
+  },
+  {
+    q: "Which command enables the SSH service to start automatically at boot on Linux?",
+    opts: ["service ssh autostart","systemctl enable ssh","systemctl autostart ssh","init.d ssh enable"],
+    ans: 1,
+    exp: "'systemctl enable ssh' configures the SSH service to start automatically at boot."
+  },
+  {
+    q: "Which command starts the SSH service immediately on Linux?",
+    opts: ["service ssh run","systemctl start ssh","systemctl launch ssh","init ssh start"],
+    ans: 1,
+    exp: "'systemctl start ssh' starts the SSH daemon service immediately on Linux."
+  },
+  {
+    q: "On macOS, which file should you check to ensure PasswordAuthentication is enabled for SSH?",
+    opts: ["/etc/ssh/ssh_config","/etc/ssh/sshd_config","/usr/local/etc/sshd","~/.ssh/config"],
+    ans: 1,
+    exp: "On macOS, /etc/ssh/sshd_config is the SSH daemon configuration file where you verify 'PasswordAuthentication yes'."
+  },
+  {
+    q: "Which pair of commands restarts the SSH daemon on macOS?",
+    opts: ["sudo service sshd restart","sudo launchctl stop com.openssh.sshd then sudo launchctl start com.openssh.sshd","sudo systemctl restart sshd","sudo /etc/init.d/sshd restart"],
+    ans: 1,
+    exp: "On macOS, SSH is managed by launchctl. Stop with: sudo launchctl stop com.openssh.sshd, then start with: sudo launchctl start com.openssh.sshd."
+  },
+  {
+    q: "Why does SSH NOT allow passing a password directly on the command line?",
+    opts: ["It is a technical limitation of the protocol","For security reasons, to prevent password exposure in shell history and process lists","Because SSH only supports key-based authentication","SSH does not support passwords at all"],
+    ans: 1,
+    exp: "SSH does not allow --password on the command line for security reasons, as it would expose the password in shell history and process lists."
+  },
+  {
+    q: "What is sshpass used for?",
+    opts: ["Generating SSH key pairs","Passing a password non-interactively to SSH (for demo/testing only)","Encrypting SSH configuration files","Managing multiple SSH sessions"],
+    ans: 1,
+    exp: "sshpass allows passing a password non-interactively: sshpass -p 'pwd' ssh user@host. It should only be used for demo/testing, not in production."
+  },
+  {
+    q: "What does SCP stand for?",
+    opts: ["Secure Copy Protocol","Shell Copy Program","System Copy Protocol","Secure Channel Protocol"],
+    ans: 0,
+    exp: "SCP stands for Secure Copy Protocol. It allows secure file transfer over a network using SSH encryption."
+  },
+  {
+    q: "Which scp command copies file.txt to a remote host at /path/?",
+    opts: ["scp file.txt user@host","scp file.txt user@host:/path/","scp --send file.txt user@host:/path/","scp -f file.txt user@host:/path/"],
+    ans: 1,
+    exp: "The correct syntax is: scp file.txt user@host:/path/ — specifying the destination path on the remote host."
+  },
+  {
+    q: "Which scp option allows copying an entire directory recursively?",
+    opts: ["-d","-a","-r","-R"],
+    ans: 2,
+    exp: "The -r flag in scp enables recursive copying of directories: scp -r folder/ user@host:/home/user/"
+  },
+  {
+    q: "What is the key advantage of rsync over scp?",
+    opts: ["rsync uses a different encryption algorithm","rsync only transfers changed files, making repeated transfers faster","rsync works without SSH","rsync supports more file formats"],
+    ans: 1,
+    exp: "rsync transfers only the differences between source and destination, making it much faster than scp for repeated transfers or large directories."
+  },
+  {
+    q: "Which rsync option enables archive mode (preserving permissions, timestamps, symlinks)?",
+    opts: ["-v","-z","-a","-r"],
+    ans: 2,
+    exp: "The -a (archive) option in rsync preserves permissions, timestamps, symbolic links, and other file attributes."
+  },
+  {
+    q: "What does the rsync -z option do?",
+    opts: ["Delete files at destination not present in source","Run rsync in verbose mode","Compress data during transfer for faster network transfer","Synchronize in zero-conflict mode"],
+    ans: 2,
+    exp: "The -z option compresses data during transfer, which makes rsync faster over slow network connections."
+  },
+  {
+    q: "Which rsync option deletes files from the destination that no longer exist in the source?",
+    opts: ["-d","--remove","--delete","--clean"],
+    ans: 2,
+    exp: "The --delete option tells rsync to remove files from the destination that are no longer present in the source directory."
+  },
+  {
+    q: "Which command syncs a local folder my_project/ to a remote machine using rsync?",
+    opts: ["rsync -avz thomas@192.168.1.39:~/projects/ my_project/","rsync -avz my_project/ thomas@192.168.1.39:~/projects/","rsync --push my_project/ thomas@192.168.1.39:~/projects/","rsync -copy my_project/ thomas@192.168.1.39"],
+    ans: 1,
+    exp: "To push/sync a local folder to a remote machine: rsync -avz my_project/ thomas@192.168.1.39:~/projects/"
+  },
+  {
+    q: "Which command pulls files FROM a remote machine using rsync?",
+    opts: ["rsync -avz my_project/ thomas@192.168.1.39:~/projects/","rsync -avz thomas@192.168.1.39:~/projects/ .","rsync --pull thomas@192.168.1.39:~/projects/ .","rsync -get thomas@192.168.1.39:~/projects/"],
+    ans: 1,
+    exp: "To pull files from a remote machine: rsync -avz thomas@192.168.1.39:~/projects/ . (the dot means current directory as destination)"
+  },
+  {
+    q: "Does rsync support resuming interrupted transfers?",
+    opts: ["No, like scp it does not support resume","Yes, rsync supports resume while scp does not","Both scp and rsync support resume","Neither supports resume"],
+    ans: 1,
+    exp: "rsync supports resume of interrupted transfers, while scp does not. This is one of rsync's key advantages."
+  },
+  {
+    q: "Does rsync support compression during transfer?",
+    opts: ["No, rsync does not support compression","Yes, with the -z flag","Yes, compression is always on by default","Only when used with SSH tunneling"],
+    ans: 1,
+    exp: "rsync supports compression with the -z flag, while scp does not support compression."
+  },
+  {
+    q: "Which tool is best described as: for simple file downloads from the web?",
+    opts: ["curl","scp","wget","rsync"],
+    ans: 2,
+    exp: "wget is described as the tool for simple file downloads. curl is for more control (headers, APIs, REST)."
+  },
+  {
+    q: "Which wget option downloads a file and saves it with a custom name?",
+    opts: ["wget --name","wget -O","wget --save-as","wget -n"],
+    ans: 1,
+    exp: "The -O option in wget specifies the output filename: wget -O lecture.pdf https://example.com/file123.pdf"
+  },
+  {
+    q: "Which curl option saves a downloaded file keeping the remote filename?",
+    opts: ["-s","-O","--output","-f"],
+    ans: 1,
+    exp: "curl -O https://example.com/file.zip saves the file using the remote filename."
+  },
+  {
+    q: "Which curl option saves a downloaded file with a custom local name?",
+    opts: ["-O","-o","--save","-n"],
+    ans: 1,
+    exp: "curl -o data.csv https://example.com/data.csv saves the file with the specified local name."
+  },
+  {
+    q: "What is curl primarily used for compared to wget?",
+    opts: ["curl is for recursive downloads; wget is for single files","curl provides more control: working with REST APIs, inspecting HTTP headers","curl is faster for large files","curl supports more archive formats"],
+    ans: 1,
+    exp: "curl is used for more control such as working with REST APIs or inspecting HTTP headers, while wget is for simple file downloads."
+  },
+  {
+    q: "Which tar command CREATES a compressed .tar.gz archive of a folder?",
+    opts: ["tar -xvf archive.tar.gz folder/","tar -czvf archive.tar.gz folder/","tar -tvf archive.tar.gz folder/","tar -avf archive.tar.gz folder/"],
+    ans: 1,
+    exp: "tar -czvf archive.tar.gz folder/ creates (-c) a gzip-compressed (-z) archive verbosely (-v) with the specified filename (-f)."
+  },
+  {
+    q: "Which tar command EXTRACTS files from an archive?",
+    opts: ["tar -czvf archive.tar.gz","tar -tvf archive.tar.gz","tar -xvf archive.tar.gz","tar -avf archive.tar.gz"],
+    ans: 2,
+    exp: "tar -xvf archive.tar.gz extracts (-x) files from the archive verbosely (-v) from the specified file (-f)."
+  },
+  {
+    q: "What does the tar -t option do?",
+    opts: ["Create a new archive","Test archive integrity","List files inside an archive without extracting","Transfer archive over network"],
+    ans: 2,
+    exp: "The -t option lists the contents of an archive without extracting them: tar -tvf archive.tar.gz"
+  },
+  {
+    q: "Which tar option enables gzip compression for .tar.gz files?",
+    opts: ["-j","-z","-g","-c"],
+    ans: 1,
+    exp: "The -z option uses gzip compression, creating .tar.gz archives. The -j option uses bzip2 compression for .tar.bz2 archives."
+  },
+  {
+    q: "Which tar option enables bzip2 compression for .tar.bz2 files?",
+    opts: ["-z","-b","-j","-B"],
+    ans: 2,
+    exp: "The -j option uses bzip2 compression, creating .tar.bz2 archives. The -z option is for gzip (.tar.gz)."
+  },
+  {
+    q: "Which command extracts a .zip file in Linux?",
+    opts: ["tar -xvf archive.zip","gunzip archive.zip","unzip archive.zip","extract archive.zip"],
+    ans: 2,
+    exp: "The 'unzip' command is used to extract .zip files in Linux."
+  },
+  {
+    q: "What does the tar -v option do?",
+    opts: ["Verify archive integrity","Show file names during processing (verbose)","Use version 2 compression","Enable virtual mode"],
+    ans: 1,
+    exp: "The -v (verbose) option shows file names as they are being processed during creation or extraction."
+  },
+  {
+    q: "What does the tar -f option specify?",
+    opts: ["Force overwrite","The archive file name","Full recursive mode","Fast compression"],
+    ans: 1,
+    exp: "The -f option specifies the archive file name to create or operate on."
+  },
+  {
+    q: "What does the tar -c option do?",
+    opts: ["Check archive integrity","Compress with gzip","Create a new archive","Copy files without compression"],
+    ans: 2,
+    exp: "The -c option creates a new archive. Combined with -z and -f: tar -czvf archive.tar.gz folder/"
+  },
+  {
+    q: "What is an alias in Linux shell?",
+    opts: ["A symbolic link to a file","A custom shortcut for frequently used commands","An alternative username","A backup copy of a command"],
+    ans: 1,
+    exp: "An alias is a custom shortcut that maps a short name to a longer command, making frequently used commands easier to type."
+  },
+  {
+    q: "Which command creates a TEMPORARY alias ll for ls -lrt?",
+    opts: ["Add alias ll='ls -lrt' in ~/.bashrc","Type alias ll='ls -lrt' directly in the terminal","export ll='ls -lrt'","set alias ll='ls -lrt'"],
+    ans: 1,
+    exp: "Running alias ll='ls -lrt' directly in the terminal creates a temporary alias that lasts only for the current session."
+  },
+  {
+    q: "Where do you add an alias to make it PERMANENT?",
+    opts: ["/etc/aliases","~/.bash_profile only","~/.bashrc","/etc/bash.bashrc"],
+    ans: 2,
+    exp: "To make an alias permanent, add it to ~/.bashrc. Then reload with 'source ~/.bashrc' or reopen the terminal."
+  },
+  {
+    q: "After editing ~/.bashrc, which command reloads it without restarting the terminal?",
+    opts: ["reload ~/.bashrc","source ~/.bashrc","exec ~/.bashrc","apply ~/.bashrc"],
+    ans: 1,
+    exp: "'source ~/.bashrc' (or '. ~/.bashrc') reloads the bashrc file in the current shell session without needing to restart."
+  },
+  {
+    q: "What does the alias 'alias projects=cd ~/project' do?",
+    opts: ["Creates a shortcut to list files in ~/project","Creates a shortcut command that navigates to ~/project","Mounts the ~/project directory","Creates a symbolic link to ~/project"],
+    ans: 1,
+    exp: "This alias creates a shortcut so that typing 'projects' in the terminal automatically runs 'cd ~/project', navigating to that directory."
+  },
+  {
+    q: "What is the $PATH variable in Linux?",
+    opts: ["The path to the current user's home directory","A list of directories the shell searches when you run a command","The path to the system configuration files","The default download directory"],
+    ans: 1,
+    exp: "$PATH is an environment variable containing a colon-separated list of directories. When you run a command, the shell searches these directories to find the executable."
+  },
+  {
+    q: "Why can you run 'ls' from any directory without specifying its full path?",
+    opts: ["Because ls is a shell built-in command","Because the shell searches all directories listed in $PATH","Because ls is stored in the home directory","Because Linux automatically adds all commands to the current directory"],
+    ans: 1,
+    exp: "System commands like 'ls' work from anywhere because their location (/bin or /usr/bin) is listed in $PATH, which the shell searches automatically."
+  },
+  {
+    q: "What happens when you run a command NOT found in any $PATH directory?",
+    opts: ["The shell searches the entire filesystem","The command runs from the current directory","The shell displays 'command not found'","The shell asks you to specify the full path"],
+    ans: 2,
+    exp: "If the shell cannot find the command in any directory listed in $PATH, it displays 'command not found'."
+  },
+  {
+    q: "Which command displays the current value of $PATH?",
+    opts: ["print $PATH","echo $PATH","show PATH","cat $PATH"],
+    ans: 1,
+    exp: "'echo $PATH' prints the current PATH variable, showing all directories separated by colons."
+  },
+  {
+    q: "How do you add a new directory to $PATH permanently in ~/.bashrc?",
+    opts: ["PATH=$HOME/scripts","export PATH=$PATH:$HOME/scripts","add PATH $HOME/scripts","set PATH=$PATH+$HOME/scripts"],
+    ans: 1,
+    exp: "The correct syntax is: export PATH=$PATH:$HOME/scripts — this appends the new directory to the existing PATH."
+  },
+  {
+    q: "What does 'chmod +x hello.sh' do?",
+    opts: ["Deletes the hello.sh file","Makes hello.sh executable","Copies hello.sh to /usr/bin","Adds hello.sh to PATH"],
+    ans: 1,
+    exp: "'chmod +x hello.sh' adds execute permission to the file, allowing it to be run as a script."
+  },
+  {
+    q: "After adding a script directory to $PATH and sourcing ~/.bashrc, how do you run the script?",
+    opts: ["You must always use ./hello.sh","You can run it by just typing hello.sh from any directory","You must specify the full path each time","You need to copy it to /usr/bin first"],
+    ans: 1,
+    exp: "Once the script's directory is in $PATH, you can run 'hello.sh' from anywhere without specifying the full path."
+  },
+  {
+    q: "What is the shebang line at the top of a bash script?",
+    opts: ["# bash script","#!/bin/bash","//bash","!bash"],
+    ans: 1,
+    exp: "The shebang line '#!/bin/bash' tells the system to use /bin/bash as the interpreter for the script."
+  },
+  {
+    q: "In the rsync demo, which command syncs test1 contents into test2?",
+    opts: ["rsync -av test2/ test1/","rsync -av test1/ test2/","rsync --sync test1 test2","rsync -copy test1/ test2/"],
+    ans: 1,
+    exp: "rsync -av test1/ test2/ syncs the contents of test1 into test2. The trailing slash on test1/ means 'contents of test1'."
+  },
+  {
+    q: "What does rsync do when you modify a file and run rsync again?",
+    opts: ["It re-transfers all files from scratch","It only transfers the modified file","It skips all files to avoid overwriting","It creates a backup before overwriting"],
+    ans: 1,
+    exp: "rsync is smart — it compares source and destination and only transfers files that have changed, saving time and bandwidth."
+  },
+  {
+    q: "Which protocol do both scp and rsync use for secure transfer?",
+    opts: ["FTP","SFTP","SSH","TLS"],
+    ans: 2,
+    exp: "Both scp and rsync use SSH for secure encrypted transfers over the network."
+  },
+  {
+    q: "Which command checks the Windows IP address to use for SSH connection?",
+    opts: ["ifconfig","ipconfig","ip addr","netstat -i"],
+    ans: 1,
+    exp: "On Windows, 'ipconfig' displays the network configuration including the IP address. On Linux/Mac, you would use 'ifconfig' or 'ip addr'."
+  },
+  {
+    q: "What does 'tar -tvf testdir.tar.gz' do in the demo?",
+    opts: ["Creates a new archive","Extracts the archive to current directory","Lists the contents of the archive without extracting","Tests and verifies archive integrity"],
+    ans: 2,
+    exp: "tar -tvf lists (-t) the contents of the archive verbosely (-v) from the specified file (-f) without extracting anything."
+  },
+  {
+    q: "In the tar demo, which is the correct sequence to create then list an archive?",
+    opts: ["tar -xvf testdir.tar.gz then tar -czvf testdir.tar.gz testdir/","tar -czvf testdir.tar.gz testdir/ then tar -tvf testdir.tar.gz","tar -tvf testdir.tar.gz then tar -czvf testdir.tar.gz","tar -avf testdir.tar.gz then tar -tvf testdir.tar.gz"],
+    ans: 1,
+    exp: "First create the archive: tar -czvf testdir.tar.gz testdir/, then list its contents: tar -tvf testdir.tar.gz"
+  },
+  {
+    q: "What is the difference between a temporary and permanent alias?",
+    opts: ["Temporary aliases use single quotes; permanent use double quotes","Temporary aliases last only for the current session; permanent aliases are saved in ~/.bashrc","Temporary aliases work only in scripts; permanent ones work in terminal","There is no difference; all aliases are permanent"],
+    ans: 1,
+    exp: "A temporary alias (typed in terminal) lasts only for the current session. A permanent alias is added to ~/.bashrc and persists across sessions."
+  },
+  {
+    q: "Which of the following is the correct syntax for a permanent alias in ~/.bashrc?",
+    opts: ["alias ll = 'ls -lrt'","alias ll='ls -lrt'","ALIAS ll='ls -lrt'","set-alias ll 'ls -lrt'"],
+    ans: 1,
+    exp: "The correct syntax is: alias ll='ls -lrt' — no spaces around the = sign. This line added to ~/.bashrc makes the alias permanent."
+  },
+  {
+    q: "Which SSH-related service must be running on the remote machine for SSH connections to work?",
+    opts: ["ssh-client","sshd (SSH daemon)","openssh-agent","ssh-broker"],
+    ans: 1,
+    exp: "The SSH daemon (sshd) must be running on the remote machine to accept incoming SSH connections. On Linux: systemctl start ssh"
+  },
+  {
+    q: "Which rsync option means recursive: copy subdirectories?",
+    opts: ["Resume interrupted transfers","-r: Recursive, copy subdirectories","Remote mode: force SSH","Read-only mode"],
+    ans: 1,
+    exp: "The -r option in rsync means recursive, allowing it to copy entire directory trees including subdirectories."
+  },
+  {
+    q: "What does the rsync -v option do?",
+    opts: ["Verify checksums of transferred files","Verbose: show progress and file names during transfer","Use version 2 of the rsync protocol","Enable virtual filesystem mode"],
+    ans: 1,
+    exp: "The -v (verbose) option makes rsync display the names of files being transferred and other progress information."
+  }
+];
+
+let userAnswers = new Array(questions.length).fill(null);
+
+function updateProgress() {
+  const answered = userAnswers.filter(a => a !== null).length;
+  const pct = Math.round((answered / questions.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-count').textContent = answered + ' / ' + questions.length;
+  document.getElementById('header-progress').textContent = answered + ' / ' + questions.length + ' answered';
+}
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+  questions.forEach(function(q, i) {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + i;
+
+    const qNum = document.createElement('div');
+    qNum.className = 'q-number';
+    qNum.textContent = 'Question ' + (i + 1) + ' of ' + questions.length;
+
+    const qText = document.createElement('div');
+    qText.className = 'q-text';
+    qText.textContent = q.q;
+
+    const opts = document.createElement('div');
+    opts.className = 'options';
+
+    q.opts.forEach(function(opt, j) {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.id = 'opt-' + i + '-' + j;
+      btn.textContent = String.fromCharCode(65 + j) + '. ' + opt;
+      btn.onclick = function() { selectAnswer(i, j); };
+      opts.appendChild(btn);
+    });
+
+    const feedback = document.createElement('div');
+    feedback.className = 'feedback';
+    feedback.id = 'feedback-' + i;
+
+    card.appendChild(qNum);
+    card.appendChild(qText);
+    card.appendChild(opts);
+    card.appendChild(feedback);
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (userAnswers[qIdx] !== null) return;
+  userAnswers[qIdx] = optIdx;
+  updateProgress();
+  const q = questions[qIdx];
+  const isCorrect = optIdx === q.ans;
+  const card = document.getElementById('card-' + qIdx);
+  const feedback = document.getElementById('feedback-' + qIdx);
+  q.opts.forEach(function(_, j) {
+    const btn = document.getElementById('opt-' + qIdx + '-' + j);
+    btn.disabled = true;
+    if (j === q.ans) btn.classList.add('reveal-correct');
+    if (j === optIdx && !isCorrect) btn.classList.add('selected-wrong');
+    if (j === optIdx && isCorrect) btn.classList.add('selected-correct');
+  });
+  card.classList.add(isCorrect ? 'correct' : 'incorrect');
+  feedback.style.display = 'block';
+  feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+  feedback.innerHTML = (isCorrect
+    ? '<span class="feedback-icon">&#10004;</span><strong>Correct!</strong> '
+    : '<span class="feedback-icon">&#10008;</span><strong>Incorrect.</strong> ') + q.exp;
+}
+
+function submitQuiz() {
+  questions.forEach(function(_, i) {
+    if (userAnswers[i] === null) {
+      const card = document.getElementById('card-' + i);
+      card.classList.add('skipped');
+      const feedback = document.getElementById('feedback-' + i);
+      feedback.style.display = 'block';
+      feedback.className = 'feedback incorrect';
+      feedback.innerHTML = '<span class="feedback-icon">&#9888;</span><strong>Skipped.</strong> ' + questions[i].exp;
+      questions[i].opts.forEach(function(_, j) {
+        const btn = document.getElementById('opt-' + i + '-' + j);
+        btn.disabled = true;
+        if (j === questions[i].ans) btn.classList.add('reveal-correct');
+      });
+    }
+  });
+  updateProgress();
+  showRecap();
+  document.getElementById('submit-btn').style.display = 'none';
+  document.getElementById('recap').scrollIntoView({ behavior: 'smooth' });
+}
+
+function showRecap() {
+  let correct = 0, wrong = 0, skipped = 0;
+  const wrongItems = [];
+  questions.forEach(function(q, i) {
+    const ua = userAnswers[i];
+    if (ua === null) { skipped++; wrongItems.push({idx: i, q: q, ua: null}); }
+    else if (ua === q.ans) { correct++; }
+    else { wrong++; wrongItems.push({idx: i, q: q, ua: ua}); }
+  });
+  const total = questions.length;
+  const pct = Math.round((correct / total) * 100);
+  let barColor = '#ef4444';
+  if (pct >= 80) barColor = '#22c55e';
+  else if (pct >= 60) barColor = '#f59e0b';
+  let gradeMsg = '';
+  if (pct >= 90) gradeMsg = '&#127881; Excellent! Outstanding performance!';
+  else if (pct >= 80) gradeMsg = '&#128077; Great job! Well done!';
+  else if (pct >= 60) gradeMsg = '&#128218; Good effort! Keep reviewing the weak areas.';
+  else gradeMsg = '&#128270; Keep studying! Focus on the topics below.';
+
+  let needsWorkHTML = '';
+  if (wrongItems.length === 0) {
+    needsWorkHTML = '<div class="all-correct-msg">&#127881; Perfect score! You answered every question correctly!</div>';
+  } else {
+    needsWorkHTML = '<div class="needs-work"><h3>&#128270; Areas to Review (' + wrongItems.length + ' questions)</h3>';
+    wrongItems.forEach(function(item) {
+      const yourAns = item.ua !== null
+        ? String.fromCharCode(65 + item.ua) + '. ' + item.q.opts[item.ua]
+        : 'Not answered (skipped)';
+      const correctAns = String.fromCharCode(65 + item.q.ans) + '. ' + item.q.opts[item.q.ans];
+      needsWorkHTML += '<div class="needs-work-item">'
+        + '<div class="nw-q">Q' + (item.idx + 1) + ': ' + item.q.q + '</div>'
+        + '<div class="nw-your">&#10008; Your answer: ' + yourAns + '</div>'
+        + '<div class="nw-ans">&#10004; Correct answer: ' + correctAns + '</div>'
+        + '<div class="nw-exp">&#128161; ' + item.q.exp + '</div>'
+        + '</div>';
+    });
+    needsWorkHTML += '</div>';
+  }
+
+  const recap = document.getElementById('recap');
+  recap.style.display = 'block';
+  recap.innerHTML = '<h2>&#128202; Quiz Results</h2>'
+    + '<div class="score-grid">'
+    + '<div class="score-box total"><div class="num">' + total + '</div><div class="lbl">Total Questions</div></div>'
+    + '<div class="score-box correct-box"><div class="num">' + correct + '</div><div class="lbl">Correct &#10004;</div></div>'
+    + '<div class="score-box wrong-box"><div class="num">' + wrong + '</div><div class="lbl">Wrong &#10008;</div></div>'
+    + '<div class="score-box skip-box"><div class="num">' + skipped + '</div><div class="lbl">Skipped &#9888;</div></div>'
+    + '<div class="score-box pct-box"><div class="num">' + pct + '%</div><div class="lbl">Score</div></div>'
+    + '</div>'
+    + '<div class="grade-bar-wrap">'
+    + '<div class="grade-bar-bg"><div class="grade-bar-fill" id="grade-bar" style="width:0%;background:' + barColor + '"></div></div>'
+    + '<div class="grade-label">' + gradeMsg + '</div>'
+    + '</div>'
+    + needsWorkHTML
+    + '<button id="restart-btn" onclick="restartQuiz()">&#8635; Restart Quiz</button>';
+
+  setTimeout(function() {
+    const bar = document.getElementById('grade-bar');
+    if (bar) bar.style.width = pct + '%';
+  }, 100);
+}
+
+function restartQuiz() {
+  userAnswers = new Array(questions.length).fill(null);
+  document.getElementById('recap').style.display = 'none';
+  document.getElementById('submit-btn').style.display = 'inline-block';
+  buildQuiz();
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+updateProgress();
+</script>
+</body>
+</html>

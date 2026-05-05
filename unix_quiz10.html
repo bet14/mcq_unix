@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unix OS - Session 10: Vi/Vim MCQ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a1a2e; }
+
+  /* STICKY NAV */
+  #sticky-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    background: #0b57d0; color: white;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  #sticky-nav a {
+    color: white; text-decoration: none; font-weight: 600;
+    background: rgba(255,255,255,0.15); padding: 6px 14px;
+    border-radius: 6px; transition: background 0.2s;
+  }
+  #sticky-nav a:hover { background: rgba(255,255,255,0.3); }
+  #sticky-nav span { font-size: 1rem; font-weight: 600; letter-spacing: 0.5px; }
+  #progress-bar-wrap {
+    width: 180px; height: 8px; background: rgba(255,255,255,0.3);
+    border-radius: 4px; overflow: hidden;
+  }
+  #progress-bar { height: 100%; background: #7dd3fc; width: 0%; transition: width 0.3s; }
+
+  /* MAIN */
+  .container { max-width: 860px; margin: 0 auto; padding: 90px 16px 60px; }
+
+  h1 { text-align: center; font-size: 1.8rem; color: #0b57d0; margin-bottom: 6px; }
+  .subtitle { text-align: center; color: #555; margin-bottom: 28px; font-size: 0.95rem; }
+
+  /* SCORE BADGE */
+  #score-badge {
+    display: none; text-align: center; margin-bottom: 20px;
+    background: #e8f0fe; border: 2px solid #0b57d0;
+    border-radius: 10px; padding: 12px 20px; font-size: 1rem; color: #0b57d0; font-weight: 600;
+  }
+
+  /* QUESTION CARD */
+  .q-card {
+    background: white; border-radius: 12px; padding: 22px 24px;
+    margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-left: 5px solid #cbd5e1;
+    transition: border-color 0.3s;
+  }
+  .q-card.correct-card { border-left-color: #22c55e; }
+  .q-card.wrong-card   { border-left-color: #ef4444; }
+
+  .q-num { font-size: 0.78rem; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .q-text { font-size: 1rem; font-weight: 600; margin-bottom: 14px; line-height: 1.5; }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn {
+    text-align: left; padding: 10px 14px; border-radius: 8px;
+    border: 2px solid #e2e8f0; background: #f8fafc;
+    cursor: pointer; font-size: 0.93rem; transition: all 0.2s;
+  }
+  .opt-btn:hover:not(:disabled) { border-color: #0b57d0; background: #eff6ff; }
+  .opt-btn.selected-correct { background: #dcfce7; border-color: #22c55e; color: #166534; font-weight: 600; }
+  .opt-btn.selected-wrong   { background: #fee2e2; border-color: #ef4444; color: #991b1b; font-weight: 600; }
+  .opt-btn.reveal-correct   { background: #dcfce7; border-color: #22c55e; color: #166534; }
+  .opt-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+    font-size: 0.9rem; line-height: 1.5; display: none;
+  }
+  .feedback.correct { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+  .feedback.wrong   { background: #fff1f2; border: 1px solid #fca5a5; color: #991b1b; }
+
+  /* SUBMIT */
+  #submit-wrap { text-align: center; margin: 30px 0 10px; }
+  #submit-btn {
+    background: #0b57d0; color: white; border: none;
+    padding: 14px 40px; font-size: 1.05rem; font-weight: 700;
+    border-radius: 10px; cursor: pointer; transition: background 0.2s;
+  }
+  #submit-btn:hover { background: #0842a0; }
+
+  /* RECAP */
+  #recap {
+    display: none; background: white; border-radius: 14px;
+    padding: 28px; margin-top: 30px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  #recap h2 { color: #0b57d0; margin-bottom: 16px; font-size: 1.4rem; }
+  .recap-stats {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .stat-box {
+    flex: 1; min-width: 130px; border-radius: 10px; padding: 14px;
+    text-align: center; font-weight: 700;
+  }
+  .stat-box.total  { background: #e8f0fe; color: #0b57d0; }
+  .stat-box.good   { background: #dcfce7; color: #166534; }
+  .stat-box.bad    { background: #fee2e2; color: #991b1b; }
+  .stat-box.skip   { background: #fef9c3; color: #854d0e; }
+  .stat-box .num   { font-size: 2rem; }
+  .stat-box .lbl   { font-size: 0.8rem; margin-top: 4px; }
+
+  #recap-list { margin-top: 16px; }
+  .recap-item {
+    padding: 10px 14px; border-radius: 8px; margin-bottom: 8px;
+    font-size: 0.9rem; line-height: 1.5;
+  }
+  .recap-item.ri-correct { background: #f0fdf4; border-left: 4px solid #22c55e; }
+  .recap-item.ri-wrong   { background: #fff1f2; border-left: 4px solid #ef4444; }
+  .recap-item.ri-skip    { background: #fefce8; border-left: 4px solid #facc15; }
+
+  .effort-section { margin-top: 22px; }
+  .effort-section h3 { color: #ef4444; margin-bottom: 10px; font-size: 1.1rem; }
+  .effort-tag {
+    display: inline-block; background: #fee2e2; color: #991b1b;
+    border-radius: 6px; padding: 4px 10px; margin: 4px; font-size: 0.85rem;
+  }
+
+  #retry-btn {
+    margin-top: 20px; background: #0b57d0; color: white; border: none;
+    padding: 12px 30px; font-size: 1rem; font-weight: 700;
+    border-radius: 10px; cursor: pointer;
+  }
+  #retry-btn:hover { background: #0842a0; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.3rem; }
+    #sticky-nav span { display: none; }
+    #progress-bar-wrap { width: 100px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<div id="sticky-nav">
+  <a href="./index.html">&#8592; Back to index</a>
+  <span>Session 10 &mdash; Vi/Vim MCQ</span>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="nav-score" style="font-size:0.85rem;">0 / 62</span>
+    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  </div>
+</div>
+
+<div class="container">
+  <h1>&#128187; Unix OS &mdash; Session 10: Vi/Vim</h1>
+  <p class="subtitle">62 multiple-choice questions &bull; Click an option to see instant feedback &bull; Submit anytime</p>
+
+  <div id="score-badge"></div>
+  <div id="quiz-form"></div>
+
+  <div id="submit-wrap">
+    <button id="submit-btn" onclick="submitQuiz()">&#9989; Submit &amp; See Results</button>
+  </div>
+
+  <div id="recap">
+    <h2>&#128202; Results Recap</h2>
+    <div class="recap-stats">
+      <div class="stat-box total"><div class="num" id="r-total">0</div><div class="lbl">Total Questions</div></div>
+      <div class="stat-box good"><div class="num" id="r-correct">0</div><div class="lbl">Correct</div></div>
+      <div class="stat-box bad"><div class="num" id="r-wrong">0</div><div class="lbl">Wrong</div></div>
+      <div class="stat-box skip"><div class="num" id="r-skip">0</div><div class="lbl">Skipped</div></div>
+    </div>
+    <div id="recap-list"></div>
+    <div class="effort-section" id="effort-section"></div>
+    <button id="retry-btn" onclick="retryWrong()">&#128257; Retry Wrong &amp; Skipped</button>
+  </div>
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+  {
+    q: `What type of editor is Vim classified as?`,
+    opts: [`A word processor with formatting support`, `A screen-oriented text editor`, `A graphical IDE`, `A binary file editor`],
+    ans: 1,
+    exp: `Vim is described as a screen-oriented text editor, not a word processor or IDE. It works entirely in the terminal.`
+  },
+  {
+    q: `When was Vim first released?`,
+    opts: [`1976`, `1984`, `1991`, `2001`],
+    ans: 2,
+    exp: `Vim was released in 1991. It is an improved version of 'vi' which was released in 1976.`
+  },
+  {
+    q: `What is the original editor that Vim improved upon?`,
+    opts: [`emacs`, `nano`, `vi`, `ed`],
+    ans: 2,
+    exp: `Vim stands for 'Vi IMproved'. It is an enhanced version of the 'vi' editor released in 1976.`
+  },
+  {
+    q: `Which of the following is NOT a reason to use CLI text editors like Vim?`,
+    opts: [`They are fast and portable`, `They require no GUI`, `They support rich text formatting`, `They are used for configs and scripts`],
+    ans: 2,
+    exp: `CLI text editors are NOT word processors and do not support rich text formatting. They are plain text editors.`
+  },
+  {
+    q: `Vim is described as a 'programmer's editor'. Which feature best supports this?`,
+    opts: [`It supports drag-and-drop`, `It is keyboard-only, fast, and always available on Unix systems`, `It has a built-in compiler`, `It auto-formats code`],
+    ans: 1,
+    exp: `Vim is keyboard-only, extremely fast, and available on almost all Unix/Linux machines, making it ideal for programmers.`
+  },
+  {
+    q: `What does POSIX compliance mean for Vim?`,
+    opts: [`Vim runs only on Windows`, `Vim is always available on Unix-compliant systems`, `Vim supports graphical plugins`, `Vim requires installation`],
+    ans: 1,
+    exp: `Vim is POSIX-compliant, meaning it is available on virtually all Unix and Unix-like systems without extra installation.`
+  },
+  {
+    q: `What is 'modal editing' in Vim?`,
+    opts: [`Editing with a mouse`, `Splitting editing tasks into different modes`, `Using multiple windows`, `Editing binary files`],
+    ans: 1,
+    exp: `Modal editing means that different tasks (navigation, text entry, selection, commands) are handled in separate modes.`
+  },
+  {
+    q: `What is the default mode when you open Vim?`,
+    opts: [`Insert mode`, `Visual mode`, `Normal mode`, `Command-line mode`],
+    ans: 2,
+    exp: `Vim opens in Normal mode by default. This is the mode for navigation and editor commands.`
+  },
+  {
+    q: `How do you enter Normal mode from any other mode?`,
+    opts: [`Press i`, `Press v`, `Press Esc`, `Press :`],
+    ans: 2,
+    exp: `Pressing Esc always returns you to Normal mode from any other mode.`
+  },
+  {
+    q: `Which key enters Insert mode and places the cursor BEFORE the current character?`,
+    opts: [`a`, `o`, `i`, `O`],
+    ans: 2,
+    exp: `'i' enters Insert mode and inserts text BEFORE the cursor position.`
+  },
+  {
+    q: `Which key enters Insert mode and places the cursor AFTER the current character?`,
+    opts: [`i`, `a`, `o`, `O`],
+    ans: 1,
+    exp: `'a' (append) enters Insert mode and inserts text AFTER the cursor position.`
+  },
+  {
+    q: `Which key opens a new line BELOW the current line and enters Insert mode?`,
+    opts: [`O`, `i`, `a`, `o`],
+    ans: 3,
+    exp: `'o' (lowercase) opens a new line below the current line and enters Insert mode.`
+  },
+  {
+    q: `Which key opens a new line ABOVE the current line and enters Insert mode?`,
+    opts: [`o`, `a`, `O`, `i`],
+    ans: 2,
+    exp: `'O' (uppercase) opens a new line above the current line and enters Insert mode.`
+  },
+  {
+    q: `How do you enter Visual mode to select characters?`,
+    opts: [`V`, `Ctrl+v`, `v`, `gh`],
+    ans: 2,
+    exp: `Pressing 'v' (lowercase) enters Visual mode for character-by-character selection.`
+  },
+  {
+    q: `How do you enter Visual mode to select whole lines?`,
+    opts: [`v`, `Ctrl+v`, `V`, `gh`],
+    ans: 2,
+    exp: `'V' (uppercase) enters Visual Line mode, selecting entire lines at a time.`
+  },
+  {
+    q: `How do you enter Visual Block (column) mode?`,
+    opts: [`v`, `V`, `Ctrl+v`, `gh`],
+    ans: 2,
+    exp: `Ctrl+v enters Visual Block mode, allowing column/block selection across multiple lines.`
+  },
+  {
+    q: `What is Command-line mode used for?`,
+    opts: [`Typing text`, `Selecting blocks`, `Saving, quitting, searching, and replacing`, `Navigating with hjkl`],
+    ans: 2,
+    exp: `Command-line mode (entered with ':') is used for file operations like save, quit, and global search/replace.`
+  },
+  {
+    q: `How do you enter Command-line mode?`,
+    opts: [`Press i in Normal mode`, `Press : in Normal mode`, `Press v in Normal mode`, `Press Esc`],
+    ans: 1,
+    exp: `Pressing ':' in Normal mode enters Command-line mode.`
+  },
+  {
+    q: `What is Ex mode in Vim?`,
+    opts: [`Same as Insert mode`, `Similar to Command-line mode but does not exit after each command`, `A mode for block selection`, `A mode for macro recording`],
+    ans: 1,
+    exp: `Ex mode (entered with Q) is similar to Command-line mode but stays in mode after each command, unlike ':' which exits after one command.`
+  },
+  {
+    q: `How do you enter Ex mode?`,
+    opts: [`Press :`, `Press Q`, `Press Esc`, `Press v`],
+    ans: 1,
+    exp: `Pressing 'Q' (uppercase) enters Ex mode.`
+  },
+  {
+    q: `What is Select mode used for?`,
+    opts: [`Navigating the file`, `Printable characters replace selected text and Vim enters Insert mode`, `Running shell commands`, `Searching text`],
+    ans: 1,
+    exp: `In Select mode (entered with 'gh'), typing printable characters replaces the selected text and Vim enters Insert mode.`
+  },
+  {
+    q: `In Normal mode, which key moves the cursor LEFT?`,
+    opts: [`j`, `k`, `l`, `h`],
+    ans: 3,
+    exp: `'h' moves the cursor left in Normal mode. The hjkl keys replace arrow keys in Vim.`
+  },
+  {
+    q: `In Normal mode, which key moves the cursor DOWN?`,
+    opts: [`h`, `j`, `k`, `l`],
+    ans: 1,
+    exp: `'j' moves the cursor down one line.`
+  },
+  {
+    q: `In Normal mode, which key moves the cursor UP?`,
+    opts: [`h`, `j`, `k`, `l`],
+    ans: 2,
+    exp: `'k' moves the cursor up one line.`
+  },
+  {
+    q: `In Normal mode, which key moves the cursor RIGHT?`,
+    opts: [`h`, `j`, `k`, `l`],
+    ans: 3,
+    exp: `'l' moves the cursor right one character.`
+  },
+  {
+    q: `What does 'w' do in Normal mode?`,
+    opts: [`Move to the end of the current word`, `Move to the beginning of the next word`, `Move to the previous word`, `Save the file`],
+    ans: 1,
+    exp: `'w' moves the cursor to the beginning of the next word.`
+  },
+  {
+    q: `What does 'b' do in Normal mode?`,
+    opts: [`Move to the next word`, `Move to the end of the word`, `Move to the beginning of the previous word`, `Delete a word`],
+    ans: 2,
+    exp: `'b' moves the cursor backward to the beginning of the previous word.`
+  },
+  {
+    q: `What does 'e' do in Normal mode?`,
+    opts: [`Move to the beginning of the next word`, `Move to the end of the current word`, `Move to the end of the line`, `Enter Ex mode`],
+    ans: 1,
+    exp: `'e' moves the cursor to the end of the current (or next) word.`
+  },
+  {
+    q: `What does '0' (zero) do in Normal mode?`,
+    opts: [`Move to the end of the line`, `Move to the first non-blank character`, `Move to the beginning of the line (column 0)`, `Go to line 0`],
+    ans: 2,
+    exp: `'0' moves the cursor to the very beginning of the line (column 0), including any leading spaces.`
+  },
+  {
+    q: `What does '^' do in Normal mode?`,
+    opts: [`Move to the end of the line`, `Move to the first non-blank character of the line`, `Move to column 0`, `Jump to matching bracket`],
+    ans: 1,
+    exp: `'^' moves to the first non-blank (non-whitespace) character of the current line.`
+  },
+  {
+    q: `What does '$' do in Normal mode?`,
+    opts: [`Move to the start of the line`, `Move to the end of the line`, `Search for a pattern`, `Delete to end of line`],
+    ans: 1,
+    exp: `'$' moves the cursor to the end of the current line.`
+  },
+  {
+    q: `What does 'gg' do in Normal mode?`,
+    opts: [`Go to the bottom of the file`, `Go to the top of the file`, `Go to the last edited line`, `Select the whole file`],
+    ans: 1,
+    exp: `'gg' moves the cursor to the very first line of the file.`
+  },
+  {
+    q: `What does 'G' (uppercase) do in Normal mode?`,
+    opts: [`Go to the top of the file`, `Go to the bottom of the file`, `Go to a specific line`, `Enter visual mode`],
+    ans: 1,
+    exp: `'G' moves the cursor to the last line of the file.`
+  },
+  {
+    q: `What does '%' do in Normal mode?`,
+    opts: [`Move to end of line`, `Jump to the matching bracket: (), {}`, `Search for a word`, `Indent the line`],
+    ans: 1,
+    exp: `'%' jumps to the matching parenthesis or brace: (), {}, [].`
+  },
+  {
+    q: `What does '5j' do in Normal mode?`,
+    opts: [`Move 5 characters right`, `Move down 5 lines`, `Delete 5 lines`, `Yank 5 lines`],
+    ans: 1,
+    exp: `Numbers before motions repeat them. '5j' moves the cursor down 5 lines.`
+  },
+  {
+    q: `What does '3w' do in Normal mode?`,
+    opts: [`Delete 3 words`, `Move forward 3 words`, `Yank 3 words`, `Move back 3 words`],
+    ans: 1,
+    exp: `'3w' skips forward 3 words, equivalent to pressing 'w' three times.`
+  },
+  {
+    q: `How do you search forward for the word 'hello' in Vim?`,
+    opts: [`?hello`, `:find hello`, `/hello`, `s/hello`],
+    ans: 2,
+    exp: `'/hello' searches forward for the pattern 'hello' in the file.`
+  },
+  {
+    q: `How do you search backward for the word 'hello' in Vim?`,
+    opts: [`/hello`, `?hello`, `:search hello`, `\\hello`],
+    ans: 1,
+    exp: `'?hello' searches backward from the current cursor position.`
+  },
+  {
+    q: `After a search, which key jumps to the NEXT match?`,
+    opts: [`N`, `n`, `*`, `/`],
+    ans: 1,
+    exp: `'n' jumps to the next match in the search direction.`
+  },
+  {
+    q: `After a search, which key jumps to the PREVIOUS match?`,
+    opts: [`n`, `p`, `N`, `b`],
+    ans: 2,
+    exp: `'N' (uppercase) jumps to the previous match (opposite direction of 'n').`
+  },
+  {
+    q: `What does ':%s/foo/bar/g' do?`,
+    opts: [`Replace the first 'foo' with 'bar' on each line`, `Replace all occurrences of 'foo' with 'bar' in the entire file`, `Search for 'foo' and highlight it`, `Delete all lines containing 'foo'`],
+    ans: 1,
+    exp: `':%s/foo/bar/g' is a global substitution: '%' means the whole file, 's' is substitute, 'g' means all occurrences per line.`
+  },
+  {
+    q: `What does the 'c' flag add to ':%s/foo/bar/gc'?`,
+    opts: [`Case-insensitive matching`, `Replace only in the current line`, `Ask for confirmation before each replacement`, `Count the number of replacements`],
+    ans: 2,
+    exp: `The 'c' flag adds confirmation prompts (y/n/a/q) before each replacement.`
+  },
+  {
+    q: `What does 'yy' do in Normal mode?`,
+    opts: [`Delete the current line`, `Yank (copy) the current line`, `Redo the last action`, `Indent the current line`],
+    ans: 1,
+    exp: `'yy' yanks (copies) the entire current line into the register.`
+  },
+  {
+    q: `What does 'y$' do in Normal mode?`,
+    opts: [`Yank the entire file`, `Yank from cursor to end of line`, `Yank the current word`, `Yank to beginning of line`],
+    ans: 1,
+    exp: `'y$' yanks from the cursor position to the end of the line.`
+  },
+  {
+    q: `What does 'yw' do in Normal mode?`,
+    opts: [`Yank the current line`, `Yank one word from the cursor`, `Yank to end of file`, `Yank to beginning of line`],
+    ans: 1,
+    exp: `'yw' yanks one word starting from the cursor position.`
+  },
+  {
+    q: `What does 'p' (lowercase) do in Normal mode?`,
+    opts: [`Paste before the cursor`, `Paste after the cursor / below the current line`, `Print the file`, `Enter paste mode`],
+    ans: 1,
+    exp: `'p' pastes the content of the register after the cursor (or below the current line for line-wise yank).`
+  },
+  {
+    q: `What does 'P' (uppercase) do in Normal mode?`,
+    opts: [`Paste after the cursor`, `Paste before the cursor / above the current line`, `Print the current line`, `Enter command mode`],
+    ans: 1,
+    exp: `'P' pastes before the cursor (or above the current line for line-wise yank).`
+  },
+  {
+    q: `What does 'dd' do in Normal mode?`,
+    opts: [`Duplicate the current line`, `Delete the current line (also stores it in register)`, `Delete one character`, `Delete to end of line`],
+    ans: 1,
+    exp: `'dd' deletes the entire current line and stores it in the register, so it can be pasted with 'p'.`
+  },
+  {
+    q: `What does 'dw' do in Normal mode?`,
+    opts: [`Delete the current line`, `Delete from cursor to start of next word`, `Delete to end of line`, `Delete one character`],
+    ans: 1,
+    exp: `'dw' deletes from the cursor to the start of the next word.`
+  },
+  {
+    q: `What does 'd$' do in Normal mode?`,
+    opts: [`Delete the entire line`, `Delete from cursor to end of line`, `Delete to beginning of line`, `Delete the current word`],
+    ans: 1,
+    exp: `'d$' deletes from the cursor position to the end of the line.`
+  },
+  {
+    q: `What does 'x' do in Normal mode?`,
+    opts: [`Delete the current line`, `Delete one character under the cursor`, `Cut the selected text`, `Exit Vim`],
+    ans: 1,
+    exp: `'x' deletes the single character under the cursor.`
+  },
+  {
+    q: `What does 'u' do in Normal mode?`,
+    opts: [`Redo the last change`, `Undo the last change`, `Enter uppercase mode`, `Move to the previous word`],
+    ans: 1,
+    exp: `'u' undoes the last change. You can press it multiple times to undo step by step.`
+  },
+  {
+    q: `What does 'Ctrl+r' do in Normal mode?`,
+    opts: [`Undo the last change`, `Redo the last undone change`, `Reload the file`, `Open a new file`],
+    ans: 1,
+    exp: `'Ctrl+r' redoes the last undone change, the opposite of 'u'.`
+  },
+  {
+    q: `What does ':w' do in Command-line mode?`,
+    opts: [`Quit without saving`, `Save the file`, `Save and quit`, `Open a new window`],
+    ans: 1,
+    exp: `':w' writes (saves) the current file to disk.`
+  },
+  {
+    q: `What does ':q!' do in Command-line mode?`,
+    opts: [`Save and quit`, `Quit and prompt to save`, `Quit without saving (force quit)`, `Quit and delete the file`],
+    ans: 2,
+    exp: `':q!' force-quits Vim without saving any changes. The '!' overrides the warning about unsaved changes.`
+  },
+  {
+    q: `What does ':wq' do in Command-line mode?`,
+    opts: [`Save only`, `Quit without saving`, `Save and quit`, `Open a new file`],
+    ans: 2,
+    exp: `':wq' saves the file and then quits Vim.`
+  },
+  {
+    q: `In the live demo, after typing 'i' then 'BEFORE' then Esc, then moving to '!' and pressing 'a' then 'AFTER', what is the result?`,
+    opts: [`AFTER Hello! BEFORE`, `BEFORE Hello! AFTER`, `Hello! BEFORE AFTER`, `BEFORE AFTER Hello!`],
+    ans: 1,
+    exp: `'i' inserts BEFORE the cursor (before 'Hello'), and 'a' appends AFTER the cursor (after '!'). Result: BEFORE Hello! AFTER`
+  },
+  {
+    q: `In Visual mode, after pressing 'v', moving to select 'Hello', pressing 'y', moving to 'BEFORE', and pressing 'p', what is the result?`,
+    opts: [`Hello BEFORE Hello! AFTER`, `BEFOREHello Hello! AFTER`, `BEFORE Hello Hello! AFTER`, `HelloBEFORE Hello! AFTER`],
+    ans: 1,
+    exp: `'p' pastes AFTER the cursor. The cursor is on 'B' of BEFORE, so Hello is pasted after 'B', giving 'BEFOREHello Hello! AFTER'.`
+  },
+  {
+    q: `What does pressing '>' do after selecting a block with Ctrl+v?`,
+    opts: [`Delete the selected block`, `Indent the selected block to the right`, `Yank the selected block`, `Comment the selected block`],
+    ans: 1,
+    exp: `'>' indents the selected block to the right. It is commonly used after Ctrl+v block selection.`
+  },
+  {
+    q: `What is the ergonomic advantage of Vim's hjkl navigation?`,
+    opts: [`It supports mouse input`, `Fingers stay near the home row, reducing hand fatigue`, `It uses function keys`, `It requires a special keyboard`],
+    ans: 1,
+    exp: `Vim is designed so fingers always stay near the home row of the keyboard, reducing fatigue and improving speed.`
+  },
+  {
+    q: `Which command creates a new file called 'demo.txt' in Vim?`,
+    opts: [`:new demo.txt`, `vim demo.txt`, `touch demo.txt`, `:create demo.txt`],
+    ans: 1,
+    exp: `Running 'vim demo.txt' in the terminal opens (or creates) the file demo.txt in Vim.`
+  },
+  {
+    q: `What is the grading breakdown for the Unix OS course?`,
+    opts: [
+      `10% Participation, 40% Midterm, 50% Final`,
+      `20% Labs, 30% Midterm, 50% Final`,
+      `10% Participation, 50% Midterm, 40% Final`,
+      `25% Participation, 25% Midterm, 50% Final`
+    ],
+    ans: 0,
+    exp: `The course is graded: 10% Participation, 40% Midterm exam, 50% Final exam.`
+  },
+  {
+    q: `How many total hours does the Unix OS course run?`,
+    opts: [`20h`, `24h`, `27h`, `30h`],
+    ans: 2,
+    exp: `The course runs for 27 hours: 2h x 12 sessions + 1h midterm + 2h final exam.`
+  },
+  {
+    q: `Which session covers 'Processes & Init Systems' in the syllabus?`,
+    opts: [`Session 7`, `Session 8`, `Session 9`, `Session 10`],
+    ans: 1,
+    exp: `Session 8 covers Processes & Init Systems according to the syllabus.`
+  }
+];
+
+let answered = {};
+let retryMode = false;
+let retryIds = [];
+
+function buildQuiz(ids) {
+  const form = document.getElementById('quiz-form');
+  form.innerHTML = '';
+  ids.forEach(i => {
+    const q = ALL_QUESTIONS[i];
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = 'card-' + i;
+
+    const optsHtml = q.opts.map((opt, oi) =>
+      `<button class="opt-btn" id="opt-${i}-${oi}" onclick="selectAnswer(${i}, ${oi})">${String.fromCharCode(65+oi)}. ${opt}</button>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="q-num">Question ${i+1} of ${ALL_QUESTIONS.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options" id="opts-${i}">${optsHtml}</div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+    form.appendChild(card);
+  });
+  updateProgress();
+}
+
+function selectAnswer(qi, oi) {
+  if (answered[qi] !== undefined) return;
+  answered[qi] = oi;
+
+  const q = ALL_QUESTIONS[qi];
+  const isCorrect = oi === q.ans;
+
+  // Disable all options
+  for (let j = 0; j < q.opts.length; j++) {
+    const btn = document.getElementById(`opt-${qi}-${j}`);
+    btn.disabled = true;
+    if (j === q.ans) btn.classList.add('reveal-correct');
+  }
+
+  const selected = document.getElementById(`opt-${qi}-${oi}`);
+  selected.classList.remove('reveal-correct');
+  selected.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+
+  const card = document.getElementById(`card-${qi}`);
+  card.classList.add(isCorrect ? 'correct-card' : 'wrong-card');
+
+  const fb = document.getElementById(`fb-${qi}`);
+  fb.style.display = 'block';
+  fb.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+  fb.innerHTML = `${isCorrect ? '&#9989; Correct!' : '&#10060; Wrong!'} &mdash; ${q.exp}`;
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = ALL_QUESTIONS.length;
+  const done = Object.keys(answered).length;
+  document.getElementById('nav-score').textContent = `${done} / ${total}`;
+  document.getElementById('progress-bar').style.width = `${(done/total)*100}%`;
+}
+
+function submitQuiz() {
+  const ids = retryMode ? retryIds : ALL_QUESTIONS.map((_,i)=>i);
+  let correct = 0, wrong = 0, skip = 0;
+  const recapList = document.getElementById('recap-list');
+  recapList.innerHTML = '';
+  const effortIds = [];
+
+  ids.forEach(i => {
+    const q = ALL_QUESTIONS[i];
+    const userAns = answered[i];
+    let status, cls;
+    if (userAns === undefined) {
+      status = `&#9888; Skipped`; cls = 'ri-skip'; skip++;
+      effortIds.push(i);
+    } else if (userAns === q.ans) {
+      status = `&#9989; Correct`; cls = 'ri-correct'; correct++;
+    } else {
+      status = `&#10060; Wrong (you chose: ${q.opts[userAns]})`; cls = 'ri-wrong'; wrong++;
+      effortIds.push(i);
+    }
+    const item = document.createElement('div');
+    item.className = `recap-item ${cls}`;
+    item.innerHTML = `<strong>Q${i+1}:</strong> ${q.q}<br><em>${status}</em> &mdash; <strong>Correct answer:</strong> ${q.opts[q.ans]}<br><small>${q.exp}</small>`;
+    recapList.appendChild(item);
+  });
+
+  document.getElementById('r-total').textContent = ids.length;
+  document.getElementById('r-correct').textContent = correct;
+  document.getElementById('r-wrong').textContent = wrong;
+  document.getElementById('r-skip').textContent = skip;
+
+  const pct = Math.round((correct / ids.length) * 100);
+  const badge = document.getElementById('score-badge');
+  badge.style.display = 'block';
+  badge.innerHTML = `&#127941; Your score: <strong>${correct} / ${ids.length}</strong> &mdash; ${pct}% ${pct>=80?'&#127881; Excellent!':pct>=60?'&#128077; Good job!':'&#128170; Keep practicing!'}`;
+
+  const effortSection = document.getElementById('effort-section');
+  if (effortIds.length > 0) {
+    effortSection.innerHTML = `<h3>&#128073; Topics to review (wrong/skipped):</h3>` +
+      effortIds.map(i => `<span class="effort-tag">Q${i+1}: ${ALL_QUESTIONS[i].q.substring(0,50)}...</span>`).join('');
+  } else {
+    effortSection.innerHTML = `<p style="color:#166534;font-weight:600;">&#127881; Perfect score! Nothing to review.</p>`;
+  }
+
+  retryIds = effortIds;
+  document.getElementById('recap').style.display = 'block';
+  document.getElementById('recap').scrollIntoView({behavior:'smooth'});
+}
+
+function retryWrong() {
+  if (retryIds.length === 0) { alert('No wrong or skipped questions!'); return; }
+  retryMode = true;
+  retryIds.forEach(i => { delete answered[i]; });
+  document.getElementById('recap').style.display = 'none';
+  document.getElementById('score-badge').style.display = 'none';
+  buildQuiz(retryIds);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Init
+buildQuiz(ALL_QUESTIONS.map((_,i)=>i));
+</script>
+</body>
+</html>
