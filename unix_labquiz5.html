@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unix/Linux Commands - MCQ Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding: 20px; }
+  .container { max-width: 860px; margin: 0 auto; }
+  h1 { text-align: center; color: #00d4ff; margin-bottom: 8px; font-size: 2rem; text-shadow: 0 0 20px #00d4ff55; }
+  .subtitle { text-align: center; color: #aaa; margin-bottom: 30px; font-size: 0.95rem; }
+  .score-board { background: #16213e; border: 2px solid #00d4ff44; border-radius: 12px; padding: 16px 24px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .score-item { text-align: center; }
+  .score-item .label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+  .score-item .value { font-size: 1.6rem; font-weight: bold; color: #00d4ff; }
+  .question-card { background: #16213e; border: 1px solid #0f3460; border-radius: 14px; padding: 24px; margin-bottom: 20px; transition: border-color 0.3s; }
+  .question-card.correct { border-color: #00c851; background: #16213e; }
+  .question-card.wrong { border-color: #ff4444; background: #16213e; }
+  .question-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+  .q-number { background: #0f3460; color: #00d4ff; border-radius: 8px; padding: 4px 10px; font-weight: bold; font-size: 0.85rem; white-space: nowrap; }
+  .q-text { font-size: 1rem; line-height: 1.6; color: #ddd; }
+  .q-text code { background: #0f3460; color: #00d4ff; padding: 2px 7px; border-radius: 5px; font-family: 'Courier New', monospace; font-size: 0.9em; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn { background: #0f3460; border: 1.5px solid #1a4a80; color: #ccc; padding: 11px 16px; border-radius: 9px; cursor: pointer; text-align: left; font-size: 0.93rem; transition: all 0.2s; line-height: 1.5; }
+  .option-btn code { background: #1a5080; color: #7dd3fc; padding: 1px 5px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.88em; }
+  .option-btn:hover:not(:disabled) { background: #1a4a80; border-color: #00d4ff; color: #fff; transform: translateX(4px); }
+  .option-btn.selected-correct { background: #0d4a2a; border-color: #00c851; color: #00c851; }
+  .option-btn.selected-wrong { background: #4a0d0d; border-color: #ff4444; color: #ff4444; }
+  .option-btn.reveal-correct { background: #0d4a2a; border-color: #00c851; color: #00c851; }
+  .option-btn:disabled { cursor: not-allowed; }
+  .feedback { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; line-height: 1.6; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #0d4a2a; border-left: 4px solid #00c851; color: #7dffb3; }
+  .feedback.wrong { background: #4a0d0d; border-left: 4px solid #ff4444; color: #ffaaaa; }
+  .feedback code { background: #1a5030; color: #7dffb3; padding: 1px 5px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.88em; }
+  .controls { text-align: center; margin: 30px 0; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn { padding: 12px 28px; border: none; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: all 0.2s; }
+  .btn-primary { background: linear-gradient(135deg, #00d4ff, #0080ff); color: #fff; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #00d4ff44; }
+  .btn-secondary { background: #0f3460; color: #00d4ff; border: 1.5px solid #00d4ff44; }
+  .btn-secondary:hover { background: #1a4a80; }
+  .progress-bar { background: #0f3460; border-radius: 10px; height: 8px; margin-bottom: 28px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #00d4ff, #0080ff); height: 100%; border-radius: 10px; transition: width 0.4s; }
+  .tag { display: inline-block; background: #0f3460; color: #7dd3fc; font-size: 0.72rem; padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+  @media (max-width: 600px) { h1 { font-size: 1.4rem; } .question-card { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>&#x1F4BB; Unix/Linux Commands Quiz</h1>
+  <p class="subtitle">Master Unix/Linux shell commands &mdash; 45 questions</p>
+  <div class="score-board">
+    <div class="score-item"><div class="label">Answered</div><div class="value" id="answered">0</div></div>
+    <div class="score-item"><div class="label">Correct</div><div class="value" id="correct" style="color:#00c851">0</div></div>
+    <div class="score-item"><div class="label">Wrong</div><div class="value" id="wrong" style="color:#ff4444">0</div></div>
+    <div class="score-item"><div class="label">Score</div><div class="value" id="score">0%</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  <div id="quiz-container"></div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="checkAll()">&#x2714; Check All</button>
+    <button class="btn btn-secondary" onclick="resetQuiz()">&#x21BA; Reset Quiz</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: `What does the command <code>mkdir lab_unix && cd lab_unix</code> do?`,
+    options: [
+      `Creates a directory named lab_unix, then moves into it only if creation succeeded`,
+      `Creates a directory named lab_unix and always moves into it regardless`,
+      `Creates two separate directories named lab_unix`,
+      `Moves into lab_unix without creating it`
+    ],
+    answer: 0,
+    explanation: `The <code>&&</code> operator runs the second command only if the first succeeds. So <code>mkdir lab_unix && cd lab_unix</code> creates the directory and then changes into it.`
+  },
+  {
+    q: `Which command is used to create a file with multi-line content using a here-document?`,
+    options: [
+      `echo "content" > file.txt`,
+      `cat &lt;&lt;EOF &gt; file.txt ... EOF`,
+      `touch file.txt`,
+      `printf "content" &gt; file.txt`
+    ],
+    answer: 1,
+    explanation: `A here-document (<code>cat &lt;&lt;EOF &gt; file.txt</code>) allows you to write multiple lines of text directly into a file until the EOF delimiter is reached.`
+  },
+  {
+    q: `What does <code>grep 'error' fake_syslog.txt > errors.txt</code> do?`,
+    options: [
+      `Counts lines containing 'error' and saves the count`,
+      `Appends lines containing 'error' to errors.txt`,
+      `Extracts all lines containing 'error' and writes them to errors.txt`,
+      `Deletes lines containing 'error' from fake_syslog.txt`
+    ],
+    answer: 2,
+    explanation: `<code>grep 'error' fake_syslog.txt</code> finds all lines containing 'error', and <code>&gt; errors.txt</code> redirects (overwrites) that output into errors.txt.`
+  },
+  {
+    q: `What is the difference between <code>></code> and <code>>></code> in shell redirection?`,
+    options: [
+      `<code>&gt;</code> appends, <code>&gt;&gt;</code> overwrites`,
+      `<code>&gt;</code> overwrites, <code>&gt;&gt;</code> appends`,
+      `Both overwrite the file`,
+      `Both append to the file`
+    ],
+    answer: 1,
+    explanation: `<code>&gt;</code> (redirect) overwrites the file content. <code>&gt;&gt;</code> (append) adds new content to the end of the existing file without deleting old data.`
+  },
+  {
+    q: `What does <code>wc errors.txt</code> output?`,
+    options: [
+      `Only the number of lines`,
+      `Only the number of words`,
+      `Lines, words, and byte count of the file`,
+      `The longest line length`
+    ],
+    answer: 2,
+    explanation: `<code>wc</code> without options outputs three numbers: lines, words, and bytes (characters) for the given file.`
+  },
+  {
+    q: `Which option of <code>wc</code> returns the length of the longest line?`,
+    options: [
+      `wc -l`,
+      `wc -w`,
+      `wc -c`,
+      `wc -L`
+    ],
+    answer: 3,
+    explanation: `<code>wc -L</code> prints the length (in characters) of the longest line in the file. <code>-l</code> counts lines, <code>-w</code> counts words, <code>-c</code> counts bytes.`
+  },
+  {
+    q: `What does <code>head -n 5 errors.txt > first_errors.txt</code> do?`,
+    options: [
+      `Saves the last 5 lines of errors.txt to first_errors.txt`,
+      `Saves the first 5 lines of errors.txt to first_errors.txt`,
+      `Counts the first 5 characters of errors.txt`,
+      `Appends the first 5 lines to first_errors.txt`
+    ],
+    answer: 1,
+    explanation: `<code>head -n 5</code> outputs the first 5 lines of a file. Combined with <code>&gt;</code>, it writes those lines into first_errors.txt.`
+  },
+  {
+    q: `What does the <code>cut -d' ' -f1,2</code> command do when applied to errors.txt?`,
+    options: [
+      `Cuts the file at line 1 and 2`,
+      `Extracts the 1st and 2nd fields using space as delimiter`,
+      `Removes the first two characters of each line`,
+      `Sorts fields 1 and 2 alphabetically`
+    ],
+    answer: 1,
+    explanation: `<code>cut -d' '</code> sets space as the delimiter, and <code>-f1,2</code> selects fields 1 and 2. This extracts the date and time columns from each log line.`
+  },
+  {
+    q: `In the pipeline <code>cut -d' ' -f1,2 errors.txt | sort | uniq -c</code>, what does <code>uniq -c</code> do?`,
+    options: [
+      `Removes all duplicate lines`,
+      `Counts and prefixes each unique line with its occurrence count`,
+      `Sorts lines uniquely`,
+      `Outputs only lines that appear once`
+    ],
+    answer: 1,
+    explanation: `<code>uniq -c</code> collapses consecutive duplicate lines and prepends each with the count of how many times it appeared. It requires sorted input to work correctly.`
+  },
+  {
+    q: `What is the purpose of <code>cat summary.txt error_times.txt warning_times.txt > final_report.txt</code>?`,
+    options: [
+      `Compares the three files and saves differences`,
+      `Concatenates the three files into one final_report.txt`,
+      `Appends summary.txt to error_times.txt`,
+      `Creates three separate output files`
+    ],
+    answer: 1,
+    explanation: `<code>cat</code> with multiple file arguments concatenates them in order. The <code>&gt;</code> writes the combined output into final_report.txt.`
+  },
+  {
+    q: `What does the pipeline <code>grep 'error' fake_syslog.txt | cut -d' ' -f1,2 | sort | uniq -c</code> accomplish?`,
+    options: [
+      `Finds errors, extracts timestamps, sorts them, and counts occurrences per timestamp`,
+      `Finds errors and saves them sorted alphabetically`,
+      `Counts total error lines and displays the result`,
+      `Removes duplicate error lines from the file`
+    ],
+    answer: 0,
+    explanation: `This pipeline: (1) filters error lines, (2) extracts date+time fields, (3) sorts them, (4) counts how many errors occurred at each timestamp.`
+  },
+  {
+    q: `Which <code>awk</code> command finds the longest line in errors.txt?`,
+    options: [
+      `awk '{print length}' errors.txt | sort -n | tail -1`,
+      `awk '{ if (length > max) { max = length; line = $0 } } END { print line }' errors.txt`,
+      `awk 'NR==1{print}' errors.txt`,
+      `awk '{max=$0} END{print max}' errors.txt`
+    ],
+    answer: 1,
+    explanation: `This awk script tracks the longest line by comparing <code>length</code> (current line length) against <code>max</code>, updating both when a longer line is found, then prints it at END.`
+  },
+  {
+    q: `What does <code>grep -c 'error' fake_syslog.txt</code> return?`,
+    options: [
+      `The content of lines containing 'error'`,
+      `The number of lines containing 'error'`,
+      `The number of characters in 'error'`,
+      `A list of files containing 'error'`
+    ],
+    answer: 1,
+    explanation: `<code>grep -c</code> (count) returns only the number of matching lines, not the lines themselves.`
+  },
+  {
+    q: `What does <code>grep -i 'error' file.txt</code> do differently from <code>grep 'error' file.txt</code>?`,
+    options: [
+      `It searches recursively in subdirectories`,
+      `It inverts the match, showing non-error lines`,
+      `It performs case-insensitive matching`,
+      `It shows line numbers alongside matches`
+    ],
+    answer: 2,
+    explanation: `<code>grep -i</code> enables case-insensitive search, so it matches 'error', 'Error', 'ERROR', etc.`
+  },
+  {
+    q: `What is the role of the pipe operator <code>|</code> in shell commands?`,
+    options: [
+      `It writes output to a file`,
+      `It passes the output of one command as input to the next command`,
+      `It runs two commands simultaneously in background`,
+      `It appends output to an existing file`
+    ],
+    answer: 1,
+    explanation: `The pipe <code>|</code> connects commands in a pipeline, passing stdout of the left command as stdin to the right command, enabling powerful data processing chains.`
+  },
+  {
+    q: `In the fake_syslog.txt content, how many lines contain the word 'error'?`,
+    options: [
+      `1`,
+      `2`,
+      `3`,
+      `4`
+    ],
+    answer: 2,
+    explanation: `Looking at the file: line 1 has 'error: connection failed', line 3 has 'error: database timeout', line 4 has 'error: database timeout' again. That is 3 lines containing 'error'.`
+  },
+  {
+    q: `After running <code>cut -d' ' -f1,2 errors.txt | sort | uniq -c | sort -nr | head -n 5</code>, what does <code>sort -nr</code> do?`,
+    options: [
+      `Sorts alphabetically in ascending order`,
+      `Sorts numerically in descending order (highest count first)`,
+      `Removes numeric characters from output`,
+      `Sorts by the second field only`
+    ],
+    answer: 1,
+    explanation: `<code>sort -n</code> sorts numerically, and <code>-r</code> reverses the order (descending). Together <code>-nr</code> puts the highest count at the top.`
+  },
+  {
+    q: `What does <code>wc -l errors.txt</code> specifically output?`,
+    options: [
+      `The longest line length`,
+      `The total number of characters`,
+      `Only the number of lines in errors.txt`,
+      `The number of words in errors.txt`
+    ],
+    answer: 2,
+    explanation: `<code>wc -l</code> outputs only the line count. It is the most commonly used wc option when you need to know how many events or records exist in a file.`
+  },
+  {
+    q: `Why is <code>sort</code> required before <code>uniq -c</code> in a pipeline?`,
+    options: [
+      `sort makes the output prettier`,
+      `uniq only detects consecutive duplicate lines, so sort groups identical lines together first`,
+      `sort removes duplicates before uniq processes them`,
+      `uniq requires alphabetical input to function`
+    ],
+    answer: 1,
+    explanation: `<code>uniq</code> only collapses consecutive identical lines. If duplicates are scattered throughout the file, <code>sort</code> must group them together first for <code>uniq -c</code> to count them correctly.`
+  },
+  {
+    q: `What does the <code>&&</code> operator guarantee in <code>mkdir lab_unix && cd lab_unix</code>?`,
+    options: [
+      `Both commands always run regardless of success or failure`,
+      `The second command runs only if the first command exits with status 0 (success)`,
+      `Both commands run in parallel`,
+      `The second command runs only if the first command fails`
+    ],
+    answer: 1,
+    explanation: `<code>&&</code> is a logical AND operator. The right-hand command executes only when the left-hand command returns exit code 0 (success). This prevents <code>cd</code> from running if <code>mkdir</code> fails.`
+  },
+  {
+    q: `Which command saves only the first 5 lines of warnings.txt into a new file?`,
+    options: [
+      `tail -n 5 warnings.txt > first_warnings.txt`,
+      `head -n 5 warnings.txt > first_warnings.txt`,
+      `grep -m 5 warnings.txt > first_warnings.txt`,
+      `cut -n 5 warnings.txt > first_warnings.txt`
+    ],
+    answer: 1,
+    explanation: `<code>head -n 5</code> outputs the first 5 lines. <code>tail -n 5</code> would give the last 5 lines instead.`
+  },
+  {
+    q: `What is the output format of <code>wc errors.txt</code> (without options)?`,
+    options: [
+      `filename: lines words bytes`,
+      `lines words bytes filename`,
+      `bytes words lines filename`,
+      `lines bytes filename`
+    ],
+    answer: 1,
+    explanation: `<code>wc</code> outputs in the format: <code>lines words bytes filename</code>. For example: <code>3 15 120 errors.txt</code>.`
+  },
+  {
+    q: `In the log line <code>2026-04-16 10:01:05 error: connection failed</code>, what does <code>cut -d' ' -f1,2</code> extract?`,
+    options: [
+      `error: connection failed`,
+      `2026-04-16 10:01:05`,
+      `10:01:05 error:`,
+      `2026-04-16`
+    ],
+    answer: 1,
+    explanation: `With space as delimiter, field 1 is <code>2026-04-16</code> (date) and field 2 is <code>10:01:05</code> (time). So <code>-f1,2</code> extracts the timestamp: <code>2026-04-16 10:01:05</code>.`
+  },
+  {
+    q: `What advantage does using a pipeline offer over saving intermediate results to files?`,
+    options: [
+      `Pipelines are slower but more accurate`,
+      `Pipelines save disk space and time by avoiding intermediate temporary files`,
+      `Pipelines allow running commands as root`,
+      `Pipelines automatically log all operations`
+    ],
+    answer: 1,
+    explanation: `Pipelines stream data directly between commands in memory, eliminating the need to write and read intermediate files. This saves disk I/O, storage space, and execution time.`
+  },
+  {
+    q: `What does <code>cat &lt;&lt;EOF &gt; fake_syslog.txt ... EOF</code> create?`,
+    options: [
+      `An empty file named EOF`,
+      `A file named fake_syslog.txt containing the lines typed between the EOF delimiters`,
+      `A compressed archive of the text`,
+      `A binary file with EOF markers`
+    ],
+    answer: 1,
+    explanation: `A here-document (<code>&lt;&lt;EOF</code>) reads lines until it encounters the delimiter <code>EOF</code> again. Combined with <code>&gt; fake_syslog.txt</code>, it writes all those lines into the file.`
+  },
+  {
+    q: `Which command would you use to find the 5 timestamps with the most errors?`,
+    options: [
+      `grep 'error' fake_syslog.txt | head -5`,
+      `cut -d' ' -f1,2 errors.txt | sort | uniq -c | sort -nr | head -n 5`,
+      `wc -l errors.txt | sort -n | head -5`,
+      `awk '{print $1,$2}' errors.txt | head -5`
+    ],
+    answer: 1,
+    explanation: `This pipeline extracts timestamps, counts occurrences, sorts by count descending, then takes the top 5. It is the correct approach to find the most frequent error timestamps.`
+  },
+  {
+    q: `What does <code>grep 'warn' fake_syslog.txt > warnings.txt</code> produce?`,
+    options: [
+      `A file containing lines that do NOT have 'warn'`,
+      `A file containing all lines from fake_syslog.txt that contain 'warn'`,
+      `A count of lines containing 'warn'`,
+      `An error because 'warn' is not a valid grep pattern`
+    ],
+    answer: 1,
+    explanation: `<code>grep 'warn'</code> matches lines containing the string 'warn'. The <code>&gt;</code> writes those matching lines into warnings.txt.`
+  },
+  {
+    q: `In the awk command for finding the longest line, what does <code>END { print line }</code> mean?`,
+    options: [
+      `It prints after processing every line`,
+      `It prints the variable 'line' after all input lines have been processed`,
+      `It marks the end of the awk script without printing`,
+      `It prints the last line of the file`
+    ],
+    answer: 1,
+    explanation: `In awk, the <code>END</code> block executes once after all input lines are processed. Here it prints the stored longest line after scanning the entire file.`
+  },
+  {
+    q: `What happens if you run <code>wc -L errors.txt >> summary.txt</code> after <code>wc errors.txt > summary.txt</code>?`,
+    options: [
+      `summary.txt is overwritten with only the -L output`,
+      `The longest line length is appended to the existing content in summary.txt`,
+      `An error occurs because summary.txt already exists`,
+      `Both commands produce the same output`
+    ],
+    answer: 1,
+    explanation: `<code>&gt;&gt;</code> appends to the file. So the first command writes wc statistics, and the second command adds the longest line length at the end of summary.txt.`
+  },
+  {
+    q: `Which of the following correctly describes the <code>sort</code> command default behavior?`,
+    options: [
+      `Sorts lines numerically in ascending order`,
+      `Sorts lines lexicographically (alphabetically) in ascending order`,
+      `Sorts lines by file size`,
+      `Sorts lines in reverse order`
+    ],
+    answer: 1,
+    explanation: `By default, <code>sort</code> sorts lines lexicographically (dictionary order) in ascending order. Use <code>-n</code> for numeric sort and <code>-r</code> to reverse.`
+  },
+  {
+    q: `What does <code>head -n 5</code> do when the file has only 3 lines?`,
+    options: [
+      `Returns an error`,
+      `Outputs all 3 lines without error`,
+      `Pads the output with 2 empty lines`,
+      `Outputs nothing`
+    ],
+    answer: 1,
+    explanation: `<code>head -n 5</code> outputs up to 5 lines. If the file has fewer lines (e.g., 3), it simply outputs all available lines without error.`
+  },
+  {
+    q: `In the fake_syslog.txt, the line <code>2026-04-16 10:02:10 error: database timeout</code> appears twice. After running <code>sort | uniq -c</code>, what will the output show for this line?`,
+    options: [
+      `1 2026-04-16 10:02:10 error: database timeout`,
+      `2 2026-04-16 10:02:10 error: database timeout`,
+      `The line appears twice without a count`,
+      `The line is removed as a duplicate`
+    ],
+    answer: 1,
+    explanation: `<code>uniq -c</code> counts consecutive duplicates. After <code>sort</code> groups the two identical lines together, <code>uniq -c</code> outputs <code>2</code> followed by the line.`
+  },
+  {
+    q: `What is the purpose of <code>wc -L</code> compared to <code>wc -l</code>?`,
+    options: [
+      `<code>-L</code> counts lines; <code>-l</code> counts the longest line`,
+      `<code>-L</code> gives the longest line length in characters; <code>-l</code> counts the number of lines`,
+      `Both options count lines but in different formats`,
+      `<code>-L</code> counts words; <code>-l</code> counts lines`
+    ],
+    answer: 1,
+    explanation: `<code>wc -l</code> (lowercase L) counts lines. <code>wc -L</code> (uppercase L) reports the maximum line length in characters. They serve very different purposes.`
+  },
+  {
+    q: `Which command creates the file final_report.txt by merging three files?`,
+    options: [
+      `merge summary.txt error_times.txt warning_times.txt > final_report.txt`,
+      `cat summary.txt error_times.txt warning_times.txt > final_report.txt`,
+      `join summary.txt error_times.txt warning_times.txt > final_report.txt`,
+      `paste summary.txt error_times.txt warning_times.txt > final_report.txt`
+    ],
+    answer: 1,
+    explanation: `<code>cat</code> concatenates multiple files sequentially. <code>paste</code> merges files side-by-side (column-wise), which is different. <code>merge</code> and <code>join</code> are not the right tools here.`
+  },
+  {
+    q: `What does the <code>-f</code> option in <code>cut -f1,2</code> specify?`,
+    options: [
+      `The file to process`,
+      `The field numbers to extract`,
+      `The format of the output`,
+      `The filter pattern to apply`
+    ],
+    answer: 1,
+    explanation: `In <code>cut</code>, <code>-f</code> specifies which fields (columns) to extract. <code>-f1,2</code> means extract field 1 and field 2.`
+  },
+  {
+    q: `What does <code>-d' '</code> in <code>cut -d' ' -f1,2</code> specify?`,
+    options: [
+      `The default output format`,
+      `The delimiter character used to split fields (a space in this case)`,
+      `The directory to search`,
+      `The depth of recursion`
+    ],
+    answer: 1,
+    explanation: `<code>-d</code> sets the delimiter for <code>cut</code>. <code>-d' '</code> uses a single space as the field separator, matching the space-separated log format.`
+  },
+  {
+    q: `If errors.txt contains 3 lines, what does <code>wc -l errors.txt</code> output?`,
+    options: [
+      `3 errors.txt`,
+      `lines: 3`,
+      `3`,
+      `errors.txt: 3 lines`
+    ],
+    answer: 0,
+    explanation: `<code>wc -l</code> outputs the count followed by the filename: <code>3 errors.txt</code>. If reading from stdin (piped), it only shows the number.`
+  },
+  {
+    q: `What is a here-document in bash?`,
+    options: [
+      `A document stored in the current directory`,
+      `A redirection that feeds multiple lines of text as standard input to a command`,
+      `A special comment block in shell scripts`,
+      `A file automatically created by the shell`
+    ],
+    answer: 1,
+    explanation: `A here-document (<code>&lt;&lt;DELIMITER</code>) is a form of I/O redirection that allows embedding multi-line strings directly in a script, feeding them as stdin to a command.`
+  },
+  {
+    q: `What does <code>sort -nr</code> do in the context of <code>uniq -c</code> output?`,
+    options: [
+      `Sorts by name in reverse alphabetical order`,
+      `Sorts numerically in descending order so the highest counts appear first`,
+      `Removes numeric prefixes added by uniq -c`,
+      `Normalizes and reverses the character encoding`
+    ],
+    answer: 1,
+    explanation: `After <code>uniq -c</code> adds numeric counts, <code>sort -n</code> sorts those numbers correctly (not lexicographically), and <code>-r</code> puts the largest count first.`
+  },
+  {
+    q: `Which command extracts timestamps from warning lines and counts their frequency?`,
+    options: [
+      `grep 'warn' fake_syslog.txt | wc -l`,
+      `cut -d' ' -f1,2 warnings.txt | sort | uniq -c > warning_times.txt`,
+      `awk '{print $1}' warnings.txt | sort`,
+      `head -n 5 warnings.txt | cut -f1`
+    ],
+    answer: 1,
+    explanation: `<code>cut -d' ' -f1,2 warnings.txt</code> extracts date+time, <code>sort</code> groups identical timestamps, <code>uniq -c</code> counts them, and <code>&gt;</code> saves to warning_times.txt.`
+  },
+  {
+    q: `In awk, what does <code>length</code> (without arguments) return?`,
+    options: [
+      `The number of fields in the current record`,
+      `The length of the current input line ($0)`,
+      `The total number of lines processed`,
+      `The length of the first field ($1)`
+    ],
+    answer: 1,
+    explanation: `In awk, <code>length</code> without arguments is equivalent to <code>length($0)</code>, returning the number of characters in the current line.`
+  },
+  {
+    q: `What would happen if you omit <code>sort</code> before <code>uniq -c</code> in the pipeline?`,
+    options: [
+      `uniq -c would still count all occurrences correctly`,
+      `uniq -c would only count consecutive duplicates, missing non-adjacent ones`,
+      `The pipeline would produce an error`,
+      `uniq -c would sort the output automatically`
+    ],
+    answer: 1,
+    explanation: `<code>uniq</code> only processes consecutive duplicate lines. Without <code>sort</code>, non-adjacent duplicates are treated as separate unique lines, giving incorrect counts.`
+  },
+  {
+    q: `What does <code>grep -v 'error' fake_syslog.txt</code> do?`,
+    options: [
+      `Shows only lines containing 'error'`,
+      `Shows all lines that do NOT contain 'error'`,
+      `Counts lines containing 'error'`,
+      `Replaces 'error' with an empty string`
+    ],
+    answer: 1,
+    explanation: `<code>grep -v</code> inverts the match, outputting lines that do NOT match the pattern. It is the opposite of the default grep behavior.`
+  },
+  {
+    q: `Which option makes grep show line numbers alongside matching lines?`,
+    options: [
+      `grep -c`,
+      `grep -n`,
+      `grep -l`,
+      `grep -v`
+    ],
+    answer: 1,
+    explanation: `<code>grep -n</code> prefixes each matching line with its line number in the file. <code>-c</code> counts matches, <code>-l</code> lists filenames, <code>-v</code> inverts the match.`
+  },
+  {
+    q: `What is the correct interpretation of this pipeline: <code>grep 'error' fake_syslog.txt | cut -d' ' -f1,2 | sort | uniq -c</code>?`,
+    options: [
+      `Count total errors, then sort by date`,
+      `Filter error lines, extract date+time, sort them, then count occurrences per timestamp`,
+      `Find unique errors and display their timestamps`,
+      `Sort all log lines and count duplicates`
+    ],
+    answer: 1,
+    explanation: `Step by step: (1) <code>grep</code> filters error lines, (2) <code>cut</code> extracts date+time fields, (3) <code>sort</code> groups identical timestamps, (4) <code>uniq -c</code> counts each unique timestamp.`
+  },
+  {
+    q: `What is the main benefit of saving intermediate results (like errors.txt, warnings.txt) to files instead of always using pipelines?`,
+    options: [
+      `Files are always faster than pipelines`,
+      `Intermediate files can be reused multiple times without re-running the initial commands`,
+      `Files use less disk space than pipelines`,
+      `Files automatically compress the data`
+    ],
+    answer: 1,
+    explanation: `Saving intermediate results to files allows you to reuse that data multiple times (e.g., errors.txt is used for wc, head, cut operations) without re-running grep each time.`
+  }
+];
+
+let answered = 0, correctCount = 0, wrongCount = 0;
+const total = questions.length;
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + i;
+
+    const optionsHTML = q.options.map((opt, j) => {
+      return `<button class="option-btn" id="opt-${i}-${j}" onclick="selectAnswer(${i}, ${j})">${opt}</button>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="question-header">
+        <span class="q-number">Q${i+1}</span>
+        <span class="q-text">${q.q}</span>
+      </div>
+      <div class="options" id="options-${i}">${optionsHTML}</div>
+      <div class="feedback" id="feedback-${i}"></div>
+    `;
+    container.appendChild(card);
+  });
+  updateStats();
+}
+
+function selectAnswer(qIndex, optIndex) {
+  const card = document.getElementById('card-' + qIndex);
+  if (card.dataset.answered) return;
+  card.dataset.answered = 'true';
+  card.dataset.selected = optIndex;
+
+  const buttons = document.querySelectorAll(`#options-${qIndex} .option-btn`);
+  buttons.forEach(btn => btn.disabled = true);
+
+  const q = questions[qIndex];
+  const feedback = document.getElementById('feedback-' + qIndex);
+  const selectedBtn = document.getElementById(`opt-${qIndex}-${optIndex}`);
+  const correctBtn = document.getElementById(`opt-${qIndex}-${q.answer}`);
+
+  answered++;
+
+  if (optIndex === q.answer) {
+    correctCount++;
+    selectedBtn.className = 'option-btn selected-correct';
+    card.className = 'question-card correct';
+    feedback.className = 'feedback correct show';
+    feedback.innerHTML = '&#x2705; Correct! ' + q.explanation;
+  } else {
+    wrongCount++;
+    selectedBtn.className = 'option-btn selected-wrong';
+    correctBtn.className = 'option-btn reveal-correct';
+    card.className = 'question-card wrong';
+    feedback.className = 'feedback wrong show';
+    feedback.innerHTML = '&#x274C; Incorrect. ' + q.explanation;
+  }
+  updateStats();
+}
+
+function checkAll() {
+  questions.forEach((q, i) => {
+    const card = document.getElementById('card-' + i);
+    if (!card.dataset.answered) {
+      selectAnswer(i, -1);
+    }
+  });
+}
+
+function updateStats() {
+  document.getElementById('answered').textContent = answered;
+  document.getElementById('correct').textContent = correctCount;
+  document.getElementById('wrong').textContent = wrongCount;
+  const pct = answered > 0 ? Math.round((correctCount / answered) * 100) : 0;
+  document.getElementById('score').textContent = pct + '%';
+  document.getElementById('progress').style.width = Math.round((answered / total) * 100) + '%';
+}
+
+function resetQuiz() {
+  answered = 0; correctCount = 0; wrongCount = 0;
+  buildQuiz();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

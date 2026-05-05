@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unix Commands - MCQ Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2e; color: #cdd6f4; min-height: 100vh; padding: 20px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { text-align: center; color: #cba6f7; font-size: 2em; margin-bottom: 8px; padding-top: 20px; }
+  .subtitle { text-align: center; color: #a6e3a1; margin-bottom: 30px; font-size: 0.95em; }
+  .progress-bar-container { background: #313244; border-radius: 10px; height: 12px; margin-bottom: 8px; }
+  .progress-bar { background: linear-gradient(90deg, #cba6f7, #89b4fa); height: 12px; border-radius: 10px; transition: width 0.4s; }
+  .progress-text { text-align: right; font-size: 0.85em; color: #a6adc8; margin-bottom: 20px; }
+  .question-card { background: #313244; border-radius: 14px; padding: 22px 26px; margin-bottom: 22px; border-left: 5px solid #89b4fa; transition: border-color 0.3s; }
+  .question-card.answered { border-left-color: #a6e3a1; }
+  .question-card.wrong { border-left-color: #f38ba8; }
+  .question-number { font-size: 0.8em; color: #89b4fa; font-weight: bold; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .question-text { font-size: 1.05em; color: #cdd6f4; margin-bottom: 16px; line-height: 1.6; }
+  .question-hint { font-size: 0.88em; color: #f9e2af; background: #45475a; border-radius: 8px; padding: 8px 12px; margin-bottom: 14px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-label { display: flex; align-items: flex-start; gap: 12px; background: #45475a; border-radius: 10px; padding: 12px 16px; cursor: pointer; transition: background 0.2s, transform 0.1s; border: 2px solid transparent; }
+  .option-label:hover { background: #585b70; transform: translateX(3px); }
+  .option-label input[type=radio] { display: none; }
+  .option-letter { background: #89b4fa; color: #1e1e2e; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85em; flex-shrink: 0; margin-top: 1px; }
+  .option-text { font-size: 0.97em; line-height: 1.5; }
+  .option-label.selected { background: #3d59a1; border-color: #89b4fa; }
+  .option-label.correct { background: #1e4a2e; border-color: #a6e3a1 !important; }
+  .option-label.incorrect { background: #4a1e2e; border-color: #f38ba8 !important; }
+  .feedback { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 0.92em; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: #1e4a2e; color: #a6e3a1; border-left: 4px solid #a6e3a1; }
+  .feedback.incorrect-fb { background: #4a1e2e; color: #f38ba8; border-left: 4px solid #f38ba8; }
+  .btn-submit { display: block; margin: 30px auto; background: linear-gradient(135deg, #cba6f7, #89b4fa); color: #1e1e2e; border: none; padding: 16px 50px; border-radius: 30px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: opacity 0.2s, transform 0.2s; }
+  .btn-submit:hover { opacity: 0.9; transform: scale(1.03); }
+  .result-panel { background: #313244; border-radius: 16px; padding: 30px; margin-top: 30px; text-align: center; display: none; }
+  .result-panel.show { display: block; }
+  .result-score { font-size: 3em; font-weight: bold; color: #cba6f7; }
+  .result-msg { font-size: 1.2em; color: #a6e3a1; margin: 10px 0 20px; }
+  .result-details { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 20px; }
+  .result-stat { background: #45475a; border-radius: 10px; padding: 14px 24px; }
+  .result-stat .val { font-size: 2em; font-weight: bold; }
+  .result-stat .lbl { font-size: 0.85em; color: #a6adc8; }
+  .val.green { color: #a6e3a1; }
+  .val.red { color: #f38ba8; }
+  .val.yellow { color: #f9e2af; }
+  .btn-retry { background: #45475a; color: #cdd6f4; border: none; padding: 12px 36px; border-radius: 20px; font-size: 1em; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+  .btn-retry:hover { background: #585b70; }
+  code { background: #1e1e2e; color: #f38ba8; padding: 2px 7px; border-radius: 5px; font-family: 'Courier New', monospace; font-size: 0.95em; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>&#x1F4BB; Unix Commands MCQ Quiz</h1>
+  <p class="subtitle">Operating System Labs &mdash; You can submit without answering all questions</p>
+  <div class="progress-bar-container"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="progress-text" id="progressText">0 / 42 answered</div>
+  <div id="quizContainer"></div>
+  <button class="btn-submit" onclick="submitQuiz()">&#x1F4CA; Submit &amp; See Results</button>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div class="result-details">
+      <div class="result-stat"><div class="val green" id="correctCount"></div><div class="lbl">Correct</div></div>
+      <div class="result-stat"><div class="val red" id="wrongCount"></div><div class="lbl">Wrong</div></div>
+      <div class="result-stat"><div class="val yellow" id="skipCount"></div><div class="lbl">Skipped</div></div>
+    </div>
+    <button class="btn-retry" onclick="retryQuiz()">&#x1F504; Retry Quiz</button>
+  </div>
+</div>
+<script>
+const questions = [
+  {
+    q: "Q1. What command creates a working directory named 'lab' in your home directory?",
+    hint: "Hint: Think about the command that makes a new directory, and the symbol for home folder.",
+    options: [
+      "touch ~/lab",
+      "mkdir ~/lab",
+      "cd ~/lab",
+      "new ~/lab"
+    ],
+    answer: 1,
+    explanation: "mkdir ~/lab — mkdir (make directory) creates a new folder. ~/  represents the home directory."
+  },
+  {
+    q: "Q2. Which command do you use to navigate into the 'lab' directory?",
+    hint: "Hint: The command stands for 'change directory'.",
+    options: [
+      "mv lab",
+      "open lab",
+      "cd lab",
+      "ls lab"
+    ],
+    answer: 2,
+    explanation: "cd lab — cd (change directory) is used to navigate between directories."
+  },
+  {
+    q: "Q3. How would you create multiple empty files (file1.txt, file2.txt, file3.txt, notes.md, data.csv) at once?",
+    hint: "Hint: One command can create multiple files by listing names separated by spaces.",
+    options: [
+      "create file1.txt file2.txt file3.txt notes.md data.csv",
+      "mkdir file1.txt file2.txt file3.txt notes.md data.csv",
+      "touch file1.txt file2.txt file3.txt notes.md data.csv",
+      "new file1.txt file2.txt file3.txt notes.md data.csv"
+    ],
+    answer: 2,
+    explanation: "touch file1.txt file2.txt file3.txt notes.md data.csv — touch creates empty files. Multiple filenames separated by spaces are all created at once."
+  },
+  {
+    q: "Q4. How would you copy all .txt files into a folder named 'backup'?",
+    hint: "Hint: Use a wildcard to match all .txt files, and create the folder first.",
+    options: [
+      "cp file*.txt backup/",
+      "mkdir backup && cp *.txt backup/",
+      "mv *.txt backup/",
+      "copy *.txt backup/"
+    ],
+    answer: 1,
+    explanation: "mkdir backup && cp *.txt backup/ — First create the backup folder, then use the wildcard *.txt to copy all .txt files into it."
+  },
+  {
+    q: "Q5. Which command renames the file file3.txt to final.txt?",
+    hint: "Hint: In Unix, renaming and moving use the same command.",
+    options: [
+      "rename file3.txt final.txt",
+      "cp file3.txt final.txt",
+      "mv file3.txt final.txt",
+      "rn file3.txt final.txt"
+    ],
+    answer: 2,
+    explanation: "mv file3.txt final.txt — The mv (move) command is used for both moving and renaming files in Unix."
+  },
+  {
+    q: "Q6. What is the correct sequence to move notes.md into a new folder called docs/?",
+    hint: "Hint: You must create the folder before moving the file into it.",
+    options: [
+      "mv notes.md docs/",
+      "mkdir docs && mv notes.md docs/",
+      "cp notes.md docs/ && rm notes.md",
+      "touch docs/ && mv notes.md docs/"
+    ],
+    answer: 1,
+    explanation: "mkdir docs && mv notes.md docs/ — First create the docs directory with mkdir, then move the file using mv."
+  },
+  {
+    q: "Q7. Which commands delete the docs/ folder and the file data.csv respectively?",
+    hint: "Hint: Deleting a folder requires a recursive option.",
+    options: [
+      "del data.csv and del -r docs/",
+      "rm data.csv and rm docs/",
+      "rm data.csv and rm -r docs/",
+      "remove data.csv and rmdir docs/"
+    ],
+    answer: 2,
+    explanation: "rm data.csv removes the file. rm -r docs/ removes the folder recursively (including all contents inside)."
+  },
+  {
+    q: "Q8. What does the option -i do when used with the rm command?",
+    hint: "Hint: The -i flag stands for 'interactive'.",
+    options: [
+      "It ignores errors and forces deletion",
+      "It asks for confirmation (y/n) before deleting each file",
+      "It shows detailed output of what is being deleted",
+      "It deletes files immediately without any prompt"
+    ],
+    answer: 1,
+    explanation: "rm -i prompts the user for confirmation before deleting each file, preventing accidental deletions."
+  },
+  {
+    q: "Q9. What does the -v option do when used with cp, mv, or rm?",
+    hint: "Hint: -v stands for 'verbose'.",
+    options: [
+      "It validates the file before the operation",
+      "It shows a version number",
+      "It displays detailed output of what the command is doing",
+      "It verifies checksums of files"
+    ],
+    answer: 2,
+    explanation: "-v (verbose) makes the command print detailed information about each operation it performs."
+  },
+  {
+    q: "Q10. What does the wildcard *.txt match?",
+    hint: "Hint: The * matches any sequence of characters.",
+    options: [
+      "Only a file literally named *.txt",
+      "Any file that starts with a dot",
+      "Any file whose name ends with .txt",
+      "Any file with exactly one character before .txt"
+    ],
+    answer: 2,
+    explanation: "*.txt matches any filename that ends with .txt — the * wildcard represents zero or more of any characters."
+  },
+  {
+    q: "Q11. What command creates a new empty file named test.txt?",
+    hint: "Hint: This command updates file timestamps and creates files if they don't exist.",
+    options: [
+      "create test.txt",
+      "new test.txt",
+      "touch test.txt",
+      "echo test.txt"
+    ],
+    answer: 2,
+    explanation: "touch test.txt — The touch command creates an empty file if it does not already exist."
+  },
+  {
+    q: "Q12. How do you delete the file test.txt from the system?",
+    hint: "Hint: The command stands for 'remove'.",
+    options: [
+      "del test.txt",
+      "rm test.txt",
+      "erase test.txt",
+      "delete test.txt"
+    ],
+    answer: 1,
+    explanation: "rm test.txt — rm (remove) is the Unix command to delete files."
+  },
+  {
+    q: "Q13. What happens to a file when it is deleted using rm in Unix?",
+    hint: "Hint: Unix terminal does not have a Recycle Bin by default.",
+    options: [
+      "It is moved to the Trash folder and can be recovered",
+      "It is archived in /tmp and can be restored",
+      "The file link is removed from the filesystem index; it cannot be easily recovered",
+      "It is compressed and stored in /backup automatically"
+    ],
+    answer: 2,
+    explanation: "rm removes the file's link from the directory index. Unlike Windows/macOS, the Unix terminal has no default Recycle Bin, so recovery requires special tools."
+  },
+  {
+    q: "Q14. Which option makes rm ask for confirmation before deleting to avoid accidental deletions?",
+    hint: "Hint: This option is called 'interactive'.",
+    options: [
+      "rm -f",
+      "rm -v",
+      "rm -i",
+      "rm -r"
+    ],
+    answer: 2,
+    explanation: "rm -i (interactive) prompts 'remove file? (y/n)' before each deletion, giving you a chance to cancel."
+  },
+  {
+    q: "Q15. What is the simplest way to create test1.txt, test2.txt, test1.csv, and report.md in one command?",
+    hint: "Hint: List all filenames after the command, separated by spaces.",
+    options: [
+      "mkdir test1.txt test2.txt test1.csv report.md",
+      "touch test1.txt test2.txt test1.csv report.md",
+      "create test1.txt test2.txt test1.csv report.md",
+      "echo > test1.txt test2.txt test1.csv report.md"
+    ],
+    answer: 1,
+    explanation: "touch test1.txt test2.txt test1.csv report.md — touch accepts multiple filenames and creates them all at once."
+  },
+  {
+    q: "Q16. What does the wildcard ? represent in a Unix filename pattern?",
+    hint: "Hint: Compare ? with * — they differ in how many characters they match.",
+    options: [
+      "Zero or more of any character",
+      "Exactly one of any character",
+      "Any digit from 0-9",
+      "Any letter from a-z"
+    ],
+    answer: 1,
+    explanation: "The ? wildcard matches exactly ONE character. For example, test?.txt matches test1.txt but NOT test10.txt."
+  },
+  {
+    q: "Q17. What does ls test?.txt display?",
+    hint: "Hint: ? matches exactly one character.",
+    options: [
+      "All files starting with test",
+      "Files like test1.txt, test2.txt (one character after 'test')",
+      "Files like test10.txt, test20.txt (two characters after 'test')",
+      "All .txt files in the directory"
+    ],
+    answer: 1,
+    explanation: "ls test?.txt lists files where test is followed by exactly one character and then .txt — e.g., test1.txt, testA.txt."
+  },
+  {
+    q: "Q18. What does ls *.md display?",
+    hint: "Hint: * matches any sequence of characters.",
+    options: [
+      "Only a file named exactly *.md",
+      "All files in the directory",
+      "All files whose names end with .md",
+      "All files whose names start with .md"
+    ],
+    answer: 2,
+    explanation: "ls *.md lists all files ending with .md, such as notes.md, report.md, README.md, etc."
+  },
+  {
+    q: "Q19. What does ls test*.* match?",
+    hint: "Hint: The pattern has two wildcards.",
+    options: [
+      "Only test.txt",
+      "All files starting with 'test' that have any extension",
+      "All files in the directory",
+      "Files named exactly test*.*"
+    ],
+    answer: 1,
+    explanation: "ls test*.* matches all files that start with 'test', followed by any characters, a dot, and any extension — e.g., test1.txt, test_data.csv."
+  },
+  {
+    q: "Q20. What command opens the manual (help page) for the cp command?",
+    hint: "Hint: The command stands for 'manual'.",
+    options: [
+      "help cp",
+      "cp --help",
+      "man cp",
+      "info cp"
+    ],
+    answer: 2,
+    explanation: "man cp opens the manual page for the cp command, showing all available options and usage examples."
+  },
+  {
+    q: "Q21. Which flag is needed with cp to copy a directory and all its contents?",
+    hint: "Hint: This flag means 'recursive'.",
+    options: [
+      "cp -a",
+      "cp -r",
+      "cp -f",
+      "cp -d"
+    ],
+    answer: 1,
+    explanation: "cp -r (recursive) copies a directory along with all files and subdirectories inside it."
+  },
+  {
+    q: "Q22. Which command creates a new folder named 'lab'?",
+    hint: "Hint: The command stands for 'make directory'.",
+    options: [
+      "touch lab",
+      "new lab",
+      "mkdir lab",
+      "create lab"
+    ],
+    answer: 2,
+    explanation: "mkdir lab — mkdir (make directory) is the standard Unix command to create a new folder."
+  },
+  {
+    q: "Q23. How can you move multiple files (test1.txt, test2.txt, test1.csv, report.md) into the lab folder at once?",
+    hint: "Hint: List all source files before the destination.",
+    options: [
+      "mv lab test1.txt test2.txt test1.csv report.md",
+      "cp test1.txt test2.txt test1.csv report.md lab/",
+      "mv test1.txt test2.txt test1.csv report.md lab/",
+      "move *.* lab/"
+    ],
+    answer: 2,
+    explanation: "mv test1.txt test2.txt test1.csv report.md lab/ — mv accepts multiple source files followed by a destination directory."
+  },
+  {
+    q: "Q24. How do you copy the entire 'lab' folder to a new folder named 'lab_final'?",
+    hint: "Hint: You need a flag to copy directories recursively.",
+    options: [
+      "cp lab lab_final",
+      "cp -r lab lab_final",
+      "mv lab lab_final",
+      "cp -f lab lab_final"
+    ],
+    answer: 1,
+    explanation: "cp -r lab lab_final — The -r flag is required to copy a directory with all its contents recursively."
+  },
+  {
+    q: "Q25. What does the && operator do when used between two commands?",
+    hint: "Hint: mkdir backup && cp *.txt backup/ — what happens if mkdir fails?",
+    options: [
+      "Runs the second command regardless of whether the first succeeds",
+      "Runs the second command only if the first command succeeds",
+      "Runs both commands simultaneously in parallel",
+      "Separates commands to run in background"
+    ],
+    answer: 1,
+    explanation: "&& is a logical AND operator. The second command runs only if the first command exits successfully (exit code 0)."
+  },
+  {
+    q: "Q26. What is the difference between rm and rm -r?",
+    hint: "Hint: Think about what each can delete.",
+    options: [
+      "rm deletes files; rm -r deletes directories recursively",
+      "rm deletes directories; rm -r deletes files",
+      "rm is faster; rm -r is slower",
+      "There is no difference"
+    ],
+    answer: 0,
+    explanation: "rm deletes regular files only. rm -r (recursive) deletes directories and all their contents, including subdirectories."
+  },
+  {
+    q: "Q27. What does the ~ symbol represent in Unix?",
+    hint: "Hint: It is used in paths like ~/lab or ~/.bashrc.",
+    options: [
+      "The root directory /",
+      "The current working directory",
+      "The home directory of the current user",
+      "The parent directory"
+    ],
+    answer: 2,
+    explanation: "~ (tilde) is a shortcut for the current user's home directory, e.g., /home/username on Linux."
+  },
+  {
+    q: "Q28. Which command shows the list of files and folders in the current directory?",
+    hint: "Hint: The command stands for 'list'.",
+    options: [
+      "dir",
+      "show",
+      "ls",
+      "list"
+    ],
+    answer: 2,
+    explanation: "ls (list) displays the contents of the current directory. Use ls -l for detailed view or ls -a to show hidden files."
+  },
+  {
+    q: "Q29. What does cp -v do?",
+    hint: "Hint: -v stands for verbose.",
+    options: [
+      "Copies only visible files",
+      "Validates files before copying",
+      "Displays each file being copied with source and destination",
+      "Copies files in version order"
+    ],
+    answer: 2,
+    explanation: "cp -v (verbose) prints each file name as it is copied, showing the source -> destination path."
+  },
+  {
+    q: "Q30. What does mv -i do?",
+    hint: "Hint: -i stands for interactive.",
+    options: [
+      "Moves files invisibly",
+      "Prompts for confirmation before overwriting an existing file",
+      "Moves files in interactive mode with a GUI",
+      "Ignores errors during move"
+    ],
+    answer: 1,
+    explanation: "mv -i (interactive) asks for confirmation before overwriting a file that already exists at the destination."
+  },
+  {
+    q: "Q31. What command would you use to copy all files starting with 'file' to a folder named 'archive'?",
+    hint: "Hint: Use a wildcard to match filenames starting with 'file'.",
+    options: [
+      "cp file archive/",
+      "cp file* archive/",
+      "mv file* archive/",
+      "cp -r file archive/"
+    ],
+    answer: 1,
+    explanation: "cp file* archive/ — The wildcard file* matches any filename starting with 'file', such as file1.txt, file2.txt, file3.txt."
+  },
+  {
+    q: "Q32. After running rm *.txt, what happens to all .txt files in the current directory?",
+    hint: "Hint: Remember that rm in Unix terminal has no Recycle Bin.",
+    options: [
+      "They are moved to the Trash folder",
+      "They are compressed into a .zip archive",
+      "They are permanently deleted and cannot be easily recovered",
+      "They are hidden but still exist"
+    ],
+    answer: 2,
+    explanation: "rm *.txt permanently deletes all .txt files in the current directory. There is no undo or Recycle Bin in the standard Unix terminal."
+  },
+  {
+    q: "Q33. What is the purpose of the touch command in Unix?",
+    hint: "Hint: It has two main uses related to files.",
+    options: [
+      "To open a file in a text editor",
+      "To create an empty file or update the timestamp of an existing file",
+      "To display the contents of a file",
+      "To change file permissions"
+    ],
+    answer: 1,
+    explanation: "touch creates an empty file if it does not exist. If the file already exists, it updates its last-modified timestamp."
+  },
+  {
+    q: "Q34. Which command shows the current working directory path?",
+    hint: "Hint: The command stands for 'print working directory'.",
+    options: [
+      "cwd",
+      "where",
+      "pwd",
+      "path"
+    ],
+    answer: 2,
+    explanation: "pwd (print working directory) displays the full path of the directory you are currently in."
+  },
+  {
+    q: "Q35. What does the command cd .. do?",
+    hint: "Hint: .. refers to the parent directory.",
+    options: [
+      "Goes to the home directory",
+      "Goes up one level to the parent directory",
+      "Goes to the root directory",
+      "Goes to the last visited directory"
+    ],
+    answer: 1,
+    explanation: "cd .. navigates up one level to the parent directory. For example, if you are in /home/user/lab, it takes you to /home/user."
+  },
+  {
+    q: "Q36. Which of the following correctly copies a directory named 'data' into a directory named 'project'?",
+    hint: "Hint: Copying directories requires the recursive flag.",
+    options: [
+      "cp data project",
+      "cp -r data project",
+      "mv data project",
+      "cp data/ project/"
+    ],
+    answer: 1,
+    explanation: "cp -r data project copies the entire data directory (and its contents) into the project directory recursively."
+  },
+  {
+    q: "Q37. What is the effect of running mkdir backup && cp *.txt backup/ if the backup directory already exists?",
+    hint: "Hint: What does mkdir do when the directory already exists?",
+    options: [
+      "mkdir fails with an error, so cp does not run",
+      "mkdir overwrites the existing directory",
+      "cp runs anyway because && ignores the first error",
+      "Both commands run successfully without any issue"
+    ],
+    answer: 0,
+    explanation: "If backup already exists, mkdir returns an error (exit code non-zero). Because of &&, cp will NOT run. Use mkdir -p to avoid this issue."
+  },
+  {
+    q: "Q38. What does mkdir -p do?",
+    hint: "Hint: -p stands for 'parents'.",
+    options: [
+      "Creates a directory with special permissions",
+      "Creates a directory and all necessary parent directories without error if they exist",
+      "Creates a private directory",
+      "Creates a directory in parallel"
+    ],
+    answer: 1,
+    explanation: "mkdir -p creates the directory and any required parent directories. It also does not fail if the directory already exists."
+  },
+  {
+    q: "Q39. How do you list all files including hidden files in a directory?",
+    hint: "Hint: Hidden files in Unix start with a dot (.).",
+    options: [
+      "ls -l",
+      "ls -h",
+      "ls -a",
+      "ls --hidden"
+    ],
+    answer: 2,
+    explanation: "ls -a (all) shows all files including hidden ones (files whose names start with a dot, like .bashrc)."
+  },
+  {
+    q: "Q40. Which command would you use to view the content of a text file without editing it?",
+    hint: "Hint: This command concatenates and displays file content.",
+    options: [
+      "open file.txt",
+      "cat file.txt",
+      "read file.txt",
+      "show file.txt"
+    ],
+    answer: 1,
+    explanation: "cat file.txt displays the content of a file in the terminal. For long files, use less file.txt for scrollable view."
+  },
+  {
+    q: "Q41. What is the correct command to remove an empty directory named 'emptydir'?",
+    hint: "Hint: There is a specific command for removing empty directories.",
+    options: [
+      "rm emptydir",
+      "rm -r emptydir",
+      "rmdir emptydir",
+      "del emptydir"
+    ],
+    answer: 2,
+    explanation: "rmdir emptydir removes an empty directory. If the directory contains files, you must use rm -r instead."
+  },
+  {
+    q: "Q42. What does the command ls -l display compared to ls?",
+    hint: "Hint: -l stands for 'long format'.",
+    options: [
+      "Only lists files, not directories",
+      "Lists files sorted by size",
+      "Lists files with detailed info: permissions, owner, size, and modification date",
+      "Lists files in reverse alphabetical order"
+    ],
+    answer: 2,
+    explanation: "ls -l (long format) shows detailed information for each file: permissions, number of links, owner, group, size, date, and name."
+  }
+];
+
+let answered = {};
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  answered = {};
+  updateProgress();
+  questions.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card_' + idx;
+    let optionsHTML = q.options.map((opt, oi) => {
+      const letters = ['A','B','C','D'];
+      return `<label class="option-label" id="opt_${idx}_${oi}" onclick="selectOption(${idx}, ${oi})">
+        <input type="radio" name="q${idx}" value="${oi}">
+        <span class="option-letter">${letters[oi]}</span>
+        <span class="option-text">${opt}</span>
+      </label>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="question-number">Question ${idx + 1} of ${questions.length}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="question-hint">${q.hint}</div>
+      <div class="options" id="opts_${idx}">${optionsHTML}</div>
+      <div class="feedback" id="fb_${idx}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectOption(qIdx, oIdx) {
+  if (answered[qIdx] !== undefined) return;
+  answered[qIdx] = oIdx;
+  const q = questions[qIdx];
+  const card = document.getElementById('card_' + qIdx);
+  const fb = document.getElementById('fb_' + qIdx);
+  for (let i = 0; i < q.options.length; i++) {
+    const lbl = document.getElementById('opt_' + qIdx + '_' + i);
+    lbl.style.pointerEvents = 'none';
+    if (i === q.answer) lbl.classList.add('correct');
+    if (i === oIdx && oIdx !== q.answer) lbl.classList.add('incorrect');
+    if (i === oIdx) lbl.classList.add('selected');
+  }
+  if (oIdx === q.answer) {
+    fb.className = 'feedback show correct-fb';
+    fb.innerHTML = '&#x2705; Correct! ' + q.explanation;
+    card.classList.add('answered');
+  } else {
+    fb.className = 'feedback show incorrect-fb';
+    fb.innerHTML = '&#x274C; Incorrect. ' + q.explanation;
+    card.classList.add('wrong');
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = questions.length;
+  const done = Object.keys(answered).length;
+  document.getElementById('progressBar').style.width = (done / total * 100) + '%';
+  document.getElementById('progressText').textContent = done + ' / ' + total + ' answered';
+}
+
+function submitQuiz() {
+  let correct = 0, wrong = 0, skipped = 0;
+  questions.forEach((q, idx) => {
+    if (answered[idx] === undefined) {
+      skipped++;
+    } else if (answered[idx] === q.answer) {
+      correct++;
+    } else {
+      wrong++;
+    }
+  });
+  const total = questions.length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById('resultScore').textContent = pct + '%';
+  let msg = '';
+  if (pct >= 90) msg = '&#x1F3C6; Excellent! You mastered Unix commands!';
+  else if (pct >= 70) msg = '&#x1F44D; Good job! Keep practicing!';
+  else if (pct >= 50) msg = '&#x1F4AA; Not bad! Review the explanations and try again.';
+  else msg = '&#x1F4DA; Keep studying! Read the explanations carefully.';
+  document.getElementById('resultMsg').innerHTML = msg;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+  document.getElementById('skipCount').textContent = skipped;
+  const panel = document.getElementById('resultPanel');
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function retryQuiz() {
+  document.getElementById('resultPanel').classList.remove('show');
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

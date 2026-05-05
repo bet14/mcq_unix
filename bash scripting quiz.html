@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bash Scripting MCQ Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding: 20px; }
+  h1 { text-align: center; color: #e94560; margin-bottom: 8px; font-size: 2em; }
+  .subtitle { text-align: center; color: #a8a8b3; margin-bottom: 30px; font-size: 0.95em; }
+  .quiz-container { max-width: 860px; margin: 0 auto; }
+  .progress-bar-wrap { background: #16213e; border-radius: 10px; height: 12px; margin-bottom: 20px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, #e94560, #f5a623); border-radius: 10px; transition: width 0.4s; }
+  .progress-text { text-align: center; color: #a8a8b3; font-size: 0.85em; margin-bottom: 20px; }
+  .question-card { background: #16213e; border-radius: 14px; padding: 24px 28px; margin-bottom: 22px; border-left: 5px solid #0f3460; transition: border-color 0.3s; }
+  .question-card.answered-correct { border-left-color: #27ae60; }
+  .question-card.answered-wrong { border-left-color: #e74c3c; }
+  .question-number { font-size: 0.78em; color: #f5a623; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .question-text { font-size: 1.05em; line-height: 1.6; margin-bottom: 16px; color: #dde; }
+  .question-text code, .option-label code { background: #0f3460; color: #f5a623; padding: 2px 7px; border-radius: 5px; font-family: 'Courier New', monospace; font-size: 0.92em; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-label { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-radius: 9px; background: #0f3460; cursor: pointer; transition: background 0.2s, transform 0.1s; border: 2px solid transparent; }
+  .option-label:hover { background: #1a4a8a; transform: translateX(3px); }
+  .option-label input[type=radio] { margin-top: 3px; accent-color: #e94560; flex-shrink: 0; }
+  .option-label.correct { background: #1a4a2a; border-color: #27ae60; }
+  .option-label.wrong { background: #4a1a1a; border-color: #e74c3c; }
+  .option-label.show-correct { background: #1a4a2a; border-color: #27ae60; }
+  .feedback { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 0.9em; display: none; }
+  .feedback.correct { background: #1a4a2a; color: #2ecc71; display: block; }
+  .feedback.wrong { background: #4a1a1a; color: #e74c3c; display: block; }
+  .btn-submit { display: block; margin: 30px auto 10px; padding: 16px 48px; background: linear-gradient(135deg, #e94560, #f5a623); color: #fff; border: none; border-radius: 30px; font-size: 1.15em; font-weight: 700; cursor: pointer; letter-spacing: 1px; transition: opacity 0.2s, transform 0.1s; }
+  .btn-submit:hover { opacity: 0.9; transform: scale(1.03); }
+  .result-box { display: none; background: #16213e; border-radius: 16px; padding: 36px; text-align: center; margin-top: 30px; border: 2px solid #e94560; }
+  .result-box h2 { font-size: 2em; color: #f5a623; margin-bottom: 12px; }
+  .result-score { font-size: 3.5em; font-weight: 900; color: #e94560; margin: 10px 0; }
+  .result-detail { color: #a8a8b3; font-size: 1em; margin-bottom: 20px; }
+  .result-grade { font-size: 1.4em; font-weight: 700; margin-bottom: 20px; }
+  .grade-A { color: #2ecc71; }
+  .grade-B { color: #3498db; }
+  .grade-C { color: #f5a623; }
+  .grade-F { color: #e74c3c; }
+  .btn-retry { padding: 12px 36px; background: #0f3460; color: #fff; border: 2px solid #e94560; border-radius: 25px; font-size: 1em; cursor: pointer; transition: background 0.2s; }
+  .btn-retry:hover { background: #e94560; }
+  .category-tag { display: inline-block; background: #0f3460; color: #f5a623; font-size: 0.72em; padding: 2px 9px; border-radius: 12px; margin-bottom: 8px; font-weight: 600; letter-spacing: 0.5px; }
+  .answered-count { text-align: center; color: #a8a8b3; font-size: 0.88em; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="quiz-container">
+  <h1>🐚 Bash Scripting Quiz</h1>
+  <p class="subtitle">Labs 1–7 · Focus on correct commands &amp; syntax · 42 Questions</p>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="progress-text" id="progressText">0 / 42 answered</div>
+  <div id="quizArea"></div>
+  <button class="btn-submit" onclick="submitQuiz()">📊 Submit &amp; See Results</button>
+  <div class="result-box" id="resultBox">
+    <h2>🎯 Your Results</h2>
+    <div class="result-score" id="scoreDisplay"></div>
+    <div class="result-detail" id="scoreDetail"></div>
+    <div class="result-grade" id="gradeDisplay"></div>
+    <button class="btn-retry" onclick="retryQuiz()">🔄 Retry Quiz</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // --- LAB 1: Swap ---
+  {
+    cat: "Lab 1: Swap",
+    q: "In <code>swap.sh</code>, what is the purpose of the <code>temp</code> variable?",
+    opts: [
+      "To store the final result of the swap",
+      "To temporarily hold the value of <code>a</code> before it is overwritten",
+      "To hold the sum of <code>a</code> and <code>b</code>",
+      "To check if <code>a</code> equals <code>b</code>"
+    ],
+    ans: 1,
+    exp: "temp=$a saves the original value of a so it is not lost when a=$b is executed."
+  },
+  {
+    cat: "Lab 1: Swap",
+    q: "Which sequence correctly swaps variables <code>a</code> and <code>b</code> using a temp variable?",
+    opts: [
+      "<code>a=$b; b=$a; temp=$a</code>",
+      "<code>temp=$a; a=$b; b=$temp</code>",
+      "<code>temp=$b; b=$a; a=$b</code>",
+      "<code>a=$temp; temp=$b; b=$a</code>"
+    ],
+    ans: 1,
+    exp: "The correct order is: save a into temp, assign b to a, then assign temp (original a) to b."
+  },
+  {
+    cat: "Lab 1: Swap",
+    q: "What does <code>read -p \"Enter value: \" a</code> do?",
+    opts: [
+      "Prints a message and exits",
+      "Reads input from a file named 'a'",
+      "Displays a prompt and stores user input into variable <code>a</code>",
+      "Assigns the string 'Enter value:' to <code>a</code>"
+    ],
+    ans: 2,
+    exp: "read -p displays a prompt string and reads the user's keyboard input into the specified variable."
+  },
+  {
+    cat: "Lab 1: Swap",
+    q: "After running <code>temp=$a; a=$b; b=$temp</code> with a=5 and b=9, what is the value of <code>b</code>?",
+    opts: ["9", "5", "temp", "0"],
+    ans: 1,
+    exp: "b=$temp and temp held the original value of a which was 5, so b becomes 5."
+  },
+  // --- LAB 2: degconv ---
+  {
+    cat: "Lab 2: Fahrenheit to Celsius",
+    q: "Why is <code>bc</code> used in <code>degconv.sh</code> instead of arithmetic expansion <code>$(( ))</code>?",
+    opts: [
+      "bc is faster than arithmetic expansion",
+      "Arithmetic expansion only handles integers; bc supports floating-point (decimal) arithmetic",
+      "bc is a built-in bash command",
+      "Arithmetic expansion cannot handle subtraction"
+    ],
+    ans: 1,
+    exp: "$(( )) only does integer math. bc (Arbitrary Precision Calculator) handles decimal numbers."
+  },
+  {
+    cat: "Lab 2: Fahrenheit to Celsius",
+    q: "What does <code>scale=2</code> mean in a <code>bc</code> expression?",
+    opts: [
+      "Multiply the result by 2",
+      "Use base-2 (binary) arithmetic",
+      "Set the number of decimal places in the result to 2",
+      "Round the result to the nearest integer"
+    ],
+    ans: 2,
+    exp: "In bc, scale sets the number of digits after the decimal point."
+  },
+  {
+    cat: "Lab 2: Fahrenheit to Celsius",
+    q: "Which command correctly converts Fahrenheit variable <code>f</code> to Celsius with 2 decimal places?",
+    opts: [
+      '<code>c=$(bc "scale=2; ($f-32)*5/9")</code>',
+      '<code>c=$(echo "scale=2; ($f - 32) * 5 / 9" | bc)</code>',
+      '<code>c=$(( ($f - 32) * 5 / 9 ))</code>',
+      '<code>c=$(awk "$f - 32 * 5 / 9")</code>'
+    ],
+    ans: 1,
+    exp: "The correct syntax pipes the expression string to bc using echo ... | bc."
+  },
+  {
+    cat: "Lab 2: Fahrenheit to Celsius",
+    q: "What is the output of the script when the user inputs <code>32</code> (Fahrenheit)?",
+    opts: [
+      "32 degrees F equals 100.00 degrees C",
+      "32 degrees F equals 0.00 degrees C",
+      "32 degrees F equals -17.78 degrees C",
+      "Error: cannot divide"
+    ],
+    ans: 1,
+    exp: "C = (32-32)*5/9 = 0.00. Freezing point of water."
+  },
+  {
+    cat: "Lab 2: Fahrenheit to Celsius",
+    q: "In the expression <code>echo \"scale=2; ($f - 32) * 5 / 9\" | bc</code>, what does the pipe <code>|</code> do?",
+    opts: [
+      "Saves the output to a file",
+      "Sends the output of echo as input to bc",
+      "Runs both commands simultaneously",
+      "Compares two values"
+    ],
+    ans: 1,
+    exp: "The pipe | sends stdout of the left command as stdin to the right command."
+  },
+  // --- LAB 3: calc ---
+  {
+    cat: "Lab 3: Mini Calculator",
+    q: "In <code>calc.sh</code>, which control structure is used to handle the menu selection?",
+    opts: ["if-elif-else", "for loop", "while loop", "case statement"],
+    ans: 3,
+    exp: "The case statement is used to match the user's choice (1-4) to the corresponding operation."
+  },
+  {
+    cat: "Lab 3: Mini Calculator",
+    q: "What is the correct syntax to end a <code>case</code> block in bash?",
+    opts: ["end", "done", "esac", "fi"],
+    ans: 2,
+    exp: "case blocks end with esac (case spelled backwards). fi ends if blocks, done ends loops."
+  },
+  {
+    cat: "Lab 3: Mini Calculator",
+    q: "In a <code>case</code> statement, what does <code>*)</code> represent?",
+    opts: [
+      "Multiplication operation",
+      "The default/catch-all pattern that matches anything not previously matched",
+      "An empty pattern",
+      "A wildcard for numbers only"
+    ],
+    ans: 1,
+    exp: "*) is the default case, similar to default: in C/Java switch statements."
+  },
+  {
+    cat: "Lab 3: Mini Calculator",
+    q: "In <code>calc.sh</code>, how is division by zero handled?",
+    opts: [
+      "bc automatically returns an error",
+      "The script uses <code>if [ $n2 -eq 0 ]</code> to check before dividing",
+      "The script uses <code>try-catch</code> block",
+      "Division by zero is not handled"
+    ],
+    ans: 1,
+    exp: "Before dividing, the script checks if n2 equals 0 using [ $n2 -eq 0 ] and sets an error message."
+  },
+  {
+    cat: "Lab 3: Mini Calculator",
+    q: "What does <code>;;</code> do at the end of each case branch?",
+    opts: [
+      "Ends the entire case statement",
+      "Terminates the current case branch (like break in other languages)",
+      "Runs the next case branch as well",
+      "It is a comment"
+    ],
+    ans: 1,
+    exp: ";; terminates a case branch. Without it, bash would fall through to the next pattern."
+  },
+  {
+    cat: "Lab 3: Mini Calculator",
+    q: "Which operator in bash <code>[ ]</code> tests if two integers are equal?",
+    opts: ["-eq", "==", "-ce", "="],
+    ans: 0,
+    exp: "-eq is the arithmetic equality test. == works in [[ ]] but -eq is standard for [ ]."
+  },
+  {
+    cat: "Lab 3: Mini Calculator",
+    q: "In the case statement of calc.sh, what is the correct pattern to match option 3 (multiplication)?",
+    opts: [
+      "<code>3: res=$(echo ...)</code>",
+      "<code>3) res=$(echo \"$n1 * $n2\" | bc) ;;</code>",
+      "<code>case 3 res=$(echo ...)</code>",
+      "<code>[3] res=$(echo ...) ;;</code>"
+    ],
+    ans: 1,
+    exp: "Case patterns use ) after the value and end with ;; to close the branch."
+  },
+  // --- LAB 4: big3 ---
+  {
+    cat: "Lab 4: Biggest of Three",
+    q: "Which operator is used in bash to test if one number is greater than or equal to another in <code>[ ]</code>?",
+    opts: ["-gt", ">=", "-ge", "-gte"],
+    ans: 2,
+    exp: "-ge means greater than or equal to. -gt means strictly greater than."
+  },
+  {
+    cat: "Lab 4: Biggest of Three",
+    q: "In <code>big3.sh</code>, how are multiple conditions combined to check if n1 is the largest?",
+    opts: [
+      "<code>if [ $n1 -ge $n2 -and $n1 -ge $n3 ]</code>",
+      "<code>if [ $n1 -ge $n2 ] && [ $n1 -ge $n3 ]</code>",
+      "<code>if [ $n1 -ge $n2 ] AND [ $n1 -ge $n3 ]</code>",
+      "<code>if (( $n1 >= $n2 and $n1 >= $n3 ))</code>"
+    ],
+    ans: 1,
+    exp: "The && operator combines two separate [ ] test conditions. Both must be true."
+  },
+  {
+    cat: "Lab 4: Biggest of Three",
+    q: "What keyword ends an <code>if-elif-else</code> block in bash?",
+    opts: ["end", "endif", "fi", "done"],
+    ans: 2,
+    exp: "fi (if spelled backwards) closes an if block in bash."
+  },
+  {
+    cat: "Lab 4: Biggest of Three",
+    q: "If n1=7, n2=7, n3=3, which variable does <code>big3.sh</code> report as the biggest?",
+    opts: ["n1 (7)", "n2 (7)", "n3 (3)", "Error: tie detected"],
+    ans: 0,
+    exp: "The first condition [ $n1 -ge $n2 ] && [ $n1 -ge $n3 ] is true (7>=7 and 7>=3), so n1 is selected."
+  },
+  {
+    cat: "Lab 4: Biggest of Three",
+    q: "What does the <code>-ge</code> flag stand for in bash test expressions?",
+    opts: ["Greater Element", "Greater or Equal", "General Expression", "Group Evaluation"],
+    ans: 1,
+    exp: "-ge stands for Greater than or Equal to in bash integer comparisons."
+  },
+  // --- LAB 5: grade ---
+  {
+    cat: "Lab 5: Grade Determination",
+    q: "In <code>grade.sh</code>, which operator checks if the mark is LESS THAN 0?",
+    opts: ["-lt", "-le", "-gt", "<"],
+    ans: 0,
+    exp: "-lt means Less Than. -le means Less than or Equal to."
+  },
+  {
+    cat: "Lab 5: Grade Determination",
+    q: "In <code>grade.sh</code>, how is the condition 'mark is invalid (below 0 OR above 100)' written?",
+    opts: [
+      "<code>if [ $mark -lt 0 ] || [ $mark -gt 100 ]</code>",
+      "<code>if [ $mark -lt 0 ] && [ $mark -gt 100 ]</code>",
+      "<code>if [ $mark < 0 ] or [ $mark > 100 ]</code>",
+      "<code>if (( mark < 0 || mark > 100 ))</code>"
+    ],
+    ans: 0,
+    exp: "|| is the OR operator between two [ ] test blocks. && would require BOTH to be true simultaneously (impossible)."
+  },
+  {
+    cat: "Lab 5: Grade Determination",
+    q: "A student scores 70. According to <code>grade.sh</code>, what grade do they receive?",
+    opts: ["A (Excellent)", "B (Good)", "C (Average)", "F (Fail)"],
+    ans: 1,
+    exp: "[ $mark -ge 70 ] is true (70>=70), so the grade is B (Good)."
+  },
+  {
+    cat: "Lab 5: Grade Determination",
+    q: "A student scores 49. According to <code>grade.sh</code>, what grade do they receive?",
+    opts: ["A", "B", "C", "F"],
+    ans: 3,
+    exp: "49 is not >= 85, not >= 70, not >= 50, so it falls to the else branch: F (Fail)."
+  },
+  {
+    cat: "Lab 5: Grade Determination",
+    q: "Which bash operator means logical OR when combining two <code>[ ]</code> test conditions?",
+    opts: ["&&", "||", "OR", "-or"],
+    ans: 1,
+    exp: "|| is the logical OR operator in bash. && is logical AND."
+  },
+  {
+    cat: "Lab 5: Grade Determination",
+    q: "What is the correct bash syntax to check if <code>mark</code> is greater than or equal to 85?",
+    opts: [
+      "<code>if mark >= 85</code>",
+      "<code>if [ $mark >= 85 ]</code>",
+      "<code>if [ $mark -ge 85 ]</code>",
+      "<code>if (mark -ge 85)</code>"
+    ],
+    ans: 2,
+    exp: "Bash uses -ge inside [ ] for integer comparison. >= is not valid in [ ] for integers."
+  },
+  // --- LAB 6: vowel ---
+  {
+    cat: "Lab 6: Vowel or Consonant",
+    q: "In <code>vowel.sh</code>, which case pattern matches any of the vowels a, e, i, o, u?",
+    opts: [
+      '<code>"a","e","i","o","u"</code>',
+      '<code>"a"|"e"|"i"|"o"|"u"</code>',
+      '<code>[aeiou]</code>',
+      '<code>"aeiou"</code>'
+    ],
+    ans: 1,
+    exp: 'In case statements, | separates multiple patterns for the same branch. "a"|"e"|"i"|"o"|"u" matches any single vowel.'
+  },
+  {
+    cat: "Lab 6: Vowel or Consonant",
+    q: "In <code>vowel.sh</code>, what does the pattern <code>[a-z]</code> match in a case statement?",
+    opts: [
+      "Only the letters a and z",
+      "Any single lowercase letter from a to z",
+      "The string literal [a-z]",
+      "Any lowercase word"
+    ],
+    ans: 1,
+    exp: "[a-z] is a glob/range pattern in case that matches any single lowercase letter."
+  },
+  {
+    cat: "Lab 6: Vowel or Consonant",
+    q: "If the user inputs the letter <code>b</code> in <code>vowel.sh</code>, what is the output?",
+    opts: [
+      "b is a vowel (Vowel)",
+      "b is a consonant (Consonant)",
+      "Please enter only a letter from a to z",
+      "Error"
+    ],
+    ans: 1,
+    exp: "b does not match the vowel pattern, but matches [a-z], so it is classified as a consonant."
+  },
+  {
+    cat: "Lab 6: Vowel or Consonant",
+    q: "If the user inputs <code>5</code> (a digit) in <code>vowel.sh</code>, which case branch is triggered?",
+    opts: [
+      'The vowel branch: "a"|"e"|"i"|"o"|"u"',
+      "The consonant branch: [a-z]",
+      "The default branch: *)",
+      "No branch is triggered"
+    ],
+    ans: 2,
+    exp: "5 does not match vowels or [a-z], so it falls to the *) default branch."
+  },
+  {
+    cat: "Lab 6: Vowel or Consonant",
+    q: "What is the correct opening syntax of a <code>case</code> statement in bash?",
+    opts: [
+      "<code>case $var do</code>",
+      "<code>case $var in</code>",
+      "<code>switch ($var)</code>",
+      "<code>case ($var) of</code>"
+    ],
+    ans: 1,
+    exp: "The correct syntax is: case $variable in ... esac"
+  },
+  // --- LAB 7: filecount ---
+  {
+    cat: "Lab 7: File Check",
+    q: "In <code>filecount.sh</code>, which flag in the <code>[ ]</code> test checks if a file EXISTS and is a regular file?",
+    opts: ["-e", "-f", "-d", "-r"],
+    ans: 1,
+    exp: "-f tests that the path exists AND is a regular file. -e tests existence only. -d tests for directory."
+  },
+  {
+    cat: "Lab 7: File Check",
+    q: "What does <code>wc -l</code> count?",
+    opts: ["Words in a file", "Lines in a file", "Characters in a file", "File size in bytes"],
+    ans: 1,
+    exp: "wc -l counts the number of newline characters (lines). wc -w counts words, wc -c counts bytes."
+  },
+  {
+    cat: "Lab 7: File Check",
+    q: "What does <code>wc -w</code> count?",
+    opts: ["Lines", "Words", "Characters", "File permissions"],
+    ans: 1,
+    exp: "wc -w counts the number of words (whitespace-separated tokens) in the input."
+  },
+  {
+    cat: "Lab 7: File Check",
+    q: "In <code>filecount.sh</code>, why is the filename redirected as <code>wc -l < \"$filename\"</code> instead of <code>wc -l \"$filename\"</code>?",
+    opts: [
+      "Both are identical in output",
+      "Using < redirects stdin so wc only prints the count without the filename",
+      "wc cannot accept filename arguments",
+      "< is required for security reasons"
+    ],
+    ans: 1,
+    exp: "When a filename is passed as argument, wc prints 'count filename'. Using < redirects stdin so only the count is printed."
+  },
+  {
+    cat: "Lab 7: File Check",
+    q: "Which command makes a shell script executable?",
+    opts: [
+      "<code>run script.sh</code>",
+      "<code>exec +x script.sh</code>",
+      "<code>chmod +x script.sh</code>",
+      "<code>bash -x script.sh</code>"
+    ],
+    ans: 2,
+    exp: "chmod +x adds execute permission to the file. You can then run it with ./script.sh"
+  },
+  // --- GENERAL BASH ---
+  {
+    cat: "General Bash",
+    q: "What is the purpose of the shebang line <code>#!/bin/bash</code> at the top of a script?",
+    opts: [
+      "It is a comment and has no effect",
+      "It specifies which interpreter should execute the script",
+      "It imports the bash library",
+      "It sets the script version"
+    ],
+    ans: 1,
+    exp: "The shebang (#!) followed by the interpreter path tells the OS which program to use to run the script."
+  },
+  {
+    cat: "General Bash",
+    q: "Which of the following correctly assigns the output of a command to a variable?",
+    opts: [
+      "<code>result = $(command)</code>",
+      "<code>result=$(command)</code>",
+      "<code>result = `command`</code>",
+      "<code>$(command) = result</code>"
+    ],
+    ans: 1,
+    exp: "Command substitution uses $() with NO spaces around =. Spaces around = cause a syntax error."
+  },
+  {
+    cat: "General Bash",
+    q: "What does the <code>-p</code> flag in <code>read -p</code> do?",
+    opts: [
+      "Reads from a pipe",
+      "Sets read to password mode (hides input)",
+      "Displays a prompt string before reading input",
+      "Reads only one character"
+    ],
+    ans: 2,
+    exp: "read -p 'prompt' var displays the prompt string on the same line before waiting for input."
+  },
+  {
+    cat: "General Bash",
+    q: "Which of the following is the correct way to run a bash script named <code>myscript.sh</code> after making it executable?",
+    opts: [
+      "<code>run myscript.sh</code>",
+      "<code>execute myscript.sh</code>",
+      "<code>./myscript.sh</code>",
+      "<code>open myscript.sh</code>"
+    ],
+    ans: 2,
+    exp: "./myscript.sh runs the script in the current directory. The ./ is needed because the current directory is usually not in PATH."
+  },
+  {
+    cat: "General Bash",
+    q: "In bash arithmetic comparison inside <code>[ ]</code>, which flag means NOT EQUAL?",
+    opts: ["-ne", "!=", "-nq", "not"],
+    ans: 0,
+    exp: "-ne means Not Equal for integer comparison in [ ]. != is used for string comparison."
+  },
+  {
+    cat: "General Bash",
+    q: "What does <code>echo \"A=$a, B=$b\"</code> do when a=10 and b=20?",
+    opts: [
+      'Prints: A=$a, B=$b',
+      "Prints: A=10, B=20",
+      "Prints: A=a, B=b",
+      "Causes an error"
+    ],
+    ans: 1,
+    exp: "Inside double quotes, variables are expanded. $a becomes 10 and $b becomes 20."
+  }
+];
+
+let userAnswers = new Array(questions.length).fill(null);
+let submitted = false;
+
+function buildQuiz() {
+  const area = document.getElementById('quizArea');
+  area.innerHTML = '';
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + i;
+    card.innerHTML = `
+      <div class="category-tag">${q.cat}</div>
+      <div class="question-number">Question ${i+1} of ${questions.length}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options" id="opts-${i}">
+        ${q.opts.map((opt, j) => `
+          <label class="option-label" id="opt-${i}-${j}">
+            <input type="radio" name="q${i}" value="${j}" onchange="selectAnswer(${i}, ${j})">
+            <span>${opt}</span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+    area.appendChild(card);
+  });
+  updateProgress();
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (submitted) return;
+  userAnswers[qIdx] = optIdx;
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = userAnswers.filter(a => a !== null).length;
+  const pct = (answered / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = answered + ' / ' + questions.length + ' answered';
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  let score = 0;
+  questions.forEach((q, i) => {
+    const card = document.getElementById('card-' + i);
+    const fb = document.getElementById('fb-' + i);
+    const selected = userAnswers[i];
+    if (selected === null) {
+      fb.className = 'feedback wrong';
+      fb.textContent = 'Not answered. Correct answer: ' + String.fromCharCode(65 + q.ans) + '. ' + q.exp;
+      card.className = 'question-card answered-wrong';
+    } else if (selected === q.ans) {
+      score++;
+      fb.className = 'feedback correct';
+      fb.textContent = '✅ Correct! ' + q.exp;
+      card.className = 'question-card answered-correct';
+      document.getElementById('opt-' + i + '-' + selected).classList.add('correct');
+    } else {
+      fb.className = 'feedback wrong';
+      fb.textContent = '❌ Wrong. Correct answer: ' + String.fromCharCode(65 + q.ans) + '. ' + q.exp;
+      card.className = 'question-card answered-wrong';
+      document.getElementById('opt-' + i + '-' + selected).classList.add('wrong');
+      document.getElementById('opt-' + i + '-' + q.ans).classList.add('show-correct');
+    }
+    // disable all radios
+    document.querySelectorAll(`input[name="q${i}"]`).forEach(r => r.disabled = true);
+  });
+
+  const pct = Math.round((score / questions.length) * 100);
+  let grade, gradeClass;
+  if (pct >= 85) { grade = 'A - Excellent! 🏆'; gradeClass = 'grade-A'; }
+  else if (pct >= 70) { grade = 'B - Good! 👍'; gradeClass = 'grade-B'; }
+  else if (pct >= 50) { grade = 'C - Average 📚'; gradeClass = 'grade-C'; }
+  else { grade = 'F - Need more practice 💪'; gradeClass = 'grade-F'; }
+
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + questions.length;
+  document.getElementById('scoreDetail').textContent = pct + '% correct (' + userAnswers.filter(a=>a!==null).length + ' questions attempted)';
+  const gd = document.getElementById('gradeDisplay');
+  gd.textContent = grade;
+  gd.className = 'result-grade ' + gradeClass;
+  const rb = document.getElementById('resultBox');
+  rb.style.display = 'block';
+  rb.scrollIntoView({ behavior: 'smooth' });
+}
+
+function retryQuiz() {
+  submitted = false;
+  userAnswers = new Array(questions.length).fill(null);
+  buildQuiz();
+  document.getElementById('resultBox').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bash Scripting MCQ - 45 Questions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .content {
+            padding: 40px;
+            min-height: 500px;
+        }
+
+        .question-section {
+            display: none;
+        }
+
+        .question-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .question-header {
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            margin-bottom: 20px;
+        }
+
+        .option {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option input[type='radio'] {
+            margin-right: 15px;
+            margin-top: 3px;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+        }
+
+        .option-text {
+            flex: 1;
+            font-size: 1em;
+            color: #333;
+            word-break: break-word;
+            font-family: 'Courier New', monospace;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .feedback-text {
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-submit {
+            background: #28a745;
+            color: white;
+            flex: 2;
+        }
+
+        .btn-submit:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .recap-section {
+            display: none;
+        }
+
+        .recap-section.active {
+            display: block;
+        }
+
+        .recap-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .recap-header h2 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card.correct {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .stat-card.incorrect {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        }
+
+        .stat-card.skipped {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .recap-details {
+            margin-top: 30px;
+        }
+
+        .recap-item {
+            background: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .recap-item.correct {
+            border-left-color: #28a745;
+        }
+
+        .recap-item.incorrect {
+            border-left-color: #dc3545;
+        }
+
+        .recap-item.skipped {
+            border-left-color: #6c757d;
+        }
+
+        .recap-question {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .recap-answer {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .recap-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .recap-status.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .recap-status.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .recap-status.skipped {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .recap-explanation {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.95em;
+            color: #555;
+            border-left: 3px solid #ffc107;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            padding: 12px 40px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        .question-counter {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bash Scripting MCQ</h1>
+            <p>Test your knowledge on Bash scripting concepts</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="quizContainer"></div>
+            <div id="recapContainer" class="recap-section"></div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                lab: 1,
+                question: 'Which command is used to create a file named `myfile.txt` with the content "Hello World" on the first line and "Bash Scripting" on the second line?',
+                options: [
+                    'echo "Hello World\\nBash Scripting" > myfile.txt',
+                    'echo -e "Hello World\\nBash Scripting" > myfile.txt',
+                    'printf "Hello World\\nBash Scripting" > myfile.txt',
+                    'touch myfile.txt && echo "Hello World" >> myfile.txt && echo "Bash Scripting" >> myfile.txt'
+                ],
+                correct: 1,
+                explanation: 'The `-e` option with `echo` enables interpretation of backslash escapes like `\\n` for a newline character.'
+            },
+            {
+                id: 2,
+                lab: 1,
+                question: 'In the script `while IFS= read -r line; do echo "$line"; done < "$FILE"`, what is the purpose of `IFS=`?',
+                options: [
+                    'It sets the Input Field Separator to a space.',
+                    'It prevents word splitting.',
+                    'It sets the Input Field Separator to an empty string, preventing leading/trailing whitespace trimming.',
+                    'It makes the `read` command interactive.'
+                ],
+                correct: 2,
+                explanation: 'Setting `IFS=` to an empty string prevents `read` from interpreting whitespace as field separators, thus preserving leading/trailing whitespace in the line.'
+            },
+            {
+                id: 3,
+                lab: 1,
+                question: 'What does the `-r` option in `read -r line` prevent?',
+                options: [
+                    'Reading only the first character of each line.',
+                    'Backslash escapes from being interpreted.',
+                    'Recursive reading of files.',
+                    'Reading empty lines.'
+                ],
+                correct: 1,
+                explanation: 'The `-r` option prevents backslash escapes from being interpreted as escape sequences, ensuring the raw content of the line is read.'
+            },
+            {
+                id: 4,
+                lab: 1,
+                question: 'How is the file `myfile.txt` provided as input to the `while` loop in the given solution for Lab 1?',
+                options: [
+                    'cat myfile.txt | while ...',
+                    'while ... < myfile.txt',
+                    'read -r line < myfile.txt',
+                    'FILE="myfile.txt"; while ... < "$FILE"'
+                ],
+                correct: 3,
+                explanation: 'The `done < "$FILE"` syntax redirects the content of the file specified by the `$FILE` variable as standard input to the `while` loop.'
+            },
+            {
+                id: 5,
+                lab: 1,
+                question: 'If `myfile.txt` contains `  Line with spaces  `, what will `echo "$line"` output if `IFS= read -r line` is used?',
+                options: [
+                    'Line with spaces (leading/trailing spaces trimmed)',
+                    '  Line with spaces   (all spaces preserved)',
+                    'Line (only the first word)',
+                    'An error because of spaces.'
+                ],
+                correct: 1,
+                explanation: 'With `IFS=` and `-r`, `read` preserves all characters, including leading and trailing whitespace.'
+            },
+            {
+                id: 6,
+                lab: 1,
+                question: 'Which of the following is NOT a common way to read a file line by line in Bash?',
+                options: [
+                    'while IFS= read -r line; do ...; done < file',
+                    'for line in $(cat file); do ...; done',
+                    'cat file | while read line; do ...; done',
+                    'exec 3<file; while read -u 3 line; do ...; done; exec 3<&-'
+                ],
+                correct: 1,
+                explanation: '`for line in $(cat file)` would split the file content by whitespace into words, not lines, and is generally not suitable for reading files line by line, especially if lines contain spaces.'
+            },
+            {
+                id: 7,
+                lab: 1,
+                question: 'What is the significance of quoting `$line` as `"$line"` when echoing it inside the loop?',
+                options: [
+                    'It\'s optional and has no effect.',
+                    'It prevents word splitting and globbing of the variable\'s content.',
+                    'It converts the line to an integer.',
+                    'It makes the output bold.'
+                ],
+                correct: 1,
+                explanation: 'Double-quoting `"$line"` is crucial to prevent the shell from performing word splitting on spaces and globbing (pathname expansion) on special characters within the variable\'s value.'
+            },
+            {
+                id: 8,
+                lab: 1,
+                question: 'Consider the script: `FILE="data.txt"; while IFS= read -r l; do echo "$l"; done < "$FILE"`. If `data.txt` is empty, what will be the output?',
+                options: [
+                    'An error message.',
+                    'The script will hang.',
+                    'Nothing.',
+                    'A blank line.'
+                ],
+                correct: 2,
+                explanation: 'If the file is empty, the `read` command will immediately encounter End-Of-File (EOF), and the `while` loop condition will be false from the start, resulting in no output.'
+            },
+            {
+                id: 9,
+                lab: 1,
+                question: 'Which of the following commands would create `myfile.txt` with exactly one line containing "Hello World" and no newline character at the end?',
+                options: [
+                    'echo "Hello World" > myfile.txt',
+                    'echo -n "Hello World" > myfile.txt',
+                    'printf "Hello World\\n" > myfile.txt',
+                    'echo -e "Hello World" > myfile.txt'
+                ],
+                correct: 1,
+                explanation: 'The `-n` option with `echo` suppresses the trailing newline character.'
+            },
+            {
+                id: 10,
+                lab: 1,
+                question: 'What is the default value of `IFS` if not explicitly set?',
+                options: [
+                    'Newline character only.',
+                    'Space, Tab, and Newline characters.',
+                    'Empty string.',
+                    'Comma.'
+                ],
+                correct: 1,
+                explanation: 'By default, `IFS` (Internal Field Separator) is set to Space, Tab, and Newline, which are used by the shell for word splitting.'
+            },
+            {
+                id: 11,
+                lab: 1,
+                question: 'If `myfile.txt` contains `Line 1`, `Line 2`, and `Line 3`, and the script from Lab 1 is run, how many times will `echo "$line"` be executed?',
+                options: [
+                    '1',
+                    '2',
+                    '3',
+                    '4'
+                ],
+                correct: 2,
+                explanation: 'The loop will execute once for each line in the file, so for three lines, it will execute three times.'
+            },
+            {
+                id: 12,
+                lab: 1,
+                question: 'What happens if `"$FILE"` is not quoted in `done < "$FILE"` and the filename contains spaces (e.g., `my file.txt`)?',
+                options: [
+                    'The script will still work correctly.',
+                    'The shell will interpret `my` and `file.txt` as two separate files.',
+                    'An error will occur because the file cannot be found.',
+                    'The script will read from standard input instead.'
+                ],
+                correct: 1,
+                explanation: 'Without quotes, the shell performs word splitting. If the filename contains spaces, it will be treated as multiple arguments, leading to an error or incorrect behavior.'
+            },
+            {
+                id: 13,
+                lab: 2,
+                question: 'What does the special variable `$#` represent in a Bash script?',
+                options: [
+                    'The last argument passed to the script.',
+                    'The process ID of the script.',
+                    'The number of arguments passed to the script.',
+                    'All arguments passed to the script.'
+                ],
+                correct: 2,
+                explanation: '`$#` expands to the number of positional parameters (arguments) passed to the script or function.'
+            },
+            {
+                id: 14,
+                lab: 2,
+                question: 'How can you access the name of the script itself within the script?',
+                options: [
+                    '$NAME',
+                    '$SCRIPT_NAME',
+                    '$0',
+                    '$*'
+                ],
+                correct: 2,
+                explanation: '`$0` holds the name of the script as it was invoked.'
+            },
+            {
+                id: 15,
+                lab: 2,
+                question: 'If a script is executed as `./args.sh apple banana cherry`, what will be the value of `$1`?',
+                options: [
+                    'apple banana cherry',
+                    'apple',
+                    'banana',
+                    'cherry'
+                ],
+                correct: 1,
+                explanation: '`$1` refers to the first positional argument, which is `apple` in this case.'
+            },
+            {
+                id: 16,
+                lab: 2,
+                question: 'To access the second argument passed to a script, which variable should be used?',
+                options: [
+                    '$@',
+                    '$2',
+                    '$#',
+                    '$ARG2'
+                ],
+                correct: 1,
+                explanation: 'Positional parameters are accessed using `$1`, `$2`, `$3`, and so on, corresponding to the order of arguments.'
+            },
+            {
+                id: 17,
+                lab: 2,
+                question: 'What is the difference between `$@` and `$*` when expanded within double quotes?',
+                options: [
+                    'They are identical in all contexts.',
+                    '`"$@"` expands each argument as a separate word, while `"$*"` expands all arguments as a single word.',
+                    '`"$*"` expands each argument as a separate word, while `"$@"` expands all arguments as a single word.',
+                    '`"$@"` includes the script name, while `"$*"` does not.'
+                ],
+                correct: 1,
+                explanation: '`"$@"` expands to `"$1"` `"$2"` `...` `"$N"`, treating each argument as a separate quoted string. `"$*"` expands to `"$1c2c...cN"`, where `c` is the first character of `IFS`, effectively joining all arguments into a single string.'
+            },
+            {
+                id: 18,
+                lab: 2,
+                question: 'If `args.sh` is run as `./args.sh "hello world" 123`, what will `echo "All arguments: $@"` output?',
+                options: [
+                    'All arguments: hello world 123',
+                    'All arguments: "hello world" 123',
+                    'All arguments: hello 123',
+                    'All arguments: hello world'
+                ],
+                correct: 0,
+                explanation: 'When `"$@"` is used, it preserves the individual arguments. In this case, `echo` will print the two arguments separated by a space.'
+            },
+            {
+                id: 19,
+                lab: 2,
+                question: 'Which of the following is true about positional parameters in Bash?',
+                options: [
+                    'They can only be accessed up to `$9`.',
+                    'They are read-only and cannot be modified.',
+                    'They are automatically reset after a function call.',
+                    'They are local to the script unless explicitly exported.'
+                ],
+                correct: 1,
+                explanation: 'Positional parameters (`$1`, `$2`, etc.) are read-only variables that represent the arguments passed to a script or function. They cannot be directly assigned new values.'
+            },
+            {
+                id: 20,
+                lab: 2,
+                question: 'What would be the output of `echo $#` if the script is executed as `./args.sh` (with no arguments)?',
+                options: [
+                    '0',
+                    '1',
+                    'An empty line.',
+                    'An error.'
+                ],
+                correct: 0,
+                explanation: 'If no arguments are passed, the number of arguments (`$#`) is 0.'
+            },
+            {
+                id: 21,
+                lab: 2,
+                question: 'If a script `test.sh` contains `echo "$1" "$2"` and is executed as `./test.sh "first arg" second`, what will be the output?',
+                options: [
+                    'first arg second',
+                    'first second',
+                    '"first arg" second',
+                    'first arg" "second'
+                ],
+                correct: 0,
+                explanation: 'The double quotes around "first arg" ensure it is treated as a single argument, which is then printed by `echo`.'
+            },
+            {
+                id: 22,
+                lab: 2,
+                question: 'Which command can be used to shift positional parameters to the left, effectively discarding the first one?',
+                options: [
+                    'pop',
+                    'shift',
+                    'discard',
+                    'next'
+                ],
+                correct: 1,
+                explanation: 'The `shift` command shifts positional parameters to the left by a specified number (default 1), discarding the leftmost ones.'
+            },
+            {
+                id: 23,
+                lab: 2,
+                question: 'What happens to `$0` when `shift` is executed?',
+                options: [
+                    'It becomes the previous `$1`.',
+                    'It remains unchanged.',
+                    'It becomes empty.',
+                    'It is discarded.'
+                ],
+                correct: 1,
+                explanation: 'The `shift` command only affects positional parameters from `$1` onwards. `$0` (the script name) remains unchanged.'
+            },
+            {
+                id: 24,
+                lab: 2,
+                question: 'If a script is called with `./script.sh a b c d`, what will be the value of `$2` after executing `shift 2`?',
+                options: [
+                    'b',
+                    'c',
+                    'd',
+                    'Empty'
+                ],
+                correct: 2,
+                explanation: '`shift 2` discards `$1` (a) and `$2` (b). The new `$1` becomes `c`, and the new `$2` becomes `d`.'
+            },
+            {
+                id: 25,
+                lab: 3,
+                question: 'In the `add_a_user` function, what is the purpose of `shift 2`?',
+                options: [
+                    'To remove the first two arguments passed to the script.',
+                    'To remove the first two arguments passed to the function.',
+                    'To shift the function\'s execution to the background.',
+                    'To shift the output to standard error.'
+                ],
+                correct: 1,
+                explanation: 'Inside a function, `shift` operates on the function\'s positional parameters, not the script\'s. `shift 2` removes the first two arguments passed to the function.'
+            },
+            {
+                id: 26,
+                lab: 3,
+                question: 'After `shift 2` is executed in the `add_a_user` function, what does `$@` represent?',
+                options: [
+                    'All arguments passed to the script.',
+                    'All arguments passed to the function, including the first two.',
+                    'All arguments passed to the function, excluding the first two.',
+                    'The first two arguments passed to the function.'
+                ],
+                correct: 2,
+                explanation: '`shift 2` removes the first two arguments, so `$@` now contains the remaining arguments passed to the function.'
+            },
+            {
+                id: 27,
+                lab: 3,
+                question: 'How are variables `USER` and `PASSWORD` assigned values in the `add_a_user` function?',
+                options: [
+                    'From user input during execution.',
+                    'From environment variables.',
+                    'From the first and second positional parameters passed to the function.',
+                    'From a configuration file.'
+                ],
+                correct: 2,
+                explanation: '`USER=$1` and `PASSWORD=$2` assign the values of the first and second arguments passed to the function to the respective variables.'
+            },
+            {
+                id: 28,
+                lab: 3,
+                question: 'What is the significance of `COMMENTS=$@` in the `add_a_user` function?',
+                options: [
+                    'It assigns all remaining arguments (after `shift 2`) to the `COMMENTS` variable as a single string.',
+                    'It assigns the number of remaining arguments to the `COMMENTS` variable.',
+                    'It assigns the first remaining argument to the `COMMENTS` variable.',
+                    'It creates an array named `COMMENTS` containing the remaining arguments.'
+                ],
+                correct: 0,
+                explanation: '`$@` expands to all remaining positional parameters. Assigning it to a variable without quotes joins them with spaces, effectively creating a single string containing all comments.'
+            },
+            {
+                id: 29,
+                lab: 3,
+                question: 'If `add_a_user "alice" "pass" "Admin" "Remote"` is called, what will be the value of `COMMENTS`?',
+                options: [
+                    'Admin',
+                    'Remote',
+                    'Admin Remote',
+                    '"Admin" "Remote"'
+                ],
+                correct: 2,
+                explanation: 'After `shift 2` removes "alice" and "pass", `$@` contains "Admin" and "Remote". `COMMENTS=$@` assigns the string "Admin Remote" to the variable.'
+            },
+            {
+                id: 30,
+                lab: 3,
+                question: 'Which of the following is a valid way to call the `add_a_user` function?',
+                options: [
+                    'add_a_user(user, pass, comment)',
+                    'call add_a_user user pass comment',
+                    'add_a_user user pass comment',
+                    'function add_a_user user pass comment'
+                ],
+                correct: 2,
+                explanation: 'In Bash, functions are called simply by using their name followed by arguments separated by spaces.'
+            },
+            {
+                id: 31,
+                lab: 3,
+                question: 'What happens if `add_a_user` is called with only one argument (e.g., `add_a_user "bob"`)?',
+                options: [
+                    'The script will crash.',
+                    '`USER` will be "bob", `PASSWORD` will be empty, and `shift 2` will cause an error.',
+                    '`USER` will be "bob", `PASSWORD` will be empty, and `shift 2` will silently fail or do nothing.',
+                    'The function will prompt for the missing password.'
+                ],
+                correct: 1,
+                explanation: 'If there are fewer than 2 arguments, `shift 2` will fail and typically output an error message like "shift: shift count out of range".'
+            },
+            {
+                id: 32,
+                lab: 3,
+                question: 'Is it necessary to declare variables like `USER` and `PASSWORD` as `local` inside the function?',
+                options: [
+                    'Yes, otherwise they will overwrite global variables with the same name.',
+                    'No, variables in Bash functions are local by default.',
+                    'Yes, but only if they are used in a loop.',
+                    'No, `local` is not a valid keyword in Bash.'
+                ],
+                correct: 0,
+                explanation: 'By default, variables in Bash are global. If a script has a global variable named `USER`, the function will overwrite it unless declared as `local USER=$1`.'
+            },
+            {
+                id: 33,
+                lab: 3,
+                question: 'What is the output of `echo "Adding comments: $COMMENTS"` if no comments were provided when calling the function?',
+                options: [
+                    'Adding comments: ',
+                    'Adding comments: null',
+                    'An error message.',
+                    'The line will not be printed.'
+                ],
+                correct: 0,
+                explanation: 'If no comments are provided, `$COMMENTS` will be empty, so the output will just be the text followed by a space.'
+            },
+            {
+                id: 34,
+                lab: 3,
+                question: 'How can you ensure that the `add_a_user` function returns a success status code (0) upon completion?',
+                options: [
+                    'Add `return 0` at the end of the function.',
+                    'Add `exit 0` at the end of the function.',
+                    'It automatically returns 0 if the last command succeeds.',
+                    'Both 1 and 3 are correct.'
+                ],
+                correct: 3,
+                explanation: 'A function returns the exit status of the last command executed within it. Explicitly using `return 0` is also a good practice to ensure a success status.'
+            },
+            {
+                id: 35,
+                lab: 3,
+                question: 'What is the primary advantage of using a function like `add_a_user` instead of writing the code inline multiple times?',
+                options: [
+                    'It makes the script run faster.',
+                    'It reduces code duplication and improves readability and maintainability.',
+                    'It allows the script to use more memory.',
+                    'It prevents syntax errors.'
+                ],
+                correct: 1,
+                explanation: 'Functions encapsulate reusable logic, making scripts cleaner, easier to read, and simpler to update since changes only need to be made in one place.'
+            },
+            {
+                id: 36,
+                lab: 3,
+                question: 'If the script `adduser.sh` is executed without any arguments, what will happen to the function calls inside it?',
+                options: [
+                    'They will not execute.',
+                    'They will execute with the hardcoded arguments provided in the script.',
+                    'They will prompt the user for input.',
+                    'They will fail because the script received no arguments.'
+                ],
+                correct: 1,
+                explanation: 'The function calls in the script (e.g., `add_a_user "john_doe"...`) use hardcoded strings, so they will execute regardless of whether the script itself received arguments.'
+            },
+            {
+                id: 37,
+                lab: 4,
+                question: 'In the `greet_user` function, what does the condition `[ -z "$1" ]` check?',
+                options: [
+                    'If the first argument is a number.',
+                    'If the first argument is not empty.',
+                    'If the first argument is empty (zero length).',
+                    'If the first argument is a valid username.'
+                ],
+                correct: 2,
+                explanation: 'The `-z` operator in a test expression `[ ... ]` checks if the length of the string is zero (i.e., it is empty).'
+            },
+            {
+                id: 38,
+                lab: 4,
+                question: 'Why is it important to quote `"$1"` in the condition `[ -z "$1" ]`?',
+                options: [
+                    'To prevent syntax errors if `$1` is empty or contains spaces.',
+                    'To convert `$1` to a string.',
+                    'To ensure `$1` is treated as a single character.',
+                    'It is not important; `[ -z $1 ]` works exactly the same.'
+                ],
+                correct: 0,
+                explanation: 'If `$1` is empty and unquoted, the expression becomes `[ -z ]`, which is a syntax error. Quoting ensures it evaluates to `[ -z "" ]`, which is valid.'
+            },
+            {
+                id: 39,
+                lab: 4,
+                question: 'What does `return 1` do in the `greet_user` function?',
+                options: [
+                    'It exits the entire script with a status code of 1.',
+                    'It exits the function and returns a status code of 1 to the caller, indicating an error.',
+                    'It prints "1" to the standard output.',
+                    'It restarts the function.'
+                ],
+                correct: 1,
+                explanation: 'The `return` command exits a function and sets its exit status. A non-zero status (like 1) conventionally indicates an error or failure.'
+            },
+            {
+                id: 40,
+                lab: 4,
+                question: 'How is the current date obtained and stored in the `CURRENT_DATE` variable?',
+                options: [
+                    'CURRENT_DATE=$date',
+                    'CURRENT_DATE="date"',
+                    'CURRENT_DATE=$(date)',
+                    'CURRENT_DATE=date()'
+                ],
+                correct: 2,
+                explanation: '`$(date)` uses command substitution to execute the `date` command and substitute its output into the variable assignment.'
+            },
+            {
+                id: 41,
+                lab: 4,
+                question: 'If `greet.sh` is executed as `./greet.sh`, what will be the output?',
+                options: [
+                    'Hello, . Today is ...',
+                    'Error: Name is missing!',
+                    'The script will hang waiting for input.',
+                    'A syntax error.'
+                ],
+                correct: 1,
+                explanation: 'When executed without arguments, `$1` is empty. The function `greet_user` is called with an empty string, triggering the `[ -z "$1" ]` condition and printing the error message.'
+            },
+            {
+                id: 42,
+                lab: 4,
+                question: 'What is the purpose of the `else` block in the `greet_user` function?',
+                options: [
+                    'To handle the case where the name is missing.',
+                    'To execute the greeting logic if the name is provided (i.e., the `if` condition is false).',
+                    'To provide an alternative greeting.',
+                    'To exit the script.'
+                ],
+                correct: 1,
+                explanation: 'The `else` block contains the code that runs when the `if` condition (`[ -z "$1" ]`) is false, meaning a name was provided.'
+            },
+            {
+                id: 43,
+                lab: 4,
+                question: 'Which of the following is an alternative way to write the condition `[ -z "$1" ]`?',
+                options: [
+                    '[[ -z $1 ]]',
+                    'test -z "$1"',
+                    '[ "$1" == "" ]',
+                    'All of the above.'
+                ],
+                correct: 3,
+                explanation: '`[[ ... ]]` is an extended test command in Bash, `test` is synonymous with `[`, and checking if the string equals an empty string achieves the same result.'
+            },
+            {
+                id: 44,
+                lab: 4,
+                question: 'If the script is modified to `greet_user "$@"` and executed as `./greet.sh John Doe`, what will happen?',
+                options: [
+                    'The function will greet "John Doe".',
+                    'The function will only greet "John".',
+                    'The function will throw an error because it expects only one argument.',
+                    'The `[ -z "$1" ]` check will fail.'
+                ],
+                correct: 1,
+                explanation: '`"$@"` passes all arguments to the function. However, the function only uses `$1` (the first argument passed to it, which is "John"). "Doe" will be ignored by the function.'
+            },
+            {
+                id: 45,
+                lab: 4,
+                question: 'How can you check the exit status of the `greet_user` function immediately after calling it?',
+                options: [
+                    'echo $STATUS',
+                    'echo $?',
+                    'echo $EXIT',
+                    'echo $#'
+                ],
+                correct: 1,
+                explanation: 'The special variable `$?` holds the exit status of the most recently executed command or function.'
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = new Array(questions.length).fill(null);
+        let submitted = false;
+
+        function initializeQuiz() {
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const quizContainer = document.getElementById('quizContainer');
+            if (submitted) {
+                renderRecap();
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            let html = `
+                <div class="question-section active">
+                    <div class="question-counter">Question ${currentQuestion + 1} of ${questions.length}</div>
+                    <div class="question-header">
+                        <div class="question-number">Lab ${q.lab}</div>
+                        <div class="question-text">${q.question}</div>
+                    </div>
+                    <div class="options-container">
+            `;
+
+            q.options.forEach((option, index) => {
+                const checked = answers[currentQuestion] === index ? 'checked' : '';
+                html += `
+                    <label class="option">
+                        <input type="radio" name="answer" value="${index}" ${checked} onchange="selectAnswer(${index})">
+                        <span class="option-text">${option}</span>
+                    </label>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <div id="feedback" class="feedback"></div>
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="previousQuestion()" ${currentQuestion === 0 ? 'disabled' : ''}>← Previous</button>
+                        <button class="btn-primary" onclick="nextQuestion()" ${currentQuestion === questions.length - 1 ? 'style=display:none' : ''}>Next →</button>
+                        <button class="btn-submit" onclick="submitQuiz()" ${currentQuestion !== questions.length - 1 ? 'style=display:none' : ''}>Submit Quiz</button>
+                        <button class="btn-submit" onclick="submitQuiz()" style="flex: 0.5; background: #ffc107; color: #333;">Submit Anytime</button>
+                    </div>
+                </div>
+            `;
+
+            quizContainer.innerHTML = html;
+            updateProgress();
+        }
+
+        function selectAnswer(index) {
+            answers[currentQuestion] = index;
+            showFeedback();
+        }
+
+        function showFeedback() {
+            const q = questions[currentQuestion];
+            const feedback = document.getElementById('feedback');
+            const selectedAnswer = answers[currentQuestion];
+
+            if (selectedAnswer === null) {
+                feedback.classList.remove('show');
+                return;
+            }
+
+            const isCorrect = selectedAnswer === q.correct;
+            feedback.className = `feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedback.innerHTML = `
+                <div class="feedback-title">${isCorrect ? '✓ Correct!' : '✗ Incorrect'}</div>
+                <div class="feedback-text">
+                    <strong>Explanation:</strong> ${q.explanation}
+                </div>
+            `;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function submitQuiz() {
+            submitted = true;
+            renderRecap();
+        }
+
+        function renderRecap() {
+            const quizContainer = document.getElementById('quizContainer');
+            quizContainer.innerHTML = '';
+
+            let correct = 0, incorrect = 0, skipped = 0;
+
+            answers.forEach((answer, index) => {
+                if (answer === null) skipped++;
+                else if (answer === questions[index].correct) correct++;
+                else incorrect++;
+            });
+
+            const percentage = ((correct / questions.length) * 100).toFixed(1);
+
+            let html = `
+                <div class="recap-section active">
+                    <div class="recap-header">
+                        <h2>Quiz Complete!</h2>
+                        <p>You scored ${percentage}% (${correct}/${questions.length} correct)</p>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card correct">
+                            <div class="stat-number">${correct}</div>
+                            <div class="stat-label">Correct</div>
+                        </div>
+                        <div class="stat-card incorrect">
+                            <div class="stat-number">${incorrect}</div>
+                            <div class="stat-label">Incorrect</div>
+                        </div>
+                        <div class="stat-card skipped">
+                            <div class="stat-number">${skipped}</div>
+                            <div class="stat-label">Skipped</div>
+                        </div>
+                    </div>
+                    <div class="recap-details">
+            `;
+
+            questions.forEach((q, index) => {
+                const answer = answers[index];
+                let status = 'skipped';
+                let statusText = 'Skipped';
+
+                if (answer !== null) {
+                    status = answer === q.correct ? 'correct' : 'incorrect';
+                    statusText = answer === q.correct ? 'Correct' : 'Incorrect';
+                }
+
+                html += `
+                    <div class="recap-item ${status}">
+                        <div class="recap-question">Q${index + 1}. ${q.question}</div>
+                        <div class="recap-answer"><strong>Your answer:</strong> ${answer !== null ? q.options[answer] : 'Not answered'}</div>
+                        ${answer !== q.correct ? `<div class="recap-answer"><strong>Correct answer:</strong> ${q.options[q.correct]}</div>` : ''}
+                        <div class="recap-explanation"><strong>Explanation:</strong> ${q.explanation}</div>
+                        <span class="recap-status ${status}">${statusText}</span>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-restart" onclick="restartQuiz()">Restart Quiz</button>
+                    </div>
+                </div>
+            `;
+
+            quizContainer.innerHTML = html;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            answers = new Array(questions.length).fill(null);
+            submitted = false;
+            renderQuestion();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeQuiz);
+    </script>
+</body>
+</html>

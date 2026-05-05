@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Session 6 - Shell Scripting Quiz</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.hdr{background:linear-gradient(135deg,#1e3a5f,#0f172a);padding:30px 20px;text-align:center;border-bottom:2px solid #334155}
+.hdr h1{font-size:1.8rem;color:#38bdf8;margin-bottom:8px}.hdr p{color:#94a3b8}
+.pbc{background:#1e293b;padding:12px 25px;position:sticky;top:0;z-index:100;border-bottom:1px solid #334155;display:flex;align-items:center;gap:15px}
+.pb{flex:1;height:10px;background:#334155;border-radius:10px;overflow:hidden}
+.pf{height:100%;background:linear-gradient(90deg,#38bdf8,#818cf8);border-radius:10px;transition:width .4s;width:0%}
+.pt{color:#94a3b8;font-size:.85rem;white-space:nowrap}
+.qc{max-width:860px;margin:25px auto;padding:0 20px 60px}
+.st{background:linear-gradient(90deg,#1e3a5f,#1e293b);border-left:4px solid #38bdf8;padding:10px 18px;margin:28px 0 14px;border-radius:0 8px 8px 0;font-size:1rem;color:#38bdf8;font-weight:700}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:15px;transition:border-color .3s}
+.card.ok{border-color:#22c55e}.card.ng{border-color:#ef4444}
+.qn{font-size:.72rem;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.qt{font-size:.97rem;color:#e2e8f0;margin-bottom:14px;line-height:1.65}
+.qt code{background:#0f172a;color:#f59e0b;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.88em}
+.opts{display:flex;flex-direction:column;gap:9px}
+.ob{background:#0f172a;border:1.5px solid #334155;color:#cbd5e1;padding:11px 15px;border-radius:8px;cursor:pointer;text-align:left;font-size:.93rem;transition:all .2s;display:flex;align-items:flex-start;gap:10px}
+.ob:hover:not(:disabled){border-color:#38bdf8;color:#e2e8f0;background:#1e3a5f}
+.ob .ol{font-weight:700;color:#38bdf8;min-width:20px;flex-shrink:0}
+.ob.cor{border-color:#22c55e!important;background:#052e16!important;color:#86efac!important}
+.ob.wrg{border-color:#ef4444!important;background:#2d0a0a!important;color:#fca5a5!important}
+.ob.rev{border-color:#22c55e!important;background:#052e16!important;color:#86efac!important}
+.ob:disabled{cursor:default}
+.exp{margin-top:12px;padding:11px 15px;border-radius:8px;font-size:.88rem;line-height:1.6;display:none}
+.exp.show{display:block}
+.exp.ce{background:#052e16;border-left:3px solid #22c55e;color:#86efac}
+.exp.we{background:#2d0a0a;border-left:3px solid #ef4444;color:#fca5a5}
+.sub{text-align:center;margin:35px 0}
+.sb{background:linear-gradient(135deg,#38bdf8,#818cf8);color:#0f172a;border:none;padding:15px 48px;font-size:1.05rem;font-weight:700;border-radius:50px;cursor:pointer;box-shadow:0 4px 20px rgba(56,189,248,.3);transition:transform .2s}
+.sb:hover{transform:translateY(-2px)}
+#recap{display:none;max-width:860px;margin:0 auto;padding:0 20px 60px}
+.rh{text-align:center;padding:35px 20px}
+.sc{width:140px;height:140px;border-radius:50%;margin:0 auto 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2.3rem;font-weight:700;border:6px solid}
+.sc.gr{border-color:#22c55e;color:#22c55e;background:#052e16}
+.sc.ok2{border-color:#f59e0b;color:#f59e0b;background:#1c1003}
+.sc.po{border-color:#ef4444;color:#ef4444;background:#2d0a0a}
+.sc span{font-size:.8rem;font-weight:400;color:#94a3b8}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.sb2{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:14px;text-align:center}
+.sb2 .sn{font-size:1.9rem;font-weight:700}.sb2 .sl{font-size:.78rem;color:#94a3b8;margin-top:3px}
+.sb2.sc2 .sn{color:#22c55e}.sb2.sw .sn{color:#ef4444}.sb2.ss .sn{color:#f59e0b}.sb2.st .sn{color:#38bdf8}
+.rs{margin:22px 0}
+.rst{font-size:.95rem;font-weight:700;padding:9px 15px;border-radius:8px;margin-bottom:10px}
+.rst.wt{background:#2d0a0a;color:#ef4444;border-left:4px solid #ef4444}
+.rst.ct{background:#052e16;color:#22c55e;border-left:4px solid #22c55e}
+.rst.skt{background:#1c1003;color:#f59e0b;border-left:4px solid #f59e0b}
+.ri{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:14px;margin-bottom:10px}
+.ri.rw{border-left:4px solid #ef4444}.ri.rc{border-left:4px solid #22c55e}.ri.rsk{border-left:4px solid #f59e0b}
+.ri .riq{font-size:.88rem;color:#e2e8f0;margin-bottom:8px;line-height:1.5}
+.riy{color:#fca5a5;font-size:.84rem}.ric{color:#86efac;font-size:.84rem}.rie{color:#94a3b8;margin-top:5px;line-height:1.5;font-size:.83rem}
+.rtb{background:#1e293b;border:2px solid #38bdf8;color:#38bdf8;padding:13px 38px;font-size:.97rem;font-weight:600;border-radius:50px;cursor:pointer;margin-top:18px;transition:all .2s}
+.rtb:hover{background:#38bdf8;color:#0f172a}
+@media(max-width:600px){.sg{grid-template-columns:repeat(2,1fr)}.hdr h1{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>&#x1F427; OS Session 6 &mdash; Shell Scripting I</h1>
+  <p>Quiz de r&eacute;vision &middot; 42 questions &middot; Soumettez quand vous voulez</p>
+</div>
+<div class="pbc">
+  <div class="pb"><div class="pf" id="pf"></div></div>
+  <div class="pt" id="pt">0 / 42 r&eacute;pondues</div>
+</div>
+<div class="qc" id="qc">
+
+<div class="st">&#x1F4CC; Section 1 &mdash; What is a Shell Script?</div>
+
+<div class="card" id="q1"><div class="qn">Question 1</div>
+<div class="qt">Qu'est-ce qu'un shell script ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(1,'A')"><span class="ol">A</span>Un fichier binaire compil&eacute; ex&eacute;cut&eacute; par le noyau Linux</button>
+<button class="ob" onclick="ans(1,'B')"><span class="ol">B</span>Un fichier texte brut contenant des commandes ex&eacute;cut&eacute;es s&eacute;quentiellement par le shell</button>
+<button class="ob" onclick="ans(1,'C')"><span class="ol">C</span>Un programme &eacute;crit en C et compil&eacute; avec gcc</button>
+<button class="ob" onclick="ans(1,'D')"><span class="ol">D</span>Un fichier de configuration du syst&egrave;me d'exploitation</button>
+</div><div class="exp" id="e1"></div></div>
+
+<div class="card" id="q2"><div class="qn">Question 2</div>
+<div class="qt">Dans quel ordre les commandes d'un shell script sont-elles ex&eacute;cut&eacute;es ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(2,'A')"><span class="ol">A</span>En ordre al&eacute;atoire</button>
+<button class="ob" onclick="ans(2,'B')"><span class="ol">B</span>En parall&egrave;le simultan&eacute;ment</button>
+<button class="ob" onclick="ans(2,'C')"><span class="ol">C</span>S&eacute;quentiellement, ligne par ligne</button>
+<button class="ob" onclick="ans(2,'D')"><span class="ol">D</span>Du bas vers le haut</button>
+</div><div class="exp" id="e2"></div></div>
+
+<div class="card" id="q3"><div class="qn">Question 3</div>
+<div class="qt">Parmi les usages suivants, lequel est typique d'un shell script ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(3,'A')"><span class="ol">A</span>Cr&eacute;er des interfaces graphiques complexes</button>
+<button class="ob" onclick="ans(3,'B')"><span class="ol">B</span>Manipulation de fichiers, ex&eacute;cution de programmes et affichage de texte</button>
+<button class="ob" onclick="ans(3,'C')"><span class="ol">C</span>Compiler du code C++</button>
+<button class="ob" onclick="ans(3,'D')"><span class="ol">D</span>G&eacute;rer la m&eacute;moire RAM directement</button>
+</div><div class="exp" id="e3"></div></div>
+
+<div class="st">&#x1F4CC; Section 2 &mdash; Le Shebang (#!)</div>
+
+<div class="card" id="q4"><div class="qn">Question 4</div>
+<div class="qt">Que signifie <code>#!/bin/bash</code> en d&eacute;but de script ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(4,'A')"><span class="ol">A</span>C'est un commentaire qui d&eacute;crit le script</button>
+<button class="ob" onclick="ans(4,'B')"><span class="ol">B</span>Il indique que le script doit &ecirc;tre ex&eacute;cut&eacute; par l'interpr&eacute;teur bash</button>
+<button class="ob" onclick="ans(4,'C')"><span class="ol">C</span>Il d&eacute;finit le r&eacute;pertoire de travail du script</button>
+<button class="ob" onclick="ans(4,'D')"><span class="ol">D</span>Il importe des biblioth&egrave;ques bash</button>
+</div><div class="exp" id="e4"></div></div>
+
+<div class="card" id="q5"><div class="qn">Question 5</div>
+<div class="qt">Quelle est la diff&eacute;rence entre <code>#!/bin/bash</code> et <code>#!/bin/zsh</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(5,'A')"><span class="ol">A</span>Aucune diff&eacute;rence, les deux sont identiques</button>
+<button class="ob" onclick="ans(5,'B')"><span class="ol">B</span><code>#!/bin/bash</code> est plus rapide que <code>#!/bin/zsh</code></button>
+<button class="ob" onclick="ans(5,'C')"><span class="ol">C</span>Ils sp&eacute;cifient des interpr&eacute;teurs diff&eacute;rents (bash vs Z shell), chacun avec sa propre syntaxe</button>
+<button class="ob" onclick="ans(5,'D')"><span class="ol">D</span><code>#!/bin/zsh</code> ne fonctionne que sur macOS</button>
+</div><div class="exp" id="e5"></div></div>
+
+<div class="card" id="q6"><div class="qn">Question 6</div>
+<div class="qt">Que se passe-t-il si vous ex&eacute;cutez <code>bash hello.sh</code> au lieu de <code>./hello.sh</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(6,'A')"><span class="ol">A</span>Le script ne s'ex&eacute;cute pas</button>
+<button class="ob" onclick="ans(6,'B')"><span class="ol">B</span>Le shebang est ignor&eacute; et bash est utilis&eacute; comme interpr&eacute;teur</button>
+<button class="ob" onclick="ans(6,'C')"><span class="ol">C</span>Une erreur de permission est g&eacute;n&eacute;r&eacute;e</button>
+<button class="ob" onclick="ans(6,'D')"><span class="ol">D</span>Le shebang est lu et appliqu&eacute; normalement</button>
+</div><div class="exp" id="e6"></div></div>
+
+<div class="card" id="q7"><div class="qn">Question 7</div>
+<div class="qt">Pourquoi est-il important de pr&eacute;ciser l'interpr&eacute;teur dans le shebang ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(7,'A')"><span class="ol">A</span>Pour rendre le script plus rapide</button>
+<button class="ob" onclick="ans(7,'B')"><span class="ol">B</span>Parce que diff&eacute;rents shells ont des syntaxes diff&eacute;rentes</button>
+<button class="ob" onclick="ans(7,'C')"><span class="ol">C</span>Pour &eacute;viter les erreurs de compilation</button>
+<button class="ob" onclick="ans(7,'D')"><span class="ol">D</span>Pour d&eacute;finir les variables d'environnement</button>
+</div><div class="exp" id="e7"></div></div>
+
+<div class="card" id="q8"><div class="qn">Question 8</div>
+<div class="qt">Quelle est la position correcte du shebang dans un script ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(8,'A')"><span class="ol">A</span>N'importe o&ugrave; dans le fichier</button>
+<button class="ob" onclick="ans(8,'B')"><span class="ol">B</span>&Agrave; la derni&egrave;re ligne du script</button>
+<button class="ob" onclick="ans(8,'C')"><span class="ol">C</span>Obligatoirement &agrave; la toute premi&egrave;re ligne du fichier</button>
+<button class="ob" onclick="ans(8,'D')"><span class="ol">D</span>Apr&egrave;s les commentaires d'en-t&ecirc;te</button>
+</div><div class="exp" id="e8"></div></div>
+
+<div class="st">&#x1F4CC; Section 3 &mdash; Commentaires</div>
+
+<div class="card" id="q9"><div class="qn">Question 9</div>
+<div class="qt">Comment &eacute;crire un commentaire dans un shell script bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(9,'A')"><span class="ol">A</span><code>// Ceci est un commentaire</code></button>
+<button class="ob" onclick="ans(9,'B')"><span class="ol">B</span><code>/* Ceci est un commentaire */</code></button>
+<button class="ob" onclick="ans(9,'C')"><span class="ol">C</span><code># Ceci est un commentaire</code></button>
+<button class="ob" onclick="ans(9,'D')"><span class="ol">D</span><code>-- Ceci est un commentaire</code></button>
+</div><div class="exp" id="e9"></div></div>
+
+<div class="card" id="q10"><div class="qn">Question 10</div>
+<div class="qt">Quelle affirmation sur les commentaires dans un script bash est VRAIE ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(10,'A')"><span class="ol">A</span>Les commentaires sont ex&eacute;cut&eacute;s mais ignor&eacute;s par le shell</button>
+<button class="ob" onclick="ans(10,'B')"><span class="ol">B</span>Les commentaires ralentissent l'ex&eacute;cution du script</button>
+<button class="ob" onclick="ans(10,'C')"><span class="ol">C</span>Les commentaires sont ignor&eacute;s &agrave; l'ex&eacute;cution mais importants pour la lisibilit&eacute; et la collaboration</button>
+<button class="ob" onclick="ans(10,'D')"><span class="ol">D</span>Les commentaires ne peuvent appara&icirc;tre qu'en d&eacute;but de fichier</button>
+</div><div class="exp" id="e10"></div></div>
+
+<div class="st">&#x1F4CC; Section 4 &mdash; Cr&eacute;er et ex&eacute;cuter un script</div>
+
+<div class="card" id="q11"><div class="qn">Question 11</div>
+<div class="qt">Quelle extension est conventionnellement utilis&eacute;e pour les shell scripts ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(11,'A')"><span class="ol">A</span><code>.bash</code></button>
+<button class="ob" onclick="ans(11,'B')"><span class="ol">B</span><code>.sh</code></button>
+<button class="ob" onclick="ans(11,'C')"><span class="ol">C</span><code>.script</code></button>
+<button class="ob" onclick="ans(11,'D')"><span class="ol">D</span><code>.txt</code></button>
+</div><div class="exp" id="e11"></div></div>
+
+<div class="card" id="q12"><div class="qn">Question 12</div>
+<div class="qt">Quelle commande rend un script ex&eacute;cutable ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(12,'A')"><span class="ol">A</span><code>exec hello.sh</code></button>
+<button class="ob" onclick="ans(12,'B')"><span class="ol">B</span><code>run +x hello.sh</code></button>
+<button class="ob" onclick="ans(12,'C')"><span class="ol">C</span><code>chmod +x hello.sh</code></button>
+<button class="ob" onclick="ans(12,'D')"><span class="ol">D</span><code>perm +x hello.sh</code></button>
+</div><div class="exp" id="e12"></div></div>
+
+<div class="card" id="q13"><div class="qn">Question 13</div>
+<div class="qt">Comment ex&eacute;cuter <code>hello.sh</code> depuis le r&eacute;pertoire courant ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(13,'A')"><span class="ol">A</span><code>run hello.sh</code></button>
+<button class="ob" onclick="ans(13,'B')"><span class="ol">B</span><code>execute hello.sh</code></button>
+<button class="ob" onclick="ans(13,'C')"><span class="ol">C</span><code>./hello.sh</code></button>
+<button class="ob" onclick="ans(13,'D')"><span class="ol">D</span><code>open hello.sh</code></button>
+</div><div class="exp" id="e13"></div></div>
+
+<div class="card" id="q14"><div class="qn">Question 14</div>
+<div class="qt">Quel est le r&eacute;sultat du script : <code>#!/bin/bash</code> &rarr; <code>echo "Hello, world!"</code> &rarr; <code>date</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(14,'A')"><span class="ol">A</span>Affiche uniquement "Hello, world!"</button>
+<button class="ob" onclick="ans(14,'B')"><span class="ol">B</span>Affiche "Hello, world!" puis la date et l'heure actuelles</button>
+<button class="ob" onclick="ans(14,'C')"><span class="ol">C</span>G&eacute;n&egrave;re une erreur car <code>date</code> n'est pas valide</button>
+<button class="ob" onclick="ans(14,'D')"><span class="ol">D</span>Affiche uniquement la date</button>
+</div><div class="exp" id="e14"></div></div>
+
+<div class="st">&#x1F4CC; Section 5 &mdash; Variables</div>
+
+<div class="card" id="q15"><div class="qn">Question 15</div>
+<div class="qt">Quelle est la syntaxe correcte pour d&eacute;clarer une variable en bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(15,'A')"><span class="ol">A</span><code>name = "Thomas"</code></button>
+<button class="ob" onclick="ans(15,'B')"><span class="ol">B</span><code>var name = "Thomas"</code></button>
+<button class="ob" onclick="ans(15,'C')"><span class="ol">C</span><code>name="Thomas"</code></button>
+<button class="ob" onclick="ans(15,'D')"><span class="ol">D</span><code>$name="Thomas"</code></button>
+</div><div class="exp" id="e15"></div></div>
+
+<div class="card" id="q16"><div class="qn">Question 16</div>
+<div class="qt">Comment r&eacute;f&eacute;rencer la valeur d'une variable <code>name</code> dans bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(16,'A')"><span class="ol">A</span><code>@name</code></button>
+<button class="ob" onclick="ans(16,'B')"><span class="ol">B</span><code>%name%</code></button>
+<button class="ob" onclick="ans(16,'C')"><span class="ol">C</span><code>&amp;name</code></button>
+<button class="ob" onclick="ans(16,'D')"><span class="ol">D</span><code>$name</code></button>
+</div><div class="exp" id="e16"></div></div>
+
+<div class="card" id="q17"><div class="qn">Question 17</div>
+<div class="qt">Que se passe-t-il si vous &eacute;crivez <code>name = "Thomas"</code> (avec des espaces autour de =) ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(17,'A')"><span class="ol">A</span>La variable est cr&eacute;&eacute;e normalement</button>
+<button class="ob" onclick="ans(17,'B')"><span class="ol">B</span>Bash g&eacute;n&egrave;re une erreur car les espaces autour de = sont interdits</button>
+<button class="ob" onclick="ans(17,'C')"><span class="ol">C</span>La valeur est assign&eacute;e avec des espaces inclus</button>
+<button class="ob" onclick="ans(17,'D')"><span class="ol">D</span>Bash ignore les espaces et cr&eacute;e la variable</button>
+</div><div class="exp" id="e17"></div></div>
+
+<div class="card" id="q18"><div class="qn">Question 18</div>
+<div class="qt">Quelle syntaxe affiche le nombre de lignes de <code>errors.txt</code> dans une phrase ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(18,'A')"><span class="ol">A</span><code>echo "Lignes: wc -l errors.txt"</code></button>
+<button class="ob" onclick="ans(18,'B')"><span class="ol">B</span><code>echo "Lignes: $(wc -l errors.txt)"</code></button>
+<button class="ob" onclick="ans(18,'C')"><span class="ol">C</span><code>echo "Lignes: {wc -l errors.txt}"</code></button>
+<button class="ob" onclick="ans(18,'D')"><span class="ol">D</span><code>print("Lignes: " + wc -l errors.txt)</code></button>
+</div><div class="exp" id="e18"></div></div>
+
+<div class="card" id="q19"><div class="qn">Question 19</div>
+<div class="qt">Quel est le r&eacute;sultat de : <code>MY_MESSAGE="Hello World"</code> puis <code>echo $MY_MESSAGE</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(19,'A')"><span class="ol">A</span><code>$MY_MESSAGE</code></button>
+<button class="ob" onclick="ans(19,'B')"><span class="ol">B</span><code>MY_MESSAGE</code></button>
+<button class="ob" onclick="ans(19,'C')"><span class="ol">C</span><code>Hello World</code></button>
+<button class="ob" onclick="ans(19,'D')"><span class="ol">D</span>Une erreur est g&eacute;n&eacute;r&eacute;e</button>
+</div><div class="exp" id="e19"></div></div>
+
+<div class="st">&#x1F4CC; Section 6 &mdash; Accolades {} et limites de variables</div>
+
+<div class="card" id="q20"><div class="qn">Question 20</div>
+<div class="qt">Pourquoi utilise-t-on <code>${USER_NAME}_final.txt</code> plut&ocirc;t que <code>$USER_NAME_final.txt</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(20,'A')"><span class="ol">A</span>Les accolades sont obligatoires pour toutes les variables</button>
+<button class="ob" onclick="ans(20,'B')"><span class="ol">B</span>Sans accolades, bash cherche une variable <code>USER_NAME_final</code> qui n'existe pas</button>
+<button class="ob" onclick="ans(20,'C')"><span class="ol">C</span>Les accolades rendent le script plus rapide</button>
+<button class="ob" onclick="ans(20,'D')"><span class="ol">D</span>C'est juste une convention stylistique sans effet</button>
+</div><div class="exp" id="e20"></div></div>
+
+<div class="card" id="q21"><div class="qn">Question 21</div>
+<div class="qt">Que fait <code>touch "${USER_NAME}.txt"</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(21,'A')"><span class="ol">A</span>Cr&eacute;e un fichier nomm&eacute; <code>${USER_NAME}.txt</code> litt&eacute;ralement</button>
+<button class="ob" onclick="ans(21,'B')"><span class="ol">B</span>Cr&eacute;e un fichier dont le nom est la valeur de USER_NAME suivie de <code>.txt</code></button>
+<button class="ob" onclick="ans(21,'C')"><span class="ol">C</span>G&eacute;n&egrave;re une erreur de syntaxe</button>
+<button class="ob" onclick="ans(21,'D')"><span class="ol">D</span>Cr&eacute;e un r&eacute;pertoire nomm&eacute; USER_NAME</button>
+</div><div class="exp" id="e21"></div></div>
+
+<div class="card" id="q22"><div class="qn">Question 22</div>
+<div class="qt">Dans quel cas les accolades <code>{}</code> sont-elles particuli&egrave;rement n&eacute;cessaires ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(22,'A')"><span class="ol">A</span>Quand la variable est utilis&eacute;e seule dans une ligne</button>
+<button class="ob" onclick="ans(22,'B')"><span class="ol">B</span>Quand la variable est imm&eacute;diatement suivie d'autres caract&egrave;res (lettres, chiffres, _)</button>
+<button class="ob" onclick="ans(22,'C')"><span class="ol">C</span>Uniquement dans les boucles for</button>
+<button class="ob" onclick="ans(22,'D')"><span class="ol">D</span>Seulement avec les variables num&eacute;riques</button>
+</div><div class="exp" id="e22"></div></div>
+
+<div class="st">&#x1F4CC; Section 7 &mdash; Lecture d'entr&eacute;e utilisateur (read)</div>
+
+<div class="card" id="q23"><div class="qn">Question 23</div>
+<div class="qt">Quelle commande lit une entr&eacute;e utilisateur et la stocke dans <code>MY_NAME</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(23,'A')"><span class="ol">A</span><code>input MY_NAME</code></button>
+<button class="ob" onclick="ans(23,'B')"><span class="ol">B</span><code>scan MY_NAME</code></button>
+<button class="ob" onclick="ans(23,'C')"><span class="ol">C</span><code>read MY_NAME</code></button>
+<button class="ob" onclick="ans(23,'D')"><span class="ol">D</span><code>get MY_NAME</code></button>
+</div><div class="exp" id="e23"></div></div>
+
+<div class="card" id="q24"><div class="qn">Question 24</div>
+<div class="qt">Vous d&eacute;finissez <code>MYVAR="hello"</code> SANS export, puis lancez <code>./myvar.sh</code>. Le script fait : <code>echo $MYVAR</code>, puis <code>MYVAR="hi there"</code>, puis <code>echo $MYVAR</code>. Quel est le r&eacute;sultat ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(24,'A')"><span class="ol">A</span>MYVAR is: hello / MYVAR is: hi there</button>
+<button class="ob" onclick="ans(24,'B')"><span class="ol">B</span>MYVAR is: (vide) / MYVAR is: hi there</button>
+<button class="ob" onclick="ans(24,'C')"><span class="ol">C</span>MYVAR is: hi there / MYVAR is: hi there</button>
+<button class="ob" onclick="ans(24,'D')"><span class="ol">D</span>Une erreur est g&eacute;n&eacute;r&eacute;e</button>
+</div><div class="exp" id="e24"></div></div>
+
+<div class="card" id="q25"><div class="qn">Question 25</div>
+<div class="qt">Que fait la commande <code>export MY_NAME</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(25,'A')"><span class="ol">A</span>Supprime la variable MY_NAME</button>
+<button class="ob" onclick="ans(25,'B')"><span class="ol">B</span>Rend la variable disponible dans les sous-shells et scripts enfants</button>
+<button class="ob" onclick="ans(25,'C')"><span class="ol">C</span>Sauvegarde la variable dans un fichier</button>
+<button class="ob" onclick="ans(25,'D')"><span class="ol">D</span>Copie la variable dans /etc/environment</button>
+</div><div class="exp" id="e25"></div></div>
+
+<div class="card" id="q26"><div class="qn">Question 26</div>
+<div class="qt">Apr&egrave;s <code>export MYVAR="hello"</code> et l'ex&eacute;cution de <code>./myvar.sh</code>, que vaut <code>MYVAR</code> dans le shell parent ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(26,'A')"><span class="ol">A</span><code>hi there</code> (modifi&eacute;e par le script)</button>
+<button class="ob" onclick="ans(26,'B')"><span class="ol">B</span>Vide (d&eacute;truite &agrave; la fin du script)</button>
+<button class="ob" onclick="ans(26,'C')"><span class="ol">C</span><code>hello</code> (inchang&eacute;e, le script a son propre environnement)</button>
+<button class="ob" onclick="ans(26,'D')"><span class="ol">D</span><code>hello hi there</code> (concat&eacute;n&eacute;es)</button>
+</div><div class="exp" id="e26"></div></div>
+
+<div class="card" id="q27"><div class="qn">Question 27</div>
+<div class="qt">Pourquoi <code>./myvar.sh</code> cr&eacute;e-t-il un nouvel environnement shell ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(27,'A')"><span class="ol">A</span>Parce que le script utilise <code>#!/bin/sh</code></button>
+<button class="ob" onclick="ans(27,'B')"><span class="ol">B</span>Parce que chaque script lanc&eacute; avec <code>./</code> d&eacute;marre un nouveau processus shell fils</button>
+<button class="ob" onclick="ans(27,'C')"><span class="ol">C</span>Parce que les variables bash sont toujours locales</button>
+<button class="ob" onclick="ans(27,'D')"><span class="ol">D</span>Parce que Linux isole tous les processus par d&eacute;faut</button>
+</div><div class="exp" id="e27"></div></div>
+
+<div class="card" id="q28"><div class="qn">Question 28</div>
+<div class="qt">Avec <code>export MYVAR="hello"</code> puis <code>./myvar.sh</code>, quel est le premier <code>echo</code> affich&eacute; ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(28,'A')"><span class="ol">A</span><code>MYVAR is:</code> (vide)</button>
+<button class="ob" onclick="ans(28,'B')"><span class="ol">B</span><code>MYVAR is: hi there</code></button>
+<button class="ob" onclick="ans(28,'C')"><span class="ol">C</span><code>MYVAR is: hello</code></button>
+<button class="ob" onclick="ans(28,'D')"><span class="ol">D</span>Une erreur</button>
+</div><div class="exp" id="e28"></div></div>
+
+<div class="st">&#x1F4CC; Section 8 &mdash; Conditions if/elif/else</div>
+
+<div class="card" id="q29"><div class="qn">Question 29</div>
+<div class="qt">Quel op&eacute;rateur teste si un fichier existe et est un fichier r&eacute;gulier ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(29,'A')"><span class="ol">A</span><code>-d</code></button>
+<button class="ob" onclick="ans(29,'B')"><span class="ol">B</span><code>-x</code></button>
+<button class="ob" onclick="ans(29,'C')"><span class="ol">C</span><code>-f</code></button>
+<button class="ob" onclick="ans(29,'D')"><span class="ol">D</span><code>-r</code></button>
+</div><div class="exp" id="e29"></div></div>
+
+<div class="card" id="q30"><div class="qn">Question 30</div>
+<div class="qt">Quel op&eacute;rateur num&eacute;rique teste si <code>a</code> est strictement sup&eacute;rieur &agrave; <code>b</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(30,'A')"><span class="ol">A</span><code>-eq</code> (equal)</button>
+<button class="ob" onclick="ans(30,'B')"><span class="ol">B</span><code>-lt</code> (less than)</button>
+<button class="ob" onclick="ans(30,'C')"><span class="ol">C</span><code>-ge</code> (greater or equal)</button>
+<button class="ob" onclick="ans(30,'D')"><span class="ol">D</span><code>-gt</code> (greater than)</button>
+</div><div class="exp" id="e30"></div></div>
+
+<div class="card" id="q31"><div class="qn">Question 31</div>
+<div class="qt">Comment se termine une structure <code>if</code> en bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(31,'A')"><span class="ol">A</span><code>end</code></button>
+<button class="ob" onclick="ans(31,'B')"><span class="ol">B</span><code>endif</code></button>
+<button class="ob" onclick="ans(31,'C')"><span class="ol">C</span><code>fi</code></button>
+<button class="ob" onclick="ans(31,'D')"><span class="ol">D</span><code>done</code></button>
+</div><div class="exp" id="e31"></div></div>
+
+<div class="card" id="q32"><div class="qn">Question 32</div>
+<div class="qt">Que fait <code>$(( ... ))</code> en bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(32,'A')"><span class="ol">A</span>Ex&eacute;cute une commande et capture sa sortie</button>
+<button class="ob" onclick="ans(32,'B')"><span class="ol">B</span>Effectue une expansion arithm&eacute;tique (calcul sur entiers)</button>
+<button class="ob" onclick="ans(32,'C')"><span class="ol">C</span>D&eacute;finit un tableau</button>
+<button class="ob" onclick="ans(32,'D')"><span class="ol">D</span>Cr&eacute;e un sous-shell</button>
+</div><div class="exp" id="e32"></div></div>
+
+<div class="card" id="q33"><div class="qn">Question 33</div>
+<div class="qt">Quel op&eacute;rateur teste si une cha&icirc;ne est &eacute;gale &agrave; "root" dans un <code>if [ ]</code> bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(33,'A')"><span class="ol">A</span><code>-eq</code></button>
+<button class="ob" onclick="ans(33,'B')"><span class="ol">B</span><code>==</code></button>
+<button class="ob" onclick="ans(33,'C')"><span class="ol">C</span><code>-str</code></button>
+<button class="ob" onclick="ans(33,'D')"><span class="ol">D</span><code>-match</code></button>
+</div><div class="exp" id="e33"></div></div>
+
+<div class="card" id="q34"><div class="qn">Question 34</div>
+<div class="qt">Quel op&eacute;rateur teste si un r&eacute;pertoire existe ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(34,'A')"><span class="ol">A</span><code>-f</code></button>
+<button class="ob" onclick="ans(34,'B')"><span class="ol">B</span><code>-d</code></button>
+<button class="ob" onclick="ans(34,'C')"><span class="ol">C</span><code>-r</code></button>
+<button class="ob" onclick="ans(34,'D')"><span class="ol">D</span><code>-w</code></button>
+</div><div class="exp" id="e34"></div></div>
+
+<div class="card" id="q35"><div class="qn">Question 35</div>
+<div class="qt">Quelle est la syntaxe correcte d'un <code>if</code> avec <code>elif</code> en bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(35,'A')"><span class="ol">A</span><code>if [...] then ... else if [...] then ... fi</code></button>
+<button class="ob" onclick="ans(35,'B')"><span class="ol">B</span><code>if [ ... ]; then ... elif [ ... ]; then ... else ... fi</code></button>
+<button class="ob" onclick="ans(35,'C')"><span class="ol">C</span><code>if { ... } { ... } elseif { ... } { ... }</code></button>
+<button class="ob" onclick="ans(35,'D')"><span class="ol">D</span><code>if (...) {...} elif (...) {...}</code></button>
+</div><div class="exp" id="e35"></div></div>
+
+<div class="card" id="q36"><div class="qn">Question 36</div>
+<div class="qt">Quel op&eacute;rateur teste si un fichier est ex&eacute;cutable ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(36,'A')"><span class="ol">A</span><code>-e</code></button>
+<button class="ob" onclick="ans(36,'B')"><span class="ol">B</span><code>-r</code></button>
+<button class="ob" onclick="ans(36,'C')"><span class="ol">C</span><code>-x</code></button>
+<button class="ob" onclick="ans(36,'D')"><span class="ol">D</span><code>-w</code></button>
+</div><div class="exp" id="e36"></div></div>
+
+<div class="st">&#x1F4CC; Section 9 &mdash; Structure case</div>
+
+<div class="card" id="q37"><div class="qn">Question 37</div>
+<div class="qt">Comment se termine chaque bloc d'un <code>case</code> en bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(37,'A')"><span class="ol">A</span><code>break</code></button>
+<button class="ob" onclick="ans(37,'B')"><span class="ol">B</span><code>;;</code></button>
+<button class="ob" onclick="ans(37,'C')"><span class="ol">C</span><code>end</code></button>
+<button class="ob" onclick="ans(37,'D')"><span class="ol">D</span><code>done</code></button>
+</div><div class="exp" id="e37"></div></div>
+
+<div class="card" id="q38"><div class="qn">Question 38</div>
+<div class="qt">Comment se ferme une structure <code>case</code> en bash ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(38,'A')"><span class="ol">A</span><code>fi</code></button>
+<button class="ob" onclick="ans(38,'B')"><span class="ol">B</span><code>end case</code></button>
+<button class="ob" onclick="ans(38,'C')"><span class="ol">C</span><code>esac</code></button>
+<button class="ob" onclick="ans(38,'D')"><span class="ol">D</span><code>done</code></button>
+</div><div class="exp" id="e38"></div></div>
+
+<div class="card" id="q39"><div class="qn">Question 39</div>
+<div class="qt">Dans une structure <code>case</code>, que repr&eacute;sente le pattern <code>*)</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(39,'A')"><span class="ol">A</span>Il correspond uniquement aux valeurs num&eacute;riques</button>
+<button class="ob" onclick="ans(39,'B')"><span class="ol">B</span>Il correspond &agrave; toute valeur non match&eacute;e (cas par d&eacute;faut)</button>
+<button class="ob" onclick="ans(39,'C')"><span class="ol">C</span>Il correspond aux cha&icirc;nes vides uniquement</button>
+<button class="ob" onclick="ans(39,'D')"><span class="ol">D</span>Il multiplie la variable par elle-m&ecirc;me</button>
+</div><div class="exp" id="e39"></div></div>
+
+<div class="card" id="q40"><div class="qn">Question 40</div>
+<div class="qt">Quand pr&eacute;f&eacute;rer <code>case</code> &agrave; <code>if/elif</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(40,'A')"><span class="ol">A</span>Quand on compare des fichiers</button>
+<button class="ob" onclick="ans(40,'B')"><span class="ol">B</span>Quand on compare une seule variable &agrave; de nombreuses valeurs possibles</button>
+<button class="ob" onclick="ans(40,'C')"><span class="ol">C</span>Quand on a des conditions num&eacute;riques complexes</button>
+<button class="ob" onclick="ans(40,'D')"><span class="ol">D</span>Uniquement pour les menus interactifs</button>
+</div><div class="exp" id="e40"></div></div>
+
+<div class="card" id="q41"><div class="qn">Question 41</div>
+<div class="qt">Comment utilise-t-on <code>|</code> dans une structure <code>case</code> ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(41,'A')"><span class="ol">A</span>Pour rediriger la sortie vers un fichier</button>
+<button class="ob" onclick="ans(41,'B')"><span class="ol">B</span>Pour s&eacute;parer des patterns alternatifs dans un m&ecirc;me bloc</button>
+<button class="ob" onclick="ans(41,'C')"><span class="ol">C</span>Pour combiner deux structures case</button>
+<button class="ob" onclick="ans(41,'D')"><span class="ol">D</span>Pour cr&eacute;er un pipe entre deux commandes</button>
+</div><div class="exp" id="e41"></div></div>
+
+<div class="st">&#x1F4CC; Section 10 &mdash; Bonnes pratiques &amp; Divers</div>
+
+<div class="card" id="q42"><div class="qn">Question 42</div>
+<div class="qt">Laquelle de ces affirmations sur <code>$(( ... ))</code> est CORRECTE ?</div>
+<div class="opts">
+<button class="ob" onclick="ans(42,'A')"><span class="ol">A</span>Il fonctionne avec les nombres flottants (d&eacute;cimaux)</button>
+<button class="ob" onclick="ans(42,'B')"><span class="ol">B</span>Il ne fonctionne qu'avec des entiers</button>
+<button class="ob" onclick="ans(42,'C')"><span class="ol">C</span>Il est identique &agrave; <code>$( ... )</code></button>
+<button class="ob" onclick="ans(42,'D')"><span class="ol">D</span>Il est disponible uniquement en zsh</button>
+</div><div class="exp" id="e42"></div></div>
+
+<div class="sub">
+  <button class="sb" onclick="submitQuiz()">&#x1F4CA; Soumettre et voir les r&eacute;sultats</button>
+  <p style="color:#64748b;margin-top:10px;font-size:.85rem;">Vous pouvez soumettre sans avoir r&eacute;pondu &agrave; toutes les questions</p>
+</div>
+</div>
+
+<div id="recap">
+  <div class="rh">
+    <div class="sc" id="sc"><div id="sp">0%</div><span id="sl">Score</span></div>
+    <h2 style="color:#e2e8f0;margin-bottom:6px;">R&eacute;capitulatif</h2>
+    <p style="color:#94a3b8;">Voici le d&eacute;tail de vos r&eacute;ponses</p>
+  </div>
+  <div class="sg">
+    <div class="sb2 st"><div class="sn" id="stTotal">0</div><div class="sl">R&eacute;pondues</div></div>
+    <div class="sb2 sc2"><div class="sn" id="stCorrect">0</div><div class="sl">&#x2705; Correctes</div></div>
+    <div class="sb2 sw"><div class="sn" id="stWrong">0</div><div class="sl">&#x274C; Incorrectes</div></div>
+    <div class="sb2 ss"><div class="sn" id="stSkip">0</div><div class="sl">&#x23ED; Ignor&eacute;es</div></div>
+  </div>
+  <div id="recapWrong" class="rs"></div>
+  <div id="recapSkip" class="rs"></div>
+  <div id="recapCorrect" class="rs"></div>
+  <div style="text-align:center;margin-top:25px;">
+    <button class="rtb" onclick="retryQuiz()">&#x1F504; Recommencer le quiz</button>
+  </div>
+</div>
+
+<script>
+const TOTAL=42;
+const userAns={};
+const CA={1:'B',2:'C',3:'B',4:'B',5:'C',6:'B',7:'B',8:'C',9:'C',10:'C',11:'B',12:'C',13:'C',14:'B',15:'C',16:'D',17:'B',18:'B',19:'C',20:'B',21:'B',22:'B',23:'C',24:'B',25:'B',26:'C',27:'B',28:'C',29:'C',30:'D',31:'C',32:'B',33:'B',34:'B',35:'B',36:'C',37:'B',38:'C',39:'B',40:'B',41:'B',42:'B'};
+const EXP={
+  1:{c:"✅ Correct ! Un shell script est un fichier TEXTE brut contenant des commandes Linux exécutées séquentiellement par le shell.",w:"❌ Incorrect. Un shell script n'est PAS un binaire compilé. C'est un simple fichier texte interprété ligne par ligne par le shell."},
+  2:{c:"✅ Correct ! Les commandes d'un script sont exécutées séquentiellement, de haut en bas, ligne par ligne.",w:"❌ Incorrect. L'exécution est séquentielle (ligne par ligne), pas parallèle ni aléatoire."},
+  3:{c:"✅ Correct ! Les shell scripts servent typiquement à la manipulation de fichiers, l'exécution de programmes et l'affichage de texte.",w:"❌ Incorrect. Les shell scripts ne sont pas conçus pour les GUI complexes, la compilation C++ ou la gestion directe de RAM."},
+  4:{c:"✅ Correct ! Le shebang #!/bin/bash indique au système d'utiliser bash comme interpréteur pour exécuter ce script.",w:"❌ Incorrect. Le shebang n'est PAS un commentaire ordinaire. Il spécifie l'interpréteur à utiliser pour exécuter le script."},
+  5:{c:"✅ Correct ! #!/bin/bash utilise bash et #!/bin/zsh utilise le Z shell. Chaque shell a sa propre syntaxe, d'où l'importance de préciser lequel utiliser.",w:"❌ Incorrect. Ces deux shebangs spécifient des interpréteurs différents avec des syntaxes différentes. Ce n'est pas une question de vitesse ou de compatibilité OS."},
+  6:{c:"✅ Correct ! Quand on exécute 'bash hello.sh', on force l'utilisation de bash et le shebang est ignoré.",w:"❌ Incorrect. 'bash hello.sh' fonctionne et exécute le script, mais le shebang est ignoré car on a explicitement spécifié bash."},
+  7:{c:"✅ Correct ! Différents shells (bash, zsh, sh...) ont des syntaxes différentes. Le shebang garantit que le bon interpréteur est utilisé.",w:"❌ Incorrect. L'importance du shebang est liée aux différences de syntaxe entre les shells, pas à la vitesse ou à la compilation."},
+  8:{c:"✅ Correct ! Le shebang DOIT être à la toute première ligne du fichier, sans aucune ligne avant lui.",w:"❌ Incorrect. Le shebang doit obligatoirement être à la PREMIÈRE ligne du fichier. S'il est ailleurs, il sera traité comme un commentaire ordinaire."},
+  9:{c:"✅ Correct ! En bash, les commentaires commencent par # (sauf la première ligne si c'est le shebang).",w:"❌ Incorrect. En bash, les commentaires utilisent #. Les syntaxes // et /* */ sont pour C/C++/Java, et -- est pour SQL."},
+  10:{c:"✅ Correct ! Les commentaires sont complètement ignorés à l'exécution, mais ils sont essentiels pour documenter le code et aider les collaborateurs.",w:"❌ Incorrect. Les commentaires ne sont PAS exécutés et ne ralentissent PAS le script. Ils peuvent apparaître n'importe où dans le fichier."},
+  11:{c:"✅ Correct ! La convention est d'utiliser l'extension .sh pour les shell scripts.",w:"❌ Incorrect. La convention standard est .sh. Techniquement un script peut fonctionner sans extension, mais .sh est la norme."},
+  12:{c:"✅ Correct ! chmod +x hello.sh ajoute le bit d'exécution au fichier, le rendant exécutable.",w:"❌ Incorrect. La commande correcte est 'chmod +x'. chmod signifie 'change mode' et +x ajoute la permission d'exécution."},
+  13:{c:"✅ Correct ! ./hello.sh exécute le script depuis le répertoire courant. Le ./ indique le répertoire courant.",w:"❌ Incorrect. Pour exécuter un script dans le répertoire courant, on utilise ./hello.sh. Le ./ est nécessaire car le répertoire courant n'est généralement pas dans le PATH."},
+  14:{c:"✅ Correct ! Le script exécute les commandes séquentiellement : d'abord echo affiche 'Hello, world!

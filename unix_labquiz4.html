@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Linux CLI Commands - MCQ Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #e0e0e0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      padding: 30px 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    .header h1 {
+      font-size: 2rem;
+      color: #00d4ff;
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px rgba(0,212,255,0.5);
+    }
+    .header p { color: #aaa; font-size: 0.95rem; }
+    .progress-bar-container {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      height: 10px;
+      margin: 16px 0 8px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+      border-radius: 10px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .progress-text { font-size: 0.85rem; color: #aaa; text-align: right; }
+    .question-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(5px);
+      transition: border-color 0.3s;
+    }
+    .question-card:hover { border-color: rgba(0,212,255,0.3); }
+    .question-card.answered-correct { border-color: rgba(0,200,100,0.5); background: rgba(0,200,100,0.05); }
+    .question-card.answered-wrong { border-color: rgba(255,80,80,0.5); background: rgba(255,80,80,0.05); }
+    .question-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .q-number {
+      background: linear-gradient(135deg, #00d4ff, #7b2ff7);
+      color: white;
+      font-weight: bold;
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .question-text {
+      font-size: 0.97rem;
+      line-height: 1.6;
+      color: #e8e8e8;
+    }
+    .question-text code {
+      background: rgba(0,212,255,0.15);
+      color: #00d4ff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(255,255,255,0.03);
+    }
+    .option-label:hover { background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.4); }
+    .option-label input[type="radio"] { display: none; }
+    .option-label.selected { background: rgba(0,212,255,0.15); border-color: #00d4ff; }
+    .option-label.correct { background: rgba(0,200,100,0.2) !important; border-color: #00c864 !important; color: #00ff88; }
+    .option-label.wrong { background: rgba(255,80,80,0.2) !important; border-color: #ff5050 !important; color: #ff8080; }
+    .option-letter {
+      font-weight: bold;
+      color: #00d4ff;
+      min-width: 22px;
+      font-size: 0.9rem;
+    }
+    .option-text { font-size: 0.92rem; line-height: 1.5; }
+    .option-text code {
+      background: rgba(0,212,255,0.15);
+      color: #00d4ff;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    .feedback {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      display: none;
+      line-height: 1.5;
+    }
+    .feedback.correct { background: rgba(0,200,100,0.15); border: 1px solid rgba(0,200,100,0.4); color: #00ff88; display: block; }
+    .feedback.wrong { background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.4); color: #ff8080; display: block; }
+    .btn-submit {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #00d4ff, #7b2ff7);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 28px;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.5px;
+    }
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+    .result-panel {
+      display: none;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 32px;
+      margin-top: 28px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    .result-panel h2 { font-size: 1.8rem; color: #00d4ff; margin-bottom: 12px; }
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(#00d4ff 0%, #7b2ff7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: white;
+      box-shadow: 0 0 30px rgba(0,212,255,0.4);
+      position: relative;
+    }
+    .score-circle::before {
+      content: '';
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: #16213e;
+    }
+    .score-circle span { position: relative; z-index: 1; }
+    .result-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 14px 24px;
+      min-width: 120px;
+    }
+    .stat-box .stat-num { font-size: 1.8rem; font-weight: bold; }
+    .stat-box .stat-label { font-size: 0.8rem; color: #aaa; margin-top: 4px; }
+    .stat-box.correct .stat-num { color: #00ff88; }
+    .stat-box.wrong .stat-num { color: #ff8080; }
+    .stat-box.skip .stat-num { color: #ffcc00; }
+    .result-message { font-size: 1.1rem; color: #ccc; margin: 12px 0; }
+    .btn-retry {
+      padding: 12px 32px;
+      background: linear-gradient(135deg, #7b2ff7, #00d4ff);
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: opacity 0.2s;
+    }
+    .btn-retry:hover { opacity: 0.85; }
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #7b2ff7;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    @media (max-width: 600px) {
+      .header h1 { font-size: 1.4rem; }
+      .question-card { padding: 16px; }
+      .result-stats { gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🐧 Linux CLI Commands — MCQ Quiz</h1>
+    <p>File & Directory Management | Commands, Syntax & Wildcards</p>
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-text" id="progressText">0 / 42 answered</div>
+  </div>
+
+  <div id="quizContainer"></div>
+
+  <button class="btn-submit" onclick="submitQuiz()">📊 Submit & See Results</button>
+
+  <div class="result-panel" id="resultPanel">
+    <h2>📋 Quiz Results</h2>
+    <div class="score-circle"><span id="scorePercent">0%</span></div>
+    <div class="result-stats">
+      <div class="stat-box correct"><div class="stat-num" id="correctCount">0</div><div class="stat-label">✅ Correct</div></div>
+      <div class="stat-box wrong"><div class="stat-num" id="wrongCount">0</div><div class="stat-label">❌ Wrong</div></div>
+      <div class="stat-box skip"><div class="stat-num" id="skipCount">0</div><div class="stat-label">⏭ Skipped</div></div>
+    </div>
+    <div class="result-message" id="resultMessage"></div>
+    <button class="btn-retry" onclick="retryQuiz()">🔄 Retry Quiz</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    section: "Directory & Navigation",
+    q: "Which command creates a directory named <code>lab</code> in your home directory?",
+    options: [
+      "touch ~/lab",
+      "mkdir ~/lab",
+      "cd ~/lab",
+      "new ~/lab"
+    ],
+    answer: 1,
+    feedback: "<code>mkdir ~/lab</code> creates a new directory. <code>~/</code> refers to your home directory."
+  },
+  {
+    section: "Directory & Navigation",
+    q: "Which command do you use to navigate into the <code>lab</code> directory?",
+    options: [
+      "open lab",
+      "goto lab",
+      "cd lab",
+      "ls lab"
+    ],
+    answer: 2,
+    feedback: "<code>cd lab</code> (change directory) moves you into the specified directory."
+  },
+  {
+    section: "Directory & Navigation",
+    q: "What does <code>cd ~</code> do?",
+    options: [
+      "Creates the home directory",
+      "Deletes the current directory",
+      "Navigates to the home directory",
+      "Lists files in home directory"
+    ],
+    answer: 2,
+    feedback: "<code>cd ~</code> always takes you back to your home directory regardless of where you are."
+  },
+  {
+    section: "Directory & Navigation",
+    q: "Which command shows your current working directory?",
+    options: [
+      "ls",
+      "pwd",
+      "dir",
+      "where"
+    ],
+    answer: 1,
+    feedback: "<code>pwd</code> (print working directory) displays the full path of the current directory."
+  },
+  {
+    section: "File Creation",
+    q: "How would you create multiple empty files <code>file1.txt</code>, <code>file2.txt</code>, <code>file3.txt</code> at once?",
+    options: [
+      "create file1.txt file2.txt file3.txt",
+      "touch file1.txt file2.txt file3.txt",
+      "new file1.txt file2.txt file3.txt",
+      "mkdir file1.txt file2.txt file3.txt"
+    ],
+    answer: 1,
+    feedback: "<code>touch</code> can accept multiple filenames and creates all of them as empty files in one command."
+  },
+  {
+    section: "File Creation",
+    q: "Which command creates a single empty file named <code>test.txt</code>?",
+    options: [
+      "mkdir test.txt",
+      "echo test.txt",
+      "touch test.txt",
+      "cp test.txt"
+    ],
+    answer: 2,
+    feedback: "<code>touch test.txt</code> creates an empty file. If the file already exists, it updates the timestamp."
+  },
+  {
+    section: "File Creation",
+    q: "You want to create files <code>notes.md</code> and <code>data.csv</code> simultaneously. Which command is correct?",
+    options: [
+      "touch notes.md && data.csv",
+      "touch notes.md data.csv",
+      "create notes.md data.csv",
+      "new notes.md, data.csv"
+    ],
+    answer: 1,
+    feedback: "<code>touch notes.md data.csv</code> — touch accepts space-separated filenames to create multiple files at once."
+  },
+  {
+    section: "Copying Files",
+    q: "How do you copy all <code>.txt</code> files into a folder named <code>backup</code>?",
+    options: [
+      "mv *.txt backup/",
+      "cp *.txt backup/",
+      "copy *.txt backup/",
+      "cp .txt backup/"
+    ],
+    answer: 1,
+    feedback: "<code>cp *.txt backup/</code> uses the wildcard <code>*</code> to match all .txt files and copies them to backup/."
+  },
+  {
+    section: "Copying Files",
+    q: "Which option must you add to <code>cp</code> to copy an entire directory recursively?",
+    options: [
+      "cp -a",
+      "cp -f",
+      "cp -r",
+      "cp -d"
+    ],
+    answer: 2,
+    feedback: "<code>cp -r</code> (recursive) copies directories and all their contents. Without it, cp cannot copy directories."
+  },
+  {
+    section: "Copying Files",
+    q: "Which command copies the entire <code>lab</code> folder to a new folder named <code>lab_final</code>?",
+    options: [
+      "cp lab lab_final",
+      "cp -r lab lab_final",
+      "mv lab lab_final",
+      "cp -f lab lab_final"
+    ],
+    answer: 1,
+    feedback: "<code>cp -r lab lab_final</code> recursively copies all files and subdirectories from lab to lab_final."
+  },
+  {
+    section: "Copying Files",
+    q: "What does the <code>-v</code> flag do when used with <code>cp</code>?",
+    options: [
+      "Validates file integrity",
+      "Copies only visible files",
+      "Shows verbose output of each file being copied",
+      "Prevents overwriting existing files"
+    ],
+    answer: 2,
+    feedback: "<code>cp -v</code> (verbose) prints the name of each file as it is copied, useful for monitoring progress."
+  },
+  {
+    section: "Moving & Renaming",
+    q: "Which command renames <code>file3.txt</code> to <code>final.txt</code>?",
+    options: [
+      "rename file3.txt final.txt",
+      "cp file3.txt final.txt",
+      "mv file3.txt final.txt",
+      "rn file3.txt final.txt"
+    ],
+    answer: 2,
+    feedback: "<code>mv</code> is used for both moving and renaming files. <code>mv file3.txt final.txt</code> renames the file."
+  },
+  {
+    section: "Moving & Renaming",
+    q: "How do you move <code>notes.md</code> into a folder called <code>docs/</code>?",
+    options: [
+      "cp notes.md docs/",
+      "mv notes.md docs/",
+      "move notes.md docs/",
+      "put notes.md docs/"
+    ],
+    answer: 1,
+    feedback: "<code>mv notes.md docs/</code> moves the file into the docs directory. The folder must exist first."
+  },
+  {
+    section: "Moving & Renaming",
+    q: "What does <code>mv -i</code> do?",
+    options: [
+      "Moves files invisibly",
+      "Prompts for confirmation before overwriting an existing file",
+      "Ignores errors during move",
+      "Moves only image files"
+    ],
+    answer: 1,
+    feedback: "<code>mv -i</code> (interactive) asks for confirmation before overwriting a destination file that already exists."
+  },
+  {
+    section: "Moving & Renaming",
+    q: "You want to move all files currently in the current directory into the <code>lab</code> folder. Which command is correct?",
+    options: [
+      "mv * lab/",
+      "cp * lab/",
+      "mv . lab/",
+      "move all lab/"
+    ],
+    answer: 0,
+    feedback: "<code>mv * lab/</code> uses the wildcard <code>*</code> to match all files and moves them into the lab directory."
+  },
+  {
+    section: "Deleting Files & Folders",
+    q: "Which command deletes the file <code>data.csv</code>?",
+    options: [
+      "del data.csv",
+      "remove data.csv",
+      "rm data.csv",
+      "erase data.csv"
+    ],
+    answer: 2,
+    feedback: "<code>rm data.csv</code> permanently removes the file. There is no recycle bin in Linux CLI."
+  },
+  {
+    section: "Deleting Files & Folders",
+    q: "Which command deletes the <code>docs/</code> folder and all its contents?",
+    options: [
+      "rm docs/",
+      "rmdir docs/",
+      "rm -r docs/",
+      "del -r docs/"
+    ],
+    answer: 2,
+    feedback: "<code>rm -r docs/</code> recursively removes the directory and everything inside it. <code>rmdir</code> only works on empty directories."
+  },
+  {
+    section: "Deleting Files & Folders",
+    q: "What does <code>rm -i</code> do?",
+    options: [
+      "Removes files immediately without prompt",
+      "Removes only invisible files",
+      "Prompts for confirmation before each deletion",
+      "Ignores read-only files"
+    ],
+    answer: 2,
+    feedback: "<code>rm -i</code> (interactive) asks you to confirm each deletion — useful to avoid accidental data loss."
+  },
+  {
+    section: "Deleting Files & Folders",
+    q: "What happens to a file deleted with <code>rm</code> in Linux?",
+    options: [
+      "It is moved to the Trash folder",
+      "It is permanently deleted and cannot be recovered easily",
+      "It is archived automatically",
+      "It is moved to /tmp"
+    ],
+    answer: 1,
+    feedback: "Unlike GUI environments, <code>rm</code> permanently deletes files. There is no built-in undo or recycle bin in the terminal."
+  },
+  {
+    section: "Deleting Files & Folders",
+    q: "Which option makes <code>rm</code> show each file as it is deleted?",
+    options: [
+      "rm -f",
+      "rm -v",
+      "rm -r",
+      "rm -d"
+    ],
+    answer: 1,
+    feedback: "<code>rm -v</code> (verbose) prints the name of each file as it is removed."
+  },
+  {
+    section: "Deleting Files & Folders",
+    q: "What does <code>rm -rf foldername</code> do?",
+    options: [
+      "Renames the folder",
+      "Removes the folder recursively and forcefully without prompts",
+      "Refreshes the folder",
+      "Reads files inside the folder"
+    ],
+    answer: 1,
+    feedback: "<code>rm -rf</code> combines recursive (<code>-r</code>) and force (<code>-f</code>) — it deletes everything without asking. Use with extreme caution!"
+  },
+  {
+    section: "Wildcards",
+    q: "What does the wildcard <code>*</code> represent in a filename pattern?",
+    options: [
+      "Exactly one character",
+      "Zero or more characters",
+      "Only letters",
+      "Only numbers"
+    ],
+    answer: 1,
+    feedback: "<code>*</code> matches zero or more of any character. For example, <code>*.txt</code> matches all files ending in .txt."
+  },
+  {
+    section: "Wildcards",
+    q: "What does <code>ls test?.txt</code> match?",
+    options: [
+      "All files starting with test",
+      "Files like test1.txt, test2.txt (exactly one character after test)",
+      "Only the file named test.txt",
+      "Files with .txt extension only"
+    ],
+    answer: 1,
+    feedback: "<code>?</code> matches exactly one character. So <code>test?.txt</code> matches test1.txt, testA.txt but NOT test10.txt."
+  },
+  {
+    section: "Wildcards",
+    q: "Which command lists only <code>.md</code> files in the current directory?",
+    options: [
+      "ls .md",
+      "ls *.md",
+      "ls md*",
+      "ls -md"
+    ],
+    answer: 1,
+    feedback: "<code>ls *.md</code> uses the wildcard to list all files whose names end with .md."
+  },
+  {
+    section: "Wildcards",
+    q: "What does <code>ls test*.*</code> match?",
+    options: [
+      "Only test.txt",
+      "All files starting with test that have an extension",
+      "All files in the directory",
+      "Files named exactly test"
+    ],
+    answer: 1,
+    feedback: "<code>test*.*</code> matches files starting with test and containing a dot, e.g., test1.txt, test2.csv, test_data.md."
+  },
+  {
+    section: "Wildcards",
+    q: "You want to delete all <code>.txt</code> files in the current directory. Which command does this?",
+    options: [
+      "rm .txt",
+      "rm -txt",
+      "rm *.txt",
+      "del *.txt"
+    ],
+    answer: 2,
+    feedback: "<code>rm *.txt</code> deletes all files ending in .txt. Be careful — this cannot be undone!"
+  },
+  {
+    section: "Wildcards",
+    q: "Which pattern matches files <code>file1.txt</code>, <code>file2.txt</code>, and <code>file3.txt</code> but NOT <code>file10.txt</code>?",
+    options: [
+      "file*.txt",
+      "file?.txt",
+      "file[1-3].txt",
+      "Both B and C"
+    ],
+    answer: 3,
+    feedback: "<code>file?.txt</code> matches exactly one character after file. <code>file[1-3].txt</code> matches 1, 2, or 3 specifically. Both work here."
+  },
+  {
+    section: "Manual & Help",
+    q: "Which command opens the manual page for the <code>cp</code> command?",
+    options: [
+      "help cp",
+      "man cp",
+      "info cp",
+      "cp --help"
+    ],
+    answer: 1,
+    feedback: "<code>man cp</code> opens the full manual page. <code>cp --help</code> also works but gives a shorter summary."
+  },
+  {
+    section: "Manual & Help",
+    q: "Inside the <code>man</code> page, which key do you press to quit?",
+    options: [
+      "Ctrl+C",
+      "Esc",
+      "q",
+      "x"
+    ],
+    answer: 2,
+    feedback: "Press <code>q</code> to quit the man page viewer (which uses the less pager)."
+  },
+  {
+    section: "Manual & Help",
+    q: "Which flag in <code>cp</code> allows copying directories (as seen in the man page)?",
+    options: [
+      "-d",
+      "-f",
+      "-r or -R",
+      "-p"
+    ],
+    answer: 2,
+    feedback: "<code>cp -r</code> or <code>cp -R</code> enables recursive copying of directories and their contents."
+  },
+  {
+    section: "Listing Files",
+    q: "Which command lists all files including hidden files?",
+    options: [
+      "ls -l",
+      "ls -a",
+      "ls -h",
+      "ls -r"
+    ],
+    answer: 1,
+    feedback: "<code>ls -a</code> shows all files including hidden ones (files starting with a dot like <code>.bashrc</code>)."
+  },
+  {
+    section: "Listing Files",
+    q: "Which command lists files in long format showing permissions, owner, and size?",
+    options: [
+      "ls -a",
+      "ls -r",
+      "ls -l",
+      "ls -s"
+    ],
+    answer: 2,
+    feedback: "<code>ls -l</code> (long format) shows detailed info: permissions, number of links, owner, group, size, date, and filename."
+  },
+  {
+    section: "Listing Files",
+    q: "How do you list files sorted by modification time (newest first)?",
+    options: [
+      "ls -t",
+      "ls -m",
+      "ls -n",
+      "ls -d"
+    ],
+    answer: 0,
+    feedback: "<code>ls -t</code> sorts files by modification time, showing the most recently modified files first."
+  },
+  {
+    section: "Command Syntax",
+    q: "What is the correct syntax to create a directory named <code>docs</code> inside the <code>lab</code> directory without navigating into it?",
+    options: [
+      "mkdir lab/docs",
+      "cd lab && mkdir docs",
+      "mkdir docs/lab",
+      "Both A and B are correct"
+    ],
+    answer: 3,
+    feedback: "Both <code>mkdir lab/docs</code> and <code>cd lab && mkdir docs</code> work. The first uses a path directly; the second navigates first."
+  },
+  {
+    section: "Command Syntax",
+    q: "Which command creates nested directories <code>a/b/c</code> all at once?",
+    options: [
+      "mkdir a b c",
+      "mkdir a/b/c",
+      "mkdir -p a/b/c",
+      "mkdirs a/b/c"
+    ],
+    answer: 2,
+    feedback: "<code>mkdir -p</code> creates parent directories as needed. Without <code>-p</code>, mkdir fails if parent directories do not exist."
+  },
+  {
+    section: "Command Syntax",
+    q: "What does <code>&&</code> do when used between two commands?",
+    options: [
+      "Runs both commands simultaneously",
+      "Runs the second command only if the first succeeds",
+      "Runs the second command regardless of the first",
+      "Pipes output from first to second"
+    ],
+    answer: 1,
+    feedback: "<code>&&</code> is a logical AND operator. The second command runs only if the first exits successfully (exit code 0)."
+  },
+  {
+    section: "Command Syntax",
+    q: "What does the <code>;</code> separator do between two commands?",
+    options: [
+      "Runs the second only if the first succeeds",
+      "Runs both commands sequentially regardless of success",
+      "Pipes output between commands",
+      "Creates a background process"
+    ],
+    answer: 1,
+    feedback: "<code>;</code> runs commands sequentially. Unlike <code>&&</code>, the second command runs even if the first fails."
+  },
+  {
+    section: "Practical Scenarios",
+    q: "You are in your home directory. Which sequence correctly creates <code>lab/</code>, enters it, and creates <code>test.txt</code>?",
+    options: [
+      "mkdir lab && cd lab && touch test.txt",
+      "touch test.txt && mkdir lab && cd lab",
+      "cd lab && mkdir lab && touch test.txt",
+      "mkdir lab touch test.txt cd lab"
+    ],
+    answer: 0,
+    feedback: "The correct order: create directory, navigate into it, then create the file. <code>&&</code> ensures each step succeeds before the next."
+  },
+  {
+    section: "Practical Scenarios",
+    q: "You want to copy <code>file1.txt</code> to <code>backup/</code> but see a confirmation prompt for each file. Which command causes this?",
+    options: [
+      "cp -r file1.txt backup/",
+      "cp -i file1.txt backup/",
+      "cp -v file1.txt backup/",
+      "cp -f file1.txt backup/"
+    ],
+    answer: 1,
+    feedback: "<code>cp -i</code> (interactive) prompts before overwriting existing files in the destination."
+  },
+  {
+    section: "Practical Scenarios",
+    q: "After running <code>rm test.txt</code>, you try to recover the file. What is the most likely outcome?",
+    options: [
+      "The file is in the Trash and can be restored",
+      "The file can be recovered using the undo command",
+      "The file is permanently gone and cannot be easily recovered",
+      "The file is moved to /tmp automatically"
+    ],
+    answer: 2,
+    feedback: "Linux <code>rm</code> permanently deletes files. There is no built-in recycle bin. Recovery requires special forensic tools and is not guaranteed."
+  },
+  {
+    section: "Practical Scenarios",
+    q: "Which command safely renames <code>old.txt</code> to <code>new.txt</code> and asks before overwriting if <code>new.txt</code> exists?",
+    options: [
+      "mv old.txt new.txt",
+      "mv -f old.txt new.txt",
+      "mv -i old.txt new.txt",
+      "rename old.txt new.txt"
+    ],
+    answer: 2,
+    feedback: "<code>mv -i</code> prompts for confirmation before overwriting an existing file at the destination."
+  },
+  {
+    section: "Practical Scenarios",
+    q: "You want to move all files from the current directory into <code>lab/</code> and see each file being moved. Which command is correct?",
+    options: [
+      "mv * lab/",
+      "mv -v * lab/",
+      "mv -i * lab/",
+      "mv -r * lab/"
+    ],
+    answer: 1,
+    feedback: "<code>mv -v * lab/</code> moves all files and prints each filename as it is moved (verbose output)."
+  },
+  {
+    section: "Practical Scenarios",
+    q: "Which command correctly creates files <code>test1.txt</code>, <code>test2.txt</code>, <code>test1.csv</code>, and <code>report.md</code> all at once?",
+    options: [
+      "touch test1.txt, test2.txt, test1.csv, report.md",
+      "touch test1.txt test2.txt test1.csv report.md",
+      "create test1.txt test2.txt test1.csv report.md",
+      "new test1.txt test2.txt test1.csv report.md"
+    ],
+    answer: 1,
+    feedback: "<code>touch</code> accepts space-separated filenames. Do NOT use commas — they are not separators in bash commands."
+  }
+];
+
+let answered = {};
+
+function buildQuiz() {
+  const container = document.getElementById("quizContainer");
+  container.innerHTML = "";
+  answered = {};
+  updateProgress();
+
+  questions.forEach((q, idx) => {
+    const card = document.createElement("div");
+    card.className = "question-card";
+    card.id = "card-" + idx;
+
+    let optionsHTML = q.options.map((opt, oi) => {
+      const letters = ["A", "B", "C", "D"];
+      return `<label class="option-label" id="opt-${idx}-${oi}" onclick="selectOption(${idx}, ${oi})">
+        <input type="radio" name="q${idx}" value="${oi}">
+        <span class="option-letter">${letters[oi]}.</span>
+        <span class="option-text">${opt}</span>
+      </label>`;
+    }).join("");
+
+    card.innerHTML = `
+      <div class="section-title">${q.section}</div>
+      <div class="question-header">
+        <span class="q-number">Q${idx + 1}</span>
+        <div class="question-text">${q.q}</div>
+      </div>
+      <div class="options">${optionsHTML}</div>
+      <div class="feedback" id="feedback-${idx}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectOption(qIdx, optIdx) {
+  if (answered[qIdx] !== undefined) return;
+
+  answered[qIdx] = optIdx;
+  const q = questions[qIdx];
+  const card = document.getElementById("card-" + qIdx);
+  const feedback = document.getElementById("feedback-" + qIdx);
+
+  for (let i = 0; i < q.options.length; i++) {
+    const lbl = document.getElementById(`opt-${qIdx}-${i}`);
+    lbl.style.pointerEvents = "none";
+    if (i === q.answer) lbl.classList.add("correct");
+    else if (i === optIdx && optIdx !== q.answer) lbl.classList.add("wrong");
+  }
+
+  if (optIdx === q.answer) {
+    card.classList.add("answered-correct");
+    feedback.className = "feedback correct";
+    feedback.innerHTML = "✅ Correct! " + q.feedback;
+  } else {
+    card.classList.add("answered-wrong");
+    feedback.className = "feedback wrong";
+    feedback.innerHTML = "❌ Incorrect. " + q.feedback;
+  }
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = questions.length;
+  const done = Object.keys(answered).length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressText").textContent = done + " / " + total + " answered";
+}
+
+function submitQuiz() {
+  const total = questions.length;
+  let correct = 0, wrong = 0, skip = 0;
+
+  questions.forEach((q, idx) => {
+    if (answered[idx] === undefined) {
+      skip++;
+      // Show correct answer for skipped
+      const lbl = document.getElementById(`opt-${idx}-${q.answer}`);
+      if (lbl) lbl.classList.add("correct");
+      const feedback = document.getElementById("feedback-" + idx);
+      feedback.className = "feedback wrong";
+      feedback.innerHTML = "⏭ Skipped. Correct answer highlighted. " + q.feedback;
+    } else if (answered[idx] === q.answer) {
+      correct++;
+    } else {
+      wrong++;
+    }
+  });
+
+  const pct = Math.round((correct / total) * 100);
+  document.getElementById("scorePercent").textContent = pct + "%";
+  document.getElementById("correctCount").textContent = correct;
+  document.getElementById("wrongCount").textContent = wrong;
+  document.getElementById("skipCount").textContent = skip;
+
+  let msg = "";
+  if (pct >= 90) msg = "🏆 Outstanding! You have mastered Linux CLI commands!";
+  else if (pct >= 75) msg = "🎉 Great job! You have a solid understanding of the commands.";
+  else if (pct >= 60) msg = "👍 Good effort! Review the highlighted answers to improve.";
+  else if (pct >= 40) msg = "📚 Keep practicing! Focus on command syntax and wildcards.";
+  else msg = "💪 Don not give up! Review the material and try again.";
+
+  document.getElementById("resultMessage").textContent = msg;
+  const panel = document.getElementById("resultPanel");
+  panel.style.display = "block";
+  panel.scrollIntoView({ behavior: "smooth" });
+
+  // Update score circle color based on score
+  const circle = document.querySelector(".score-circle");
+  if (pct >= 75) circle.style.background = "conic-gradient(#00ff88 0%, #00d4ff 100%)";
+  else if (pct >= 50) circle.style.background = "conic-gradient(#ffcc00 0%, #ff8800 100%)";
+  else circle.style.background = "conic-gradient(#ff5050 0%, #ff8080 100%)";
+}
+
+function retryQuiz() {
+  document.getElementById("resultPanel").style.display = "none";
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

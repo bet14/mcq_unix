@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unix OS – Session 5 Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #e0e0e0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 30px 20px 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    header h1 {
+      font-size: 2rem;
+      color: #e94560;
+      margin-bottom: 8px;
+    }
+    header p {
+      color: #a0aec0;
+      font-size: 0.95rem;
+    }
+    .progress-bar-wrap {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      height: 10px;
+      margin: 16px 0 4px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #e94560, #f6a623);
+      border-radius: 10px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .progress-label {
+      text-align: right;
+      font-size: 0.8rem;
+      color: #a0aec0;
+      margin-bottom: 20px;
+    }
+    .question-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      transition: border-color 0.3s;
+    }
+    .question-card.answered-correct { border-color: #48bb78; background: rgba(72,187,120,0.08); }
+    .question-card.answered-wrong   { border-color: #fc8181; background: rgba(252,129,129,0.08); }
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .q-number {
+      background: #e94560;
+      color: white;
+      border-radius: 50%;
+      min-width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .q-text {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+    .q-text code {
+      background: rgba(255,255,255,0.12);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.92em;
+      color: #f6ad55;
+    }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 12px 16px;
+      text-align: left;
+      color: #e2e8f0;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: rgba(233,69,96,0.2);
+      border-color: #e94560;
+      transform: translateX(4px);
+    }
+    .option-btn .opt-label {
+      background: rgba(255,255,255,0.15);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      min-width: 26px;
+      text-align: center;
+    }
+    .option-btn.correct {
+      background: rgba(72,187,120,0.25);
+      border-color: #48bb78;
+      color: #9ae6b4;
+    }
+    .option-btn.wrong {
+      background: rgba(252,129,129,0.25);
+      border-color: #fc8181;
+      color: #fed7d7;
+    }
+    .option-btn.reveal-correct {
+      background: rgba(72,187,120,0.15);
+      border-color: #48bb78;
+      color: #9ae6b4;
+    }
+    .option-btn:disabled { cursor: default; }
+    .feedback {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: rgba(72,187,120,0.15); border: 1px solid #48bb78; color: #9ae6b4; }
+    .feedback.wrong-fb   { background: rgba(252,129,129,0.15); border: 1px solid #fc8181; color: #fed7d7; }
+    .score-panel {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 24px;
+      display: none;
+    }
+    .score-panel.show { display: block; }
+    .score-big {
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: #e94560;
+      margin: 10px 0;
+    }
+    .score-msg { font-size: 1.1rem; color: #a0aec0; margin-bottom: 20px; }
+    .btn-restart {
+      background: linear-gradient(90deg, #e94560, #f6a623);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 32px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-restart:hover { opacity: 0.85; }
+    .submit-btn {
+      background: linear-gradient(90deg, #e94560, #f6a623);
+      border: none;
+      border-radius: 10px;
+      padding: 14px 40px;
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: block;
+      margin: 10px auto 30px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .submit-btn:hover { opacity: 0.88; transform: scale(1.02); }
+    .tag {
+      display: inline-block;
+      background: rgba(233,69,96,0.2);
+      color: #e94560;
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      border: 1px solid rgba(233,69,96,0.35);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🐧 Unix OS – Session 5</h1>
+    <p>Advanced CLI: I/O &amp; Text Processing</p>
+    <p style="margin-top:6px; color:#f6a623; font-weight:600;">40 Questions · Mid-Term Preparation</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 40 answered</div>
+  </header>
+
+  <div class="score-panel" id="scorePanel">
+    <div style="font-size:1.3rem; font-weight:700; color:#e2e8f0;">🎓 Quiz Complete!</div>
+    <div class="score-big" id="scoreBig">--</div>
+    <div class="score-msg" id="scoreMsg">--</div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Restart Quiz</button>
+  </div>
+
+  <div id="quizContainer"></div>
+  <button class="submit-btn" id="submitBtn" onclick="submitQuiz()">✅ Submit &amp; See Results</button>
+</div>
+
+<script>
+
+
+const questions = [
+  {
+    tag: "Stream Redirection",
+    q: "What does the <code>&gt;</code> operator do when used in a shell command?",
+    options: ["Appends output to a file", "Redirects stdout to a file, overwriting it", "Redirects stderr to a file", "Reads input from a file"],
+    answer: 1,
+    explanation: "<code>&gt;</code> redirects stdout to a file and <strong>overwrites</strong> its contents if the file already exists."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "What is the difference between <code>&gt;</code> and <code>&gt;&gt;</code>?",
+    options: [
+      "<code>&gt;</code> appends, <code>&gt;&gt;</code> overwrites",
+      "Both overwrite the file",
+      "<code>&gt;</code> overwrites, <code>&gt;&gt;</code> appends",
+      "<code>&gt;&gt;</code> is used for stderr only"
+    ],
+    answer: 2,
+    explanation: "<code>&gt;</code> <strong>overwrites</strong> the file content, while <code>&gt;&gt;</code> <strong>appends</strong> to the existing content."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "Which command writes the text \"Welcome\" into <code>greeting.txt</code>, overwriting any existing content?",
+    options: [
+      "echo \"Welcome\" >> greeting.txt",
+      "echo \"Welcome\" > greeting.txt",
+      "cat \"Welcome\" > greeting.txt",
+      "print \"Welcome\" > greeting.txt"
+    ],
+    answer: 1,
+    explanation: "<code>echo \"Welcome\" &gt; greeting.txt</code> uses <code>&gt;</code> to write (overwrite) the text into the file."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "Which command appends \"to the course\" to an existing <code>greeting.txt</code>?",
+    options: [
+      "echo \"to the course\" > greeting.txt",
+      "echo \"to the course\" < greeting.txt",
+      "echo \"to the course\" >> greeting.txt",
+      "cat \"to the course\" >> greeting.txt"
+    ],
+    answer: 2,
+    explanation: "<code>&gt;&gt;</code> appends to the file without erasing existing content."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "What does <code>&lt;</code> do in a shell command?",
+    options: [
+      "Redirects stdout to a file",
+      "Redirects stderr to a file",
+      "Redirects input from a file to a command (substituting stdin)",
+      "Appends output to a file"
+    ],
+    answer: 2,
+    explanation: "<code>&lt;</code> redirects a file as <strong>stdin</strong> to a command, replacing keyboard input."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "What does the command <code>wc -l &lt; list.txt</code> do?",
+    options: [
+      "Writes the line count into list.txt",
+      "Counts the lines of list.txt by reading it as stdin",
+      "Appends the line count to list.txt",
+      "Displays list.txt on screen"
+    ],
+    answer: 1,
+    explanation: "<code>wc -l &lt; list.txt</code> feeds <code>list.txt</code> as stdin to <code>wc -l</code>, which counts lines."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "How do you redirect <strong>only stderr</strong> to a file called <code>error.log</code>?",
+    options: [
+      "command > error.log",
+      "command 2> error.log",
+      "command >> error.log",
+      "command 1> error.log"
+    ],
+    answer: 1,
+    explanation: "<code>2&gt;</code> redirects file descriptor 2 (stderr) to the specified file."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "What does <code>command &gt; output.txt 2&gt;&amp;1</code> accomplish?",
+    options: [
+      "Redirects stderr to output.txt and discards stdout",
+      "Redirects both stdout and stderr into output.txt",
+      "Appends stdout to output.txt and discards stderr",
+      "Redirects stdin from output.txt"
+    ],
+    answer: 1,
+    explanation: "<code>2&gt;&amp;1</code> merges stderr (fd 2) into stdout (fd 1), so both streams go to <code>output.txt</code>."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "In the command <code>ls non_existing_file 2&gt; error.log</code>, what is written to <code>error.log</code>?",
+    options: [
+      "The list of files in the current directory",
+      "Nothing — the file stays empty",
+      "The error message from ls (e.g., 'No such file or directory')",
+      "The stdout of ls"
+    ],
+    answer: 2,
+    explanation: "When <code>ls</code> cannot find the file, it outputs an error via <strong>stderr</strong>. <code>2&gt;</code> captures that error into <code>error.log</code>."
+  },
+  {
+    tag: "Stream Redirection",
+    q: "What are the three standard streams in Linux?",
+    options: [
+      "stdin, stdout, stdlog",
+      "input, output, debug",
+      "stdin, stdout, stderr",
+      "read, write, error"
+    ],
+    answer: 2,
+    explanation: "Linux defines three standard streams: <strong>stdin</strong> (0), <strong>stdout</strong> (1), and <strong>stderr</strong> (2)."
+  },
+  {
+    tag: "Pipe",
+    q: "What does the pipe operator <code>|</code> do?",
+    options: [
+      "Redirects stdout to a file",
+      "Connects the stdout of one command to the stdin of another",
+      "Runs two commands simultaneously in background",
+      "Redirects stderr to stdout"
+    ],
+    answer: 1,
+    explanation: "The pipe <code>|</code> takes the <strong>stdout</strong> of the left command and feeds it as <strong>stdin</strong> to the right command."
+  },
+  {
+    tag: "Pipe",
+    q: "What does <code>ls /etc | less</code> do?",
+    options: [
+      "Saves the listing of /etc into a file called less",
+      "Lists /etc and views the output one page at a time",
+      "Counts the number of files in /etc",
+      "Searches for 'less' inside /etc"
+    ],
+    answer: 1,
+    explanation: "<code>ls /etc</code> lists the directory; the pipe sends that output to <code>less</code> for paginated viewing."
+  },
+  {
+    tag: "Pipe",
+    q: "What does <code>cat /etc/passwd | wc -l</code> count?",
+    options: [
+      "The number of characters in /etc/passwd",
+      "The number of words in /etc/passwd",
+      "The number of lines (entries) in /etc/passwd",
+      "The number of files in /etc"
+    ],
+    answer: 2,
+    explanation: "<code>wc -l</code> counts lines. Piped from <code>/etc/passwd</code>, it counts the number of user entries."
+  },
+  {
+    tag: "Pipe",
+    q: "What is the result of <code>cat name.txt | sort</code>?",
+    options: [
+      "Displays name.txt in reverse order",
+      "Sorts the lines of name.txt and displays them",
+      "Saves sorted lines to a new file",
+      "Removes duplicate lines from name.txt"
+    ],
+    answer: 1,
+    explanation: "<code>sort</code> receives the content of <code>name.txt</code> via pipe and outputs lines in sorted order."
+  },
+  {
+    tag: "Pipe",
+    q: "What does <code>ls /usr/bin | tail -n 5</code> display?",
+    options: [
+      "The first 5 entries in /usr/bin",
+      "The last 5 entries in /usr/bin",
+      "All entries in /usr/bin except the last 5",
+      "5 random entries from /usr/bin"
+    ],
+    answer: 1,
+    explanation: "<code>tail -n 5</code> shows the <strong>last 5 lines</strong> of its input — here the last 5 entries listed in /usr/bin."
+  },
+  {
+    tag: "Pipe",
+    q: "Which of the following best describes a pipeline in Linux?",
+    options: [
+      "A file that stores command history",
+      "A chain of commands where each command's output is the next command's input",
+      "A background process manager",
+      "A method to run commands as root"
+    ],
+    answer: 1,
+    explanation: "A pipeline chains commands using <code>|</code>, passing stdout of each command as stdin to the next."
+  },
+  {
+    tag: "Text Viewers",
+    q: "Which command displays the <strong>full content</strong> of a file at once?",
+    options: ["less", "more", "head", "cat"],
+    answer: 3,
+    explanation: "<code>cat</code> (concatenate) prints the entire file content to stdout immediately."
+  },
+  {
+    tag: "Text Viewers",
+    q: "What is the main difference between <code>less</code> and <code>cat</code>?",
+    options: [
+      "cat allows scrolling; less does not",
+      "less allows scrollable/paginated viewing; cat dumps all content at once",
+      "less only works with binary files",
+      "cat is only for small files"
+    ],
+    answer: 1,
+    explanation: "<code>less</code> (and <code>more</code>) are <strong>pagers</strong> — they allow scrolling through content page by page."
+  },
+  {
+    tag: "Text Viewers",
+    q: "What does <code>head -n 5 file.txt</code> display?",
+    options: [
+      "The last 5 lines of file.txt",
+      "The first 5 lines of file.txt",
+      "Lines 5 to 10 of file.txt",
+      "The 5th line of file.txt only"
+    ],
+    answer: 1,
+    explanation: "<code>head -n 5</code> prints the <strong>first 5 lines</strong> of the file."
+  },
+  {
+    tag: "Text Viewers",
+    q: "Which command shows the <strong>last lines</strong> of a file?",
+    options: ["head", "cat", "tail", "less"],
+    answer: 2,
+    explanation: "<code>tail</code> displays the end of a file. By default it shows the last 10 lines."
+  },
+  {
+    tag: "Text Viewers",
+    q: "What does <code>wc -l file.txt</code> output?",
+    options: [
+      "The number of words in file.txt",
+      "The number of characters in file.txt",
+      "The number of lines in file.txt",
+      "The size of file.txt in bytes"
+    ],
+    answer: 2,
+    explanation: "<code>wc -l</code> counts and displays the number of <strong>lines</strong> in the file."
+  },
+  {
+    tag: "Text Viewers",
+    q: "What does <code>wc -c file.txt</code> count?",
+    options: ["Lines", "Words", "Characters (bytes)", "Columns"],
+    answer: 2,
+    explanation: "<code>wc -c</code> counts the number of <strong>characters (bytes)</strong> in the file."
+  },
+  {
+    tag: "Text Viewers",
+    q: "Which two commands are described as 'scrollable viewers'?",
+    options: ["cat and head", "head and tail", "less and more", "wc and sort"],
+    answer: 2,
+    explanation: "<code>less</code> and <code>more</code> are both interactive pagers that allow scrolling through file content."
+  },
+  {
+    tag: "sort / cut / uniq",
+    q: "What does the <code>sort</code> command do by default?",
+    options: [
+      "Sorts lines numerically",
+      "Sorts lines alphabetically",
+      "Removes duplicate lines",
+      "Reverses the order of lines"
+    ],
+    answer: 1,
+    explanation: "By default, <code>sort</code> sorts lines <strong>alphabetically</strong> (lexicographic order)."
+  },
+  {
+    tag: "sort / cut / uniq",
+    q: "What is the purpose of <code>uniq</code>?",
+    options: [
+      "Sort lines in unique order",
+      "Remove or report duplicate adjacent lines",
+      "Count unique characters",
+      "Find unique files in a directory"
+    ],
+    answer: 1,
+    explanation: "<code>uniq</code> removes <strong>consecutive duplicate lines</strong>. It is typically used after <code>sort</code> to remove all duplicates."
+  },
+  {
+    tag: "sort / cut / uniq",
+    q: "Why is <code>sort</code> usually run before <code>uniq</code>?",
+    options: [
+      "sort makes the file smaller",
+      "uniq only removes adjacent duplicates, so sorting first groups duplicates together",
+      "uniq requires sorted input to function at all",
+      "sort removes duplicates automatically"
+    ],
+    answer: 1,
+    explanation: "<code>uniq</code> only removes <strong>adjacent</strong> duplicates. Sorting first ensures all duplicates are next to each other."
+  },
+  {
+    tag: "sort / cut / uniq",
+    q: "In <code>cut -d\":\" -f1 /etc/passwd</code>, what does <code>-d\":\"</code> specify?",
+    options: [
+      "The field number to extract",
+      "The delimiter used to split each line",
+      "The character position to cut",
+      "The output file"
+    ],
+    answer: 1,
+    explanation: "<code>-d</code> sets the <strong>delimiter</strong>. Here <code>:</code> is the separator used in <code>/etc/passwd</code>."
+  },
+  {
+    tag: "sort / cut / uniq",
+    q: "In <code>cut -d\":\" -f1 /etc/passwd</code>, what does <code>-f1</code> specify?",
+    options: [
+      "The first character of each line",
+      "The first field (column) after splitting by the delimiter",
+      "The first file to process",
+      "The first line of the file"
+    ],
+    answer: 1,
+    explanation: "<code>-f1</code> extracts the <strong>first field</strong> (column) from each line after splitting by the delimiter."
+  },
+  {
+    tag: "sort / cut / uniq",
+    q: "What does the full pipeline <code>cut -d\":\" -f1 /etc/passwd | sort | uniq</code> produce?",
+    options: [
+      "A sorted list of all passwords",
+      "A sorted, deduplicated list of usernames from /etc/passwd",
+      "A count of users on the system",
+      "The home directories of all users"
+    ],
+    answer: 1,
+    explanation: "It extracts usernames (field 1), sorts them alphabetically, then removes any duplicates."
+  },
+  {
+    tag: "sort / cut / uniq",
+    q: "What does the <code>-c</code> option of <code>cut</code> do?",
+    options: [
+      "Specifies the delimiter character",
+      "Counts the number of fields",
+      "Extracts characters by position",
+      "Cuts the file into chunks"
+    ],
+    answer: 2,
+    explanation: "<code>cut -c</code> extracts specific <strong>character positions</strong> from each line."
+  },
+  {
+    tag: "sort / cut / uniq",
+    q: "Which command would sort the file <code>names.txt</code> alphabetically and display the result?",
+    options: [
+      "uniq names.txt",
+      "cut names.txt",
+      "sort names.txt",
+      "grep names.txt"
+    ],
+    answer: 2,
+    explanation: "<code>sort names.txt</code> reads the file and outputs its lines in alphabetical order."
+  },
+  {
+    tag: "grep",
+    q: "What is the primary purpose of <code>grep</code>?",
+    options: [
+      "Sort lines in a file",
+      "Count words in a file",
+      "Search/filter lines matching a pattern",
+      "Display the first lines of a file"
+    ],
+    answer: 2,
+    explanation: "<code>grep</code> stands for 'Global Regular Expression Print' — it searches for and prints lines matching a pattern."
+  },
+  {
+    tag: "grep",
+    q: "What does <code>grep -i \"error\" logs.txt</code> do differently from <code>grep \"error\" logs.txt</code>?",
+    options: [
+      "It searches recursively in subdirectories",
+      "It performs a case-insensitive search",
+      "It inverts the match (shows non-matching lines)",
+      "It shows line numbers"
+    ],
+    answer: 1,
+    explanation: "<code>-i</code> makes the search <strong>case-insensitive</strong>, matching 'error', 'ERROR', 'Error', etc."
+  },
+  {
+    tag: "grep",
+    q: "What does <code>grep -v \"localhost\" /etc/hosts</code> display?",
+    options: [
+      "Only lines containing 'localhost'",
+      "All lines NOT containing 'localhost'",
+      "The number of lines with 'localhost'",
+      "Lines with 'localhost' highlighted"
+    ],
+    answer: 1,
+    explanation: "<code>-v</code> <strong>inverts</strong> the match — it shows lines that do <em>not</em> match the pattern."
+  },
+  {
+    tag: "grep",
+    q: "What does <code>grep -n \"root\" /etc/passwd</code> show?",
+    options: [
+      "The number of lines matching 'root'",
+      "Matching lines with their line numbers prepended",
+      "Lines that do not contain 'root'",
+      "A recursive search for 'root'"
+    ],
+    answer: 1,
+    explanation: "<code>-n</code> adds the <strong>line number</strong> before each matching line in the output."
+  },
+  {
+    tag: "grep",
+    q: "What does <code>grep -c \"/bin/bash\" /etc/passwd</code> return?",
+    options: [
+      "The content of lines containing '/bin/bash'",
+      "A count of how many lines match '/bin/bash'",
+      "The first line containing '/bin/bash'",
+      "All lines not containing '/bin/bash'"
+    ],
+    answer: 1,
+    explanation: "<code>-c</code> returns only the <strong>count</strong> of lines that match the pattern."
+  },
+  {
+    tag: "grep",
+    q: "What does <code>grep -r \"TODO\" ~/projects</code> do?",
+    options: [
+      "Searches for 'TODO' only in the root of ~/projects",
+      "Recursively searches all files in ~/projects for 'TODO'",
+      "Removes lines containing 'TODO' from all files",
+      "Lists files named 'TODO' in ~/projects"
+    ],
+    answer: 1,
+    explanation: "<code>-r</code> enables <strong>recursive</strong> search through all files in the directory and its subdirectories."
+  },
+  {
+    tag: "grep",
+    q: "What does <code>grep -l \"password\" *.conf</code> output?",
+    options: [
+      "All lines containing 'password' in .conf files",
+      "Only the filenames of .conf files that contain 'password'",
+      "The count of matches in each .conf file",
+      "Lines NOT containing 'password' in .conf files"
+    ],
+    answer: 1,
+    explanation: "<code>-l</code> lists only the <strong>filenames</strong> that contain at least one match, not the matching lines themselves."
+  },
+  {
+    tag: "grep",
+    q: "Which command is equivalent to <code>grep \"root\" /etc/passwd</code>?",
+    options: [
+      "cat /etc/passwd | sort root",
+      "cat /etc/passwd | grep root",
+      "grep /etc/passwd | root",
+      "find /etc/passwd -name root"
+    ],
+    answer: 1,
+    explanation: "Both commands search for 'root' in <code>/etc/passwd</code>. The pipe version passes the file content through stdin to grep."
+  },
+  {
+    tag: "grep",
+    q: "You want to find a file named <code>config.txt</code> anywhere on the system. Which command is correct?",
+    options: [
+      "grep -r config.txt /",
+      "ls -la config.txt",
+      "sudo find / -name \"config.txt\"",
+      "cat / | grep config.txt"
+    ],
+    answer: 2,
+    explanation: "<code>sudo find / -name \"config.txt\"</code> searches the entire filesystem. <code>sudo</code> is needed to access all directories."
+  },
+  {
+    tag: "grep",
+    q: "In the logs.txt exercise, which command finds ALL lines containing 'error' regardless of case?",
+    options: [
+      "grep \"error\" logs.txt",
+      "grep -v \"error\" logs.txt",
+      "grep -i \"error\" logs.txt",
+      "grep -n \"ERROR\" logs.txt"
+    ],
+    answer: 2,
+    explanation: "<code>grep -i</code> performs a <strong>case-insensitive</strong> match, catching 'error', 'ERROR', 'Error', etc."
+  }
+];
+
+let answered = new Array(questions.length).fill(null);
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + i;
+
+    const letters = ['A','B','C','D'];
+    const optionsHTML = q.options.map((opt, j) =>
+      `<button class="option-btn" id="opt-${i}-${j}" onclick="selectAnswer(${i},${j})">
+        <span class="opt-label">${letters[j]}</span> ${opt}
+       </button>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="tag">${q.tag}</div>
+      <div class="q-header">
+        <div class="q-number">${i+1}</div>
+        <div class="q-text">${q.q}</div>
+      </div>
+      <div class="options">${optionsHTML}</div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (answered[qIdx] !== null) return;
+  answered[qIdx] = optIdx;
+
+  const correct = questions[qIdx].answer;
+  const fb = document.getElementById('fb-' + qIdx);
+  const card = document.getElementById('card-' + qIdx);
+
+  for (let j = 0; j < 4; j++) {
+    const btn = document.getElementById(`opt-${qIdx}-${j}`);
+    btn.disabled = true;
+    if (j === correct) btn.classList.add('reveal-correct');
+  }
+
+  const chosenBtn = document.getElementById(`opt-${qIdx}-${optIdx}`);
+  if (optIdx === correct) {
+    chosenBtn.classList.remove('reveal-correct');
+    chosenBtn.classList.add('correct');
+    card.classList.add('answered-correct');
+    fb.className = 'feedback show correct-fb';
+    fb.innerHTML = '✅ <strong>Correct!</strong> ' + questions[qIdx].explanation;
+  } else {
+    chosenBtn.classList.add('wrong');
+    card.classList.add('answered-wrong');
+    fb.className = 'feedback show wrong-fb';
+    fb.innerHTML = '❌ <strong>Incorrect.</strong> ' + questions[qIdx].explanation;
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = answered.filter(a => a !== null).length;
+  const pct = (done / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = done + ' / ' + questions.length + ' answered';
+}
+
+function submitQuiz() {
+  const unanswered = answered.filter(a => a === null).length;
+  if (unanswered > 0) {
+    if (!confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+  }
+  // Auto-answer remaining as wrong
+  answered.forEach((a, i) => {
+    if (a === null) selectAnswer(i, -1);
+  });
+
+  const correct = answered.filter((a, i) => a === questions[i].answer).length;
+  const pct = Math.round((correct / questions.length) * 100);
+  const panel = document.getElementById('scorePanel');
+  document.getElementById('scoreBig').textContent = correct + ' / ' + questions.length + ' (' + pct + '%)';
+
+	let msg = '';
+  if (pct >= 90) msg = '🏆 Outstanding! You are fully ready for the mid-term!';
+  else if (pct >= 75) msg = "🎉 Great job! A bit more review and you'll ace it!"; // Đã sửa dấu nháy kép ở đây
+  else if (pct >= 60) msg = '📚 Good effort! Focus on the topics you missed.';
+  else msg = '💪 Keep practicing! Review the session slides and retry.';
+
+  document.getElementById('scoreMsg').textContent = msg;
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('submitBtn').style.display = 'none';
+}
+
+function restartQuiz() {
+  answered = new Array(questions.length).fill(null);
+  document.getElementById('scorePanel').classList.remove('show');
+  document.getElementById('submitBtn').style.display = 'block';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
