@@ -6,49 +6,84 @@
   <title>Unix Commands & Quizzes Index</title>
   <style>
     :root{
-      --bg:#f6f8fc;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --border:#dbe4f0;
-      --shadow:0 6px 18px rgba(15, 23, 42, .08);
-      --class:#dbeafe;
-      --lab:#dcfce7;
-      --others:#fce7f3;
+      --bg1:#07111f;
+      --bg2:#0b1728;
+      --bg3:#111c31;
+
+      --text:#e5eefc;
+      --muted:#94a3b8;
+      --border:rgba(148,163,184,.18);
+      --shadow:0 14px 40px rgba(0, 0, 0, .35);
+
+      --class1:#0f2747;
+      --class2:#12345f;
+      --lab1:#0d2b28;
+      --lab2:#123f39;
+      --misc1:#2a1834;
+      --misc2:#3a1f46;
+
       --class-border:#60a5fa;
       --lab-border:#34d399;
-      --others-border:#f472b6;
-      --link:#0f172a;
-      --hover:#f8fafc;
+      --misc-border:#f472b6;
+
+      --link:#eaf2ff;
+      --link-muted:#b7c5db;
+      --hover:rgba(255,255,255,.06);
+
+      --btn-bg:rgba(15, 23, 42, .72);
+      --btn-bg-hover:rgba(30, 41, 59, .92);
+      --btn-border:rgba(148,163,184,.22);
     }
 
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(52,211,153,.14), transparent 26%),
+        radial-gradient(circle at bottom center, rgba(244,114,182,.10), transparent 30%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 52%, var(--bg3) 100%);
       color:var(--text);
+      min-height:100vh;
     }
 
     .container{
-      max-width: 1350px;
+      max-width: 1400px;
       margin: 0 auto;
       padding: 18px 14px 28px;
     }
 
     .header{
-      background: rgba(255,255,255,.9);
+      position: relative;
+      overflow:hidden;
+      background: linear-gradient(135deg, rgba(15, 23, 42, .82), rgba(17, 24, 39, .88));
       border:1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px 18px;
+      border-radius: 18px;
+      padding: 18px 18px 16px;
       box-shadow: var(--shadow);
       margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .header::after{
+      content:"";
+      position:absolute;
+      inset:auto -40px -60px auto;
+      width:200px;
+      height:200px;
+      border-radius:50%;
+      background: radial-gradient(circle, rgba(59,130,246,.18), transparent 68%);
+      pointer-events:none;
     }
 
     h1{
       margin:0 0 6px;
-      font-size: 22px;
+      font-size: 26px;
       line-height: 1.2;
-      color:#0f172a;
+      color:#f8fbff;
+      letter-spacing: .2px;
     }
 
     .subtitle{
@@ -62,18 +97,19 @@
       display:flex;
       gap:8px;
       flex-wrap:wrap;
-      margin-top:10px;
+      margin-top:12px;
     }
 
     .tag{
       display:inline-flex;
       align-items:center;
       gap:6px;
-      padding:6px 10px;
+      padding:6px 11px;
       border-radius:999px;
       font-size:12px;
       font-weight:700;
       border:1px solid transparent;
+      letter-spacing:.2px;
     }
 
     .tag::before{
@@ -85,65 +121,113 @@
       background: currentColor;
     }
 
-    .tag.class{background:var(--class); color:#1d4ed8; border-color:var(--class-border)}
-    .tag.lab{background:var(--lab); color:#047857; border-color:var(--lab-border)}
-    .tag.others{background:var(--others); color:#be185d; border-color:var(--others-border)}
+    .tag.class{
+      background: rgba(96,165,250,.14);
+      color:#93c5fd;
+      border-color: rgba(96,165,250,.25);
+    }
+    .tag.lab{
+      background: rgba(52,211,153,.12);
+      color:#6ee7b7;
+      border-color: rgba(52,211,153,.22);
+    }
+    .tag.misc{
+      background: rgba(244,114,182,.12);
+      color:#f9a8d4;
+      border-color: rgba(244,114,182,.22);
+    }
 
     .grid{
       display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap:12px;
       align-items:start;
     }
 
     .col{
-      background: rgba(255,255,255,.92);
+      background: rgba(15, 23, 42, .72);
       border:1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 18px;
       box-shadow: var(--shadow);
       overflow:hidden;
+      backdrop-filter: blur(10px);
     }
 
     .col-header{
-      padding:10px 12px;
+      padding:12px 14px;
       font-size:15px;
       font-weight:800;
-      color:#0f172a;
-      border-bottom:1px solid var(--border);
+      color:#f8fbff;
+      border-bottom:1px solid rgba(148,163,184,.15);
+      letter-spacing:.2px;
     }
 
-    .col-header.class{background: linear-gradient(135deg, #dbeafe, #eff6ff)}
-    .col-header.lab{background: linear-gradient(135deg, #dcfce7, #f0fdf4)}
-    .col-header.others{background: linear-gradient(135deg, #fce7f3, #fdf2f8)}
+    .col-header.class{
+      background: linear-gradient(135deg, var(--class1), var(--class2));
+    }
+    .col-header.lab{
+      background: linear-gradient(135deg, var(--lab1), var(--lab2));
+    }
+    .col-header.misc{
+      background: linear-gradient(135deg, var(--misc1), var(--misc2));
+    }
 
     .links{
       list-style:none;
-      padding:8px;
+      padding:10px;
       margin:0;
     }
 
     .links li{margin:0}
 
     .links a{
-      display:block;
-      padding:9px 10px;
-      margin:6px 0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 13px;
+      margin:8px 0;
       text-decoration:none;
       color:var(--link);
-      border:1px solid var(--border);
-      border-radius: 10px;
-      background:#fff;
-      transition:.2s ease;
+      border:1px solid var(--btn-border);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, .88), rgba(15, 23, 42, .66));
+      transition: .2s ease;
       line-height:1.25;
-      font-weight:600;
+      font-weight:700;
       font-size:13px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.18);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .links a::after{
+      content:"→";
+      color:var(--link-muted);
+      font-weight:800;
+      transition:.2s ease;
+      flex:0 0 auto;
     }
 
     .links a:hover{
-      transform: translateY(-1px);
-      background: var(--hover);
-      border-color:#cbd5e1;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, .08);
+      transform: translateY(-2px);
+      background: var(--btn-bg-hover);
+      border-color: rgba(148,163,184,.38);
+      box-shadow: 0 10px 24px rgba(0,0,0,.28);
+    }
+
+    .links a:hover::after{
+      color:#ffffff;
+      transform: translateX(2px);
+    }
+
+    .links a:active{
+      transform: translateY(0);
+    }
+
+    .links a:focus-visible{
+      outline:2px solid rgba(96,165,250,.75);
+      outline-offset:2px;
     }
 
     .small{
@@ -157,8 +241,9 @@
     @media (max-width: 1100px){
       .grid{grid-template-columns: repeat(2, minmax(0, 1fr))}
     }
-    @media (max-width: 640px){
+    @media (max-width: 720px){
       .grid{grid-template-columns: 1fr}
+      h1{font-size:22px}
     }
   </style>
 </head>
@@ -166,63 +251,53 @@
   <div class="container">
     <div class="header">
       <h1>Unix Commands & Quizzes Index</h1>
-      <p class="subtitle">
-        Danh sách các file HTML được chia thành 4 cột để dễ tìm.
-      </p>
+      <p class="subtitle"></p>
       <div class="legend">
         <span class="tag class">Class</span>
         <span class="tag lab">Lab</span>
-        <span class="tag others">Others</span>
+        <span class="tag misc">Misc</span>
       </div>
     </div>
 
     <div class="grid">
+      <!-- CLASS -->
       <div class="col">
-        <div class="col-header class">Others</div>
+        <div class="col-header class">Class</div>
         <ul class="links">
-          <li><a href="Advanced Commands.html">Advanced Commands.html<span class="small">Class content</span></a></li>
-          <li><a href="Basic Commands.html">Basic Commands.html<span class="small">Class content</span></a></li>
-<li><a href="Directory Structure.html">Directory Structure.html<span class="small">Class content</span></a></li>
-          <li><a href="bash scripting quiz.html">bash scripting quiz.html<span class="small">Class content</span></a></li>
-          <li><a href="chmod chown.html">chmod chown.html<span class="small">Class content</span></a></li>
+          <li><a href="unix_quiz3.html">Class 3</a></li>
+          <li><a href="unix_quiz4.html">Class 4</a></li>
+          <li><a href="unix_quiz5.html">Class 5</a></li>
+          <li><a href="unix_quiz6.html">Class 6</a></li>
+          <li><a href="unix_quiz7.html">Class 7</a></li>
+          <li><a href="unix_quiz8.html">Class 8</a></li>
+          <li><a href="unix_quiz9.html">Class 9</a></li>
+          <li><a href="unix_quiz10.html">Class 10</a></li>
+          <li><a href="unix_quiz9to11.html">Class 9 to 11</a></li>
+          <li><a href="unix_quiz12.html">Class 12</a></li>
         </ul>
       </div>
 
+      <!-- LAB -->
       <div class="col">
-        <div class="col-header class">Lab</div>
+        <div class="col-header lab">Lab</div>
         <ul class="links">
-          <li><a href="unix_labquiz3.html">unix_labquiz3.html<span class="small">Lab quiz</span></a></li>
-          <li><a href="unix_labquiz4.html">unix_labquiz4.html<span class="small">Lab quiz</span></a></li>
-          <li><a href="unix_labquiz5.html">unix_labquiz5.html<span class="small">Lab quiz</span></a></li>
-<li><a href="unix_labquiz7.html">unix_labquiz7.html<span class="small">Lab quiz</span></a></li>
+          <li><a href="unix_labquiz3.html">Lab 3</a></li>
+          <li><a href="unix_labquiz4.html">Lab 4</a></li>
+          <li><a href="unix_labquiz5.html">Lab 5</a></li>
+          <li><a href="unix_labquiz7.html">Lab 7</a></li>
         </ul>
       </div>
 
+      <!-- MISC -->
       <div class="col">
-        <div class="col-header lab">Class p1</div>
+        <div class="col-header misc">Misc</div>
         <ul class="links">
-          
- <li><a href="unix_commandlines_quiz5.html">unix_commandlines_quiz5.html<span class="small">Others</span></a></li>
-          
-          <li><a href="unix_quiz3.html">unix_quiz3.html<span class="small">Others</span></a></li>
-          <li><a href="unix_quiz4.html">unix_quiz4.html<span class="small">Others</span></a></li>
-          <li><a href="unix_quiz5.html">unix_quiz5.html<span class="small">Others</span></a></li>
-            <li><a href="unix_quiz6.html">unix_quiz6.html<span class="small">Others</span></a></li>
-        </ul>
-      </div>
-
-      <div class="col">
-        <div class="col-header others">Class p2</div>
-        <ul class="links">
-          
-       
-          <li><a href="unix_quiz6_os.html">unix_quiz6_os.html<span class="small">Others</span></a></li>
-          <li><a href="unix_quiz7.html">unix_quiz7.html<span class="small">Others</span></a></li>
-          <li><a href="unix_quiz8.html">unix_quiz8.html<span class="small">Others</span></a></li>
-          <li><a href="unix_quiz9.html">unix_quiz9.html<span class="small">Others</span></a></li>
-          <li><a href="unix_quiz9to11.html">unix_quiz9to11.html<span class="small">Others</span></a></li>
-<li><a href="unix_quiz10.html">unix_quiz10.html<span class="small">Others</span></a></li>
-          <li><a href="unix_quiz12.html">unix_quiz12.html<span class="small">Others</span></a></li>
+          <li><a href="Advanced Commands.html">Advanced Commands</a></li>
+          <li><a href="Basic Commands.html">Basic Commands</a></li>
+          <li><a href="unix_commandlines_quiz5.html">Command lines (old ver)</a></li>
+          <li><a href="Directory Structure.html">Directory Structure</a></li>
+          <li><a href="bash scripting quiz.html">Bash Scripting</a></li>
+          <li><a href="chmod chown.html">chmod chown</a></li>
         </ul>
       </div>
     </div>
