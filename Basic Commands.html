@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linux Basic Commands MCQ Quiz</title>
+  <style>
+    :root{
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --success:#16a34a;
+      --danger:#dc2626;
+      --border:#dbe3f0;
+      --soft:#eef4ff;
+      --shadow: 0 10px 30px rgba(31,41,55,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #f9fbff 0%, #eef4ff 100%);
+      color:var(--text);
+    }
+    .page{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 120px;
+    }
+    .header{
+      background: var(--card);
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    h1{
+      margin:0 0 8px;
+      font-size: 28px;
+      color:#0f172a;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+    }
+    .topbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:16px;
+    }
+    .pill{
+      background:var(--soft);
+      border:1px solid #cfe0ff;
+      color:#1e40af;
+      padding:10px 14px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:600;
+    }
+    .quiz-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .question-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+    .qhead{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom:12px;
+    }
+    .qnum{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:44px;
+      height:44px;
+      border-radius:12px;
+      background:var(--soft);
+      color:var(--primary-dark);
+      font-weight:700;
+    }
+    .qtitle{
+      flex:1;
+      margin:0 0 0 12px;
+      font-size:18px;
+      line-height:1.5;
+    }
+    .options{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+    .option{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:14px 14px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      cursor:pointer;
+      transition:.2s ease;
+      background:#fff;
+    }
+    .option:hover{border-color:#a9c2ff; background:#f8fbff}
+    .option input{margin-top:3px; transform:scale(1.05)}
+    .option.correct{
+      border-color: rgba(22,163,74,.35);
+      background: #f0fdf4;
+    }
+    .option.wrong{
+      border-color: rgba(220,38,38,.35);
+      background: #fef2f2;
+    }
+    .option.locked{cursor:not-allowed}
+    .option-label{
+      flex:1;
+      line-height:1.5;
+    }
+    .feedback{
+      margin-top:12px;
+      border-radius:14px;
+      padding:12px 14px;
+      display:none;
+      line-height:1.6;
+      border:1px solid transparent;
+    }
+    .feedback.show{display:block}
+    .feedback.correct{
+      background:#f0fdf4;
+      border-color:#86efac;
+      color:#166534;
+    }
+    .feedback.wrong{
+      background:#fef2f2;
+      border-color:#fca5a5;
+      color:#991b1b;
+    }
+    .legend{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .legend span{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .dot{
+      width:12px;height:12px;border-radius:50%;
+      display:inline-block;
+    }
+    .dot.green{background:var(--success)}
+    .dot.red{background:var(--danger)}
+    .dot.blue{background:var(--primary)}
+    .fixed-actions{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      background: rgba(246,248,252,.92);
+      backdrop-filter: blur(10px);
+      border-top:1px solid var(--border);
+      padding:14px 16px;
+      z-index:1000;
+    }
+    .action-inner{
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      gap:12px;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      border:none;
+      border-radius:12px;
+      padding:12px 18px;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition:.2s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-index{
+      background:#e5eefc;
+      color:#1d4ed8;
+    }
+    .btn-submit{
+      background:var(--primary);
+      color:#fff;
+    }
+    .btn-submit:hover{background:var(--primary-dark)}
+    .progress{
+      font-weight:700;
+      color:#0f172a;
+    }
+    .recap{
+      margin-top:18px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow: var(--shadow);
+      padding:20px;
+    }
+    .recap h2{margin-top:0}
+    .summary-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap:12px;
+      margin:16px 0 18px;
+    }
+    .summary-box{
+      background:#f8fbff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+    }
+    .summary-box .label{color:var(--muted); font-size:14px}
+    .summary-box .value{font-size:24px; font-weight:800; margin-top:6px}
+    .review-list{
+      display:grid;
+      gap:12px;
+    }
+    .review-item{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
+    }
+    .review-item.correct{border-left:6px solid var(--success)}
+    .review-item.wrong{border-left:6px solid var(--danger)}
+    .review-item h3{
+      margin:0 0 8px;
+      font-size:16px;
+    }
+    .review-item p{
+      margin:6px 0;
+      line-height:1.6;
+    }
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .badge.correct{background:#dcfce7;color:#166534}
+    .badge.wrong{background:#fee2e2;color:#991b1b}
+    @media (max-width: 640px){
+      h1{font-size:24px}
+      .qtitle{font-size:16px}
+      .action-inner{justify-content:center}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>Linux Basic Commands MCQ Quiz</h1>
+      <p class="subtitle">
+        60 English multiple-choice questions about Linux basic commands. Answers are checked immediately after clicking.
+        You can submit anytime, even if you have not completed all questions.
+      </p>
+      <div class="topbar">
+        <div class="pill">Immediate feedback</div>
+        <div class="pill">60 questions</div>
+        <div class="pill">Light clean layout</div>
+        <div class="pill">Detailed recap included</div>
+      </div>
+    </div>
+
+    <div id="quiz" class="quiz-grid"></div>
+
+    <div class="recap" id="recap">
+      <h2>Recap</h2>
+      <div class="summary-grid">
+        <div class="summary-box">
+          <div class="label">Answered</div>
+          <div class="value" id="answeredCount">0</div>
+        </div>
+        <div class="summary-box">
+          <div class="label">Correct</div>
+          <div class="value" id="correctCount">0</div>
+        </div>
+        <div class="summary-box">
+          <div class="label">Wrong</div>
+          <div class="value" id="wrongCount">0</div>
+        </div>
+        <div class="summary-box">
+          <div class="label">Score</div>
+          <div class="value" id="scoreCount">0%</div>
+        </div>
+      </div>
+      <h3>Detailed review</h3>
+      <div class="review-list" id="reviewList"></div>
+    </div>
+  </div>
+
+  <div class="fixed-actions">
+    <div class="action-inner">
+      <div class="progress" id="progressText">0 / 60 answered</div>
+      <div class="btns">
+        <a class="btn btn-index" href="index.html">Index</a>
+        <button class="btn btn-submit" id="submitBtn">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {q:"What does the hostname command display?", options:["The current time","The name of the machine","The list of users","The current directory"], answer:1, explanation:"hostname shows the name of the machine."},
+      {q:"Why is a hostname important on a network?", options:["It deletes files","It gives each machine a unique name","It shows hidden files","It changes the password"], answer:1, explanation:"A hostname helps identify each machine uniquely on a network."},
+      {q:"Which command shows the machine name?", options:["pwd","hostname","who","ls"], answer:1, explanation:"hostname is used to display the machine name."},
+      {q:"What does the date command display?", options:["The current system date and time","The list of files","The username only","The kernel version"], answer:0, explanation:"date shows the current system date and time."},
+      {q:"Which command displays only the date?", options:["date +%T","date +%D","date -l","date -r"], answer:1, explanation:"date +%D prints the date only."},
+      {q:"Which command displays only the time?", options:["date +%T","date +%D","date +%U","date +%N"], answer:0, explanation:"date +%T prints the time only."},
+      {q:"What information does the who command show?", options:["Only the hostname","Login details of all users","File permissions","Current directory path"], answer:1, explanation:"who displays login details of users currently logged in."},
+      {q:"Which of the following may appear in who output?", options:["IP address and terminal number","File size and owner","Kernel modules","Process ID only"], answer:0, explanation:"who output can include terminal and host information."},
+      {q:"What is the main purpose of who?", options:["To list logged-in users","To delete users","To rename files","To display date format"], answer:0, explanation:"who is mainly used to list logged-in users."},
+      {q:"What does the whoami command display?", options:["The login details of all users","The name of the current user","The name of the machine","The current time"], answer:1, explanation:"whoami shows the current effective username."},
+      {q:"Which command shows the identity of the logged-in user?", options:["whoami","uname","env","pwd"], answer:0, explanation:"whoami displays the current user's identity."},
+      {q:"If you want to know which user you are currently using, which command do you use?", options:["who","whoami","hostname","ls"], answer:1, explanation:"whoami is the correct command."},
+      {q:"What does the env command display?", options:["File contents","Environment variables and their values","Directory structure","Current time zone only"], answer:1, explanation:"env prints environment variables."},
+      {q:"Which command lists environment variables?", options:["env","pwd","mkdir","cp"], answer:0, explanation:"env is used to show environment variables."},
+      {q:"Why is env useful?", options:["It helps view system settings stored as variables","It deletes temporary files","It creates folders","It changes file permissions"], answer:0, explanation:"Environment variables contain system and session settings."},
+      {q:"What does uptime display?", options:["The time the machine has been turned on","The current username","The number of files in a directory","The hostname only"], answer:0, explanation:"uptime shows how long the system has been running."},
+      {q:"Which command shows how long the system has been running?", options:["uname","uptime","whoami","cd"], answer:1, explanation:"uptime provides running duration and load information."},
+      {q:"The uptime command is used to check:", options:["System load and running duration","Hidden files","Directory permissions","Login password"], answer:0, explanation:"uptime shows both duration and load averages."},
+      {q:"What does the uname command display?", options:["Information about the computer system","All user logins","The current directory","A list of files"], answer:0, explanation:"uname shows system information such as kernel details."},
+      {q:"Which command can show the kernel version?", options:["uname","pwd","mv","touch"], answer:0, explanation:"uname can show the kernel version."},
+      {q:"Which command is related to system information?", options:["uname","mkdir","rm","cp"], answer:0, explanation:"uname is used for system information."},
+      {q:"What does the man command do?", options:["It prints the working directory","It shows the manual of a command","It renames files","It lists users"], answer:1, explanation:"man opens the manual pages for commands."},
+      {q:"What is the purpose of man uname?", options:["To display manual information for uname","To delete the uname command","To create a new directory","To show current time"], answer:0, explanation:"man uname shows the manual for uname."},
+      {q:"Which command helps you learn about another command?", options:["man","ls","cd","rmdir"], answer:0, explanation:"man is used to read command documentation."},
+      {q:"What does pwd stand for?", options:["Print working directory","Present window data","Path with data","Program working drive"], answer:0, explanation:"pwd stands for print working directory."},
+      {q:"What does pwd display?", options:["The current directory path","The current user password","The hostname","The environment variables"], answer:0, explanation:"pwd shows the current directory path."},
+      {q:"Which command tells you where you are in the directory tree?", options:["pwd","touch","whoami","date"], answer:0, explanation:"pwd displays the current location in the filesystem."},
+      {q:"What does ls do?", options:["Copies files","Lists contents of directories","Changes directory","Removes empty directories"], answer:1, explanation:"ls lists files and directories."},
+      {q:"Which command shows the files in a folder?", options:["ls","mv","uname","env"], answer:0, explanation:"ls displays folder contents."},
+      {q:"What is the purpose of ls?", options:["To display directory contents","To show system uptime","To create a file","To print a username"], answer:0, explanation:"ls is used to list contents of directories."},
+      {q:"What does cd mean?", options:["Change directory","Copy data","Clear display","Create document"], answer:0, explanation:"cd stands for change directory."},
+      {q:"Which command changes the working directory?", options:["cd","pwd","ls","rm"], answer:0, explanation:"cd changes the current directory."},
+      {q:"If you want to move to another folder, which command do you use?", options:["cd","touch","env","who"], answer:0, explanation:"cd is the correct command for moving between folders."},
+      {q:"What does mkdir do?", options:["Makes a directory","Moves a directory","Removes a directory","Lists files"], answer:0, explanation:"mkdir creates directories."},
+      {q:"Which command creates a new folder?", options:["mkdir","rmdir","cp","rm"], answer:0, explanation:"mkdir creates a new folder."},
+      {q:"The command mkdir is used to:", options:["Make directories","Rename files","Display time","Show users"], answer:0, explanation:"mkdir is used to make directories."},
+      {q:"What does rmdir do?", options:["Removes an empty directory","Removes a file","Copies a directory","Displays directory path"], answer:0, explanation:"rmdir removes empty directories."},
+      {q:"Which command deletes an empty folder?", options:["rmdir","mkdir","ls","whoami"], answer:0, explanation:"rmdir deletes empty folders."},
+      {q:"rmdir works best when the directory is:", options:["Full of files","Empty","Hidden","Read-only"], answer:1, explanation:"rmdir only removes empty directories."},
+      {q:"What does mv do?", options:["Moves a directory or file","Makes a file","Prints a file","Views system logs"], answer:0, explanation:"mv moves or renames files and directories."},
+      {q:"mv can also be used to:", options:["Rename a file or directory","Show hidden files","Display time","Change users"], answer:0, explanation:"mv can rename items by moving them to a new name."},
+      {q:"Which command is used to move or rename files?", options:["mv","cp","rm","touch"], answer:0, explanation:"mv is used for moving and renaming."},
+      {q:"What does cp do?", options:["Copies a file","Changes permissions","Creates a process","Clears the screen"], answer:0, explanation:"cp copies files or directories."},
+      {q:"Which command is used to duplicate a file?", options:["cp","mv","rm","pwd"], answer:0, explanation:"cp duplicates files."},
+      {q:"The cp command is mainly used for:", options:["Copying files","Listing files","Renaming folders","Displaying environment variables"], answer:0, explanation:"cp is mainly for copying."},
+      {q:"What does rm do?", options:["Removes a file","Reads a file","Renames a file","Restores a file"], answer:0, explanation:"rm removes files."},
+      {q:"Which command deletes a file?", options:["rm","cp","touch","who"], answer:0, explanation:"rm deletes files."},
+      {q:"Which option asks for confirmation before every removal?", options:["rm -i","rm -r","rm -f","rm -a"], answer:0, explanation:"rm -i prompts before deleting each file."},
+      {q:"Which option deletes directories and their contents recursively?", options:["rm -r","rm -i","rm -f","rm -l"], answer:0, explanation:"rm -r removes directories recursively."},
+      {q:"Which option forces deletion without confirmation?", options:["rm -f","rm -i","rm -r","rm -d"], answer:0, explanation:"rm -f forces deletion."},
+      {q:"What does touch do?", options:["Creates or updates a file","Deletes a file","Moves a directory","Lists hidden files"], answer:0, explanation:"touch creates empty files or updates timestamps."},
+      {q:"Which command creates an empty file?", options:["touch","mkdir","rmdir","whoami"], answer:0, explanation:"touch creates an empty file."},
+      {q:"touch is also used to:", options:["Update the timestamp of a file","Show system uptime","Print the username","Copy folders"], answer:0, explanation:"touch can update file timestamps."},
+      {q:"What does cd .. do?", options:["Goes up one directory","Goes to the home directory","Goes to the previous command","Deletes the current folder"], answer:0, explanation:"cd .. moves up one directory level."},
+      {q:"What does cd - do?", options:["Goes to the previous directory","Goes to the root directory","Shows hidden files","Creates a new folder"], answer:0, explanation:"cd - switches to the previous directory."},
+      {q:"What does cd ~ do?", options:["Goes to the home directory","Goes to the previous directory","Lists files alphabetically","Removes a file"], answer:0, explanation:"cd ~ takes you to the home directory."},
+      {q:"What does !! mean in Linux?", options:["Repeat the last command","Delete the last command","Show the last user","Create a new file"], answer:0, explanation:"!! repeats the last executed command."},
+      {q:"In Linux wildcards, * matches:", options:["Exactly one character","Any number of characters, even none","Only numbers","Only hidden files"], answer:1, explanation:"* matches any number of characters, including zero."},
+      {q:"In Linux wildcards, ? matches:", options:["Any number of characters","Exactly one character","Only letters a to z","One directory only"], answer:1, explanation:"? matches exactly one character."},
+      {q:"In Linux wildcards, [a-p] matches:", options:["One character in the range a to p","Any character","Exactly two characters","A hidden file only"], answer:0, explanation:"[a-p] matches one character from the given range."}
+    ];
+
+    const quiz = document.getElementById("quiz");
+    const reviewList = document.getElementById("reviewList");
+    const answeredCount = document.getElementById("answeredCount");
+    const correctCount = document.getElementById("correctCount");
+    const wrongCount = document.getElementById("wrongCount");
+    const scoreCount = document.getElementById("scoreCount");
+    const progressText = document.getElementById("progressText");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const state = Array(questions.length).fill(null);
+    const locked = Array(questions.length).fill(false);
+
+    function renderQuiz(){
+      quiz.innerHTML = questions.map((item, index) => `
+        <div class="question-card" id="card-${index}">
+          <div class="qhead">
+            <div class="qnum">${index + 1}</div>
+            <p class="qtitle">${item.q}</p>
+          </div>
+          <div class="options">
+            ${item.options.map((opt, optIndex) => `
+              <label class="option" id="q${index}-opt${optIndex}">
+                <input type="radio" name="q${index}" value="${optIndex}" />
+                <div class="option-label">${String.fromCharCode(65 + optIndex)}. ${opt}</div>
+              </label>
+            `).join("")}
+          </div>
+          <div class="feedback" id="feedback-${index}"></div>
+        </div>
+      `).join("");
+
+      questions.forEach((item, index) => {
+        document.querySelectorAll(`input[name="q${index}"]`).forEach(input => {
+          input.addEventListener("change", (e) => handleAnswer(index, parseInt(e.target.value)));
+        });
+      });
+      updateProgress();
+    }
+
+    function handleAnswer(qIndex, selected){
+      if (locked[qIndex]) return;
+      locked[qIndex] = true;
+      state[qIndex] = selected;
+
+      const item = questions[qIndex];
+      const isCorrect = selected === item.answer;
+      const feedback = document.getElementById(`feedback-${qIndex}`);
+      const selectedLabel = document.getElementById(`q${qIndex}-opt${selected}`);
+      const correctLabel = document.getElementById(`q${qIndex}-opt${item.answer}`);
+
+      document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(input => input.disabled = true);
+      document.querySelectorAll(`#card-${qIndex} .option`).forEach(el => el.classList.add("locked"));
+
+      if (selectedLabel) selectedLabel.classList.add(isCorrect ? "correct" : "wrong");
+      if (correctLabel) correctLabel.classList.add("correct");
+
+      feedback.className = `feedback show ${isCorrect ? "correct" : "wrong"}`;
+      feedback.innerHTML = `
+        <strong>${isCorrect ? "Correct" : "Wrong"}.</strong>
+        ${isCorrect ? "Good job!" : "The correct answer is " + String.fromCharCode(65 + item.answer) + ". " + item.options[item.answer] + "."}
+        <br><em>Explanation:</em> ${item.explanation}
+      `;
+
+      updateProgress();
+    }
+
+    function updateProgress(){
+      const answered = state.filter(v => v !== null).length;
+      const correct = state.reduce((sum, val, idx) => sum + (val === questions[idx].answer ? 1 : 0), 0);
+      const wrong = answered - correct;
+      const score = answered ? Math.round((correct / questions.length) * 100) : 0;
+
+      answeredCount.textContent = answered;
+      correctCount.textContent = correct;
+      wrongCount.textContent = wrong;
+      scoreCount.textContent = score + "%";
+      progressText.textContent = `${answered} / ${questions.length} answered`;
+    }
+
+    function submitQuiz(){
+      const answered = state.filter(v => v !== null).length;
+      const correct = state.reduce((sum, val, idx) => sum + (val === questions[idx].answer ? 1 : 0), 0);
+      const wrong = answered - correct;
+      const unanswered = questions.length - answered;
+      const score = Math.round((correct / questions.length) * 100);
+
+      reviewList.innerHTML = questions.map((item, index) => {
+        const userAnswer = state[index];
+        const status = userAnswer === null ? "wrong" : (userAnswer === item.answer ? "correct" : "wrong");
+        const userText = userAnswer === null ? "Not answered" : `${String.fromCharCode(65 + userAnswer)}. ${item.options[userAnswer]}`;
+        const correctText = `${String.fromCharCode(65 + item.answer)}. ${item.options[item.answer]}`;
+        return `
+          <div class="review-item ${status}">
+            <h3>Question ${index + 1}</h3>
+            <span class="badge ${status}">${status === "correct" ? "Correct" : "Needs improvement"}</span>
+            <p><strong>Question:</strong> ${item.q}</p>
+            <p><strong>Your answer:</strong> ${userText}</p>
+            <p><strong>Correct answer:</strong> ${correctText}</p>
+            <p><strong>Explanation:</strong> ${item.explanation}</p>
+          </div>
+        `;
+      }).join("");
+
+      answeredCount.textContent = answered;
+      correctCount.textContent = correct;
+      wrongCount.textContent = wrong + unanswered;
+      scoreCount.textContent = score + "%";
+      document.getElementById("recap").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    submitBtn.addEventListener("click", submitQuiz);
+    renderQuiz();
+  </script>
+</body>
+</html>

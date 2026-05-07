@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linux Directory Structure MCQ Quiz</title>
+  <style>
+    :root{
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --success:#16a34a;
+      --danger:#dc2626;
+      --warning:#f59e0b;
+      --border:#dbe4f0;
+      --shadow:0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(180deg,#f8fbff 0%, #eef4ff 100%);
+      color:var(--text);
+    }
+    .page{
+      max-width:1200px;
+      margin:0 auto;
+      padding:24px 16px 120px;
+    }
+    .header{
+      background:rgba(255,255,255,0.9);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:24px;
+      margin-bottom:20px;
+    }
+    .header h1{
+      margin:0 0 8px;
+      font-size:28px;
+      color:#0f172a;
+    }
+    .header p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+      gap:12px;
+      margin-top:16px;
+    }
+    .stat{
+      background:#f8fbff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px 16px;
+    }
+    .stat .label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    .stat .value{
+      font-size:22px;
+      font-weight:700;
+      color:#111827;
+    }
+    .toolbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin:16px 0 22px;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius:14px;
+      padding:12px 18px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+      box-shadow:0 8px 18px rgba(37, 99, 235, 0.15);
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .btn-index{
+      background:#e8f0ff;
+      color:#1746b5;
+      border:1px solid #bfd0ff;
+    }
+    .btn-submit{
+      background:var(--primary);
+      color:#fff;
+    }
+    .btn-submit:hover{background:var(--primary-dark)}
+    .btn-secondary{
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--border);
+      box-shadow:none;
+    }
+    .quiz{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
+    }
+    .question-card{
+      background:rgba(255,255,255,0.96);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px 18px 16px;
+    }
+    .q-head{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin-bottom:12px;
+    }
+    .q-number{
+      min-width:46px;
+      height:46px;
+      border-radius:14px;
+      background:#eff6ff;
+      color:#1d4ed8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      font-size:16px;
+      border:1px solid #dbeafe;
+    }
+    .q-text{
+      flex:1;
+      font-size:17px;
+      line-height:1.5;
+      font-weight:700;
+      margin-top:2px;
+    }
+    .options{
+      display:grid;
+      gap:10px;
+    }
+    .option{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+      background:#fff;
+      cursor:pointer;
+      transition:all .15s ease;
+    }
+    .option:hover{
+      border-color:#9db9ff;
+      background:#f8fbff;
+    }
+    .option input{
+      margin-right:10px;
+      transform:scale(1.08);
+    }
+    .option.correct{
+      border-color:#86efac;
+      background:#f0fdf4;
+    }
+    .option.wrong{
+      border-color:#fca5a5;
+      background:#fef2f2;
+    }
+    .feedback{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      display:none;
+      line-height:1.6;
+      font-size:14px;
+    }
+    .feedback.show{display:block}
+    .feedback.correct{
+      background:#f0fdf4;
+      border:1px solid #86efac;
+      color:#166534;
+    }
+    .feedback.wrong{
+      background:#fef2f2;
+      border:1px solid #fca5a5;
+      color:#991b1b;
+    }
+    .feedback.neutral{
+      background:#f8fafc;
+      border:1px solid #cbd5e1;
+      color:#334155;
+    }
+    .results{
+      margin-top:26px;
+      background:rgba(255,255,255,0.96);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+    .results h2{
+      margin:0 0 14px;
+      font-size:24px;
+    }
+    .recap-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .recap-box{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+      background:#f8fbff;
+    }
+    .recap-box h3{
+      margin:0 0 8px;
+      font-size:14px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .recap-box .big{
+      font-size:26px;
+      font-weight:800;
+      color:#0f172a;
+    }
+    .section-title{
+      font-size:18px;
+      margin:18px 0 12px;
+      font-weight:800;
+    }
+    .review-item{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px 16px;
+      margin-bottom:12px;
+      background:#fff;
+    }
+    .review-item.correct{border-left:6px solid var(--success)}
+    .review-item.wrong{border-left:6px solid var(--danger)}
+    .review-item.unanswered{border-left:6px solid var(--warning)}
+    .review-item .meta{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      font-size:14px;
+      margin-bottom:8px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .pill.correct{background:#dcfce7;color:#166534}
+    .pill.wrong{background:#fee2e2;color:#991b1b}
+    .pill.unanswered{background:#fef3c7;color:#92400e}
+    .fixed-bottom{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      background:rgba(255,255,255,0.92);
+      backdrop-filter:blur(10px);
+      border-top:1px solid var(--border);
+      box-shadow:0 -10px 24px rgba(15,23,42,0.08);
+      z-index:999;
+    }
+    .fixed-inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:12px 16px;
+      display:flex;
+      gap:12px;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .fixed-note{
+      color:var(--muted);
+      font-size:14px;
+    }
+    @media (max-width: 640px){
+      .header h1{font-size:23px}
+      .q-text{font-size:16px}
+      .fixed-inner{justify-content:center}
+      .btn{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>Linux Directory Structure — MCQ Quiz</h1>
+      <p>
+        Answer the questions directly below. Feedback appears immediately after each click with
+        <strong>correct / wrong</strong> and a short explanation. You can submit anytime, even if you have not finished all questions.
+      </p>
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Total Questions</div>
+          <div class="value" id="totalCount">60</div>
+        </div>
+        <div class="stat">
+          <div class="label">Answered</div>
+          <div class="value" id="answeredCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Correct</div>
+          <div class="value" id="correctCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Wrong</div>
+          <div class="value" id="wrongCount">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <a class="btn btn-index" href="index.html">Index</a>
+      <button class="btn btn-submit" id="submitTop" type="button">Submit</button>
+      <button class="btn btn-secondary" id="resetBtn" type="button">Reset</button>
+    </div>
+
+    <form id="quizForm" class="quiz"></form>
+
+    <div class="results" id="results" style="display:none;">
+      <h2>Recap Results</h2>
+      <div class="recap-grid">
+        <div class="recap-box">
+          <h3>Score</h3>
+          <div class="big" id="scoreText">0 / 60</div>
+        </div>
+        <div class="recap-box">
+          <h3>Accuracy</h3>
+          <div class="big" id="accuracyText">0%</div>
+        </div>
+        <div class="recap-box">
+          <h3>Need More Practice</h3>
+          <div class="big" id="practiceText">0</div>
+        </div>
+      </div>
+
+      <div class="section-title">Detailed Review</div>
+      <div id="reviewList"></div>
+
+      <div class="section-title">What to improve</div>
+      <div id="improvementList" class="review-item unanswered"></div>
+    </div>
+  </div>
+
+  <div class="fixed-bottom">
+    <div class="fixed-inner">
+      <div class="fixed-note">Index button and submit button are always available.</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a class="btn btn-index" href="index.html">Index</a>
+        <button class="btn btn-submit" id="submitBottom" type="button">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [
+      {q:"What does the root directory in Linux represent?", options:["A user folder","The starting point of the filesystem","A temporary storage area","A device driver folder"], answer:1, explanation:"The root directory / is the top of the Linux filesystem tree and all other directories branch from it."},
+      {q:"Which symbol is used to represent the root directory in Linux?", options:["#","~","/","\\"], answer:2, explanation:"The forward slash / represents the root directory in Linux."},
+      {q:"Linux directory layout follows which standard?", options:["TCP/IP Standard","Filesystem Hierarchy Standard (FHS)","POSIX Network Model","Windows File Standard"], answer:1, explanation:"Linux directory organization is based on the Filesystem Hierarchy Standard (FHS)."},
+      {q:"In Linux, everything is treated as a:", options:["Folder","Process","File","Command"], answer:2, explanation:"Linux follows the philosophy that almost everything is represented as a file."},
+      {q:"Which of the following is an example of a general file?", options:["/dev/sda1","/etc/passwd","/usr/bin","/proc"], answer:1, explanation:"/etc/passwd is a regular file storing user account information."},
+      {q:"Which file type is used to represent hardware devices in Linux?", options:["General files","Directory files","Device files","Binary files only"], answer:2, explanation:"Hardware devices are represented by device files in /dev."},
+      {q:"What is the purpose of a directory file?", options:["To store hardware drivers only","To act as a warehouse for other file types","To store login passwords only","To store kernel modules only"], answer:1, explanation:"Directories act as containers that hold files and other directories."},
+      {q:"Which directory contains most system-wide configuration files?", options:["/bin","/etc","/usr","/proc"], answer:1, explanation:"/etc is the main location for system configuration files."},
+      {q:"What does /etc/passwd contain?", options:["Kernel modules","User account information","DNS records","Mounted file systems"], answer:1, explanation:"/etc/passwd stores user account details such as usernames and IDs."},
+      {q:"What is stored in /etc/fstab?", options:["User group details","Disk drives and mount points","CPU information","Kernel boot logs"], answer:1, explanation:"/etc/fstab lists file systems and their mount points."},
+      {q:"Which file schedules commands to run automatically at set times?", options:["/etc/crontab","/etc/hosts","/etc/profile","/etc/group"], answer:0, explanation:"/etc/crontab defines scheduled tasks for cron."},
+      {q:"Which file maps IP addresses to hostnames?", options:["/etc/resolv.conf","/etc/hosts","/etc/passwd","/etc/shadow"], answer:1, explanation:"/etc/hosts manually maps hostnames to IP addresses."},
+      {q:"Which file stores DNS configuration?", options:["/etc/termcap","/etc/resolv.conf","/etc/group","/etc/mtab"], answer:1, explanation:"/etc/resolv.conf holds DNS resolver settings."},
+      {q:"Which file contains system-wide default settings and aliases for Bash?", options:["/etc/bashrc","/etc/init.d","/etc/security","/etc/inittab"], answer:0, explanation:"/etc/bashrc contains system-wide Bash configuration and aliases."},
+      {q:"What is the purpose of /etc/profile?", options:["Store group memberships","Define system-wide environment settings for Bash","Show mounted partitions","Store CPU details"], answer:1, explanation:"/etc/profile sets system-wide environment variables and shell startup settings."},
+      {q:"Which directory contains additional scripts executed automatically after user login?", options:["/etc/profile.d","/etc/X11","/usr/share","/var/log"], answer:0, explanation:"Scripts in /etc/profile.d are executed during login shell initialization."},
+      {q:"Which file defines INIT process behavior and system run levels?", options:["/etc/hosts.allow","/etc/inittab","/etc/modules.conf","/etc/group"], answer:1, explanation:"/etc/inittab was historically used to control init behavior and runlevels."},
+      {q:"Which file contains security-related configuration files?", options:["/etc/security","/etc/termcap","/etc/init.d","/etc/grub.conf"], answer:0, explanation:"/etc/security is used for security-related configuration."},
+      {q:"Which directory contains configuration files for the X Window System?", options:["/etc/X11","/usr/include","/proc","/bin"], answer:0, explanation:"/etc/X11 contains configuration for the X Window System."},
+      {q:"What is stored in /etc/hosts.allow?", options:["Hosts denied access","Hosts allowed to access services","User login history","Kernel version info"], answer:1, explanation:"/etc/hosts.allow defines hosts permitted to access services."},
+      {q:"What is stored in /etc/hosts.deny?", options:["Hosts denied access to services","Disk mount points","System messages","Shared libraries"], answer:0, explanation:"/etc/hosts.deny defines hosts that are blocked from services."},
+      {q:"Which file contains information about currently mounted file systems?", options:["/etc/mtab","/proc/mounts","Both A and B","/etc/fstab"], answer:2, explanation:"Both /etc/mtab and /proc/mounts can show currently mounted file systems."},
+      {q:"Which file stores information about system groups and memberships?", options:["/etc/group","/etc/passwd","/etc/profile","/etc/resolv.conf"], answer:0, explanation:"/etc/group stores group names and memberships."},
+      {q:"Which file contains GRUB boot loader configuration?", options:["/etc/grub.conf","/etc/crontab","/etc/init.d","/etc/modules.conf"], answer:0, explanation:"/etc/grub.conf is the GRUB boot loader configuration file in the given content."},
+      {q:"Which directory contains service startup and shutdown scripts?", options:["/etc/init.d","/usr/lib","/var/log","/proc"], answer:0, explanation:"/etc/init.d contains service control scripts."},
+      {q:"Which directory contains most user-level executable programs and commands?", options:["/usr/bin","/usr/include","/etc/bin","/proc/bin"], answer:0, explanation:"/usr/bin stores most user commands and executables."},
+      {q:"Which directory stores standard header files used by C and other languages?", options:["/usr/lib","/usr/include","/usr/share","/usr/sbin"], answer:1, explanation:"/usr/include contains header files used for development."},
+      {q:"What is the purpose of /usr/share?", options:["Store architecture-independent shareable data","Store kernel modules","Store device files","Store boot loaders"], answer:0, explanation:"/usr/share is for architecture-independent shareable data and documentation."},
+      {q:"What is stored in /usr/lib?", options:["User commands only","Object files and shared libraries","Login sessions","Hardware interrupts"], answer:1, explanation:"/usr/lib contains libraries and object files."},
+      {q:"What is the role of /usr/sbin?", options:["Contains admin commands for the superuser","Contains user documents","Contains temporary files","Contains mounted file systems"], answer:0, explanation:"/usr/sbin is used for system administration commands."},
+      {q:"What kind of information is found in /proc/cpuinfo?", options:["CPU details such as type, model, and speed","DNS settings","User accounts","Mounted partitions"], answer:0, explanation:"/proc/cpuinfo provides CPU-related information."},
+      {q:"What does /proc/meminfo report?", options:["Memory usage details","Login history","Kernel boot configuration","File permissions"], answer:0, explanation:"/proc/meminfo shows memory information and usage."},
+      {q:"Which file displays supported and currently available file systems?", options:["/proc/filesystems","/proc/swaps","/proc/stat","/proc/modules"], answer:0, explanation:"/proc/filesystems lists supported file systems."},
+      {q:"What is shown in /proc/interrupts?", options:["Kernel modules loaded","Interrupts handled by each IRQ","Memory consumption","Host access rules"], answer:1, explanation:"/proc/interrupts shows interrupts per IRQ line."},
+      {q:"What information is contained in /proc/ioports?", options:["Input/output addresses used by hardware devices","User login details","Mounted file systems","System messages"], answer:0, explanation:"/proc/ioports lists I/O port ranges used by devices."},
+      {q:"Which file lists currently loaded kernel modules?", options:["/proc/modules","/proc/mounts","/proc/stat","/proc/cpuinfo"], answer:0, explanation:"/proc/modules shows currently loaded kernel modules."},
+      {q:"What does /proc/swaps contain?", options:["CPU temperature","Swap space and swap files in use","User passwords","Boot loader settings"], answer:1, explanation:"/proc/swaps displays active swap devices and files."},
+      {q:"Which file provides detailed statistics about system activity and performance?", options:["/proc/stat","/proc/filesystems","/proc/interrupts","/proc/meminfo"], answer:0, explanation:"/proc/stat contains various system statistics."},
+      {q:"What is the purpose of /proc/mounts?", options:["Show all mounted file systems","Show user login history","Store boot scripts","Store shared libraries"], answer:0, explanation:"/proc/mounts shows the current mount table."},
+      {q:"Which file displays Linux version information?", options:["/version","/etc/version","/proc/version","/usr/version"], answer:0, explanation:"The content states /version as the Linux version information file."},
+      {q:"What does /var/log/messages contain?", options:["Global system messages and general activity logs","User home directory content","DNS records","Kernel source code"], answer:0, explanation:"/var/log/messages stores general system logs and messages."},
+      {q:"Which log file stores the last login of each user?", options:["/var/log/wtmp","/var/log/lastlog","/var/log/messages","/var/log/syslog"], answer:1, explanation:"/var/log/lastlog records the last login of each user."},
+      {q:"What is stored in /var/log/wtmp?", options:["User login and logout sessions history","Kernel modules","Group memberships","Disk mount points"], answer:0, explanation:"/var/log/wtmp keeps login and logout history."},
+      {q:"Which directory is typically associated with device files?", options:["/dev","/bin","/etc","/home"], answer:0, explanation:"/dev is the standard directory for device files."},
+      {q:"What is /dev/sda1 an example of?", options:["Directory file","Device file","Log file","Text file"], answer:1, explanation:"/dev/sda1 represents a device file for a storage partition."},
+      {q:"What is the Linux filesystem structure commonly described as?", options:["Flat structure","Tree-like structure","Circular structure","Random structure"], answer:1, explanation:"Linux directories are organized in a tree-like hierarchy."},
+      {q:"In a Linux-like OS, files are stored starting from:", options:["User folder","Desktop","Root directory","/usr/bin"], answer:2, explanation:"All paths originate from the root directory /."},
+      {q:"Which of the following is TRUE about Linux files?", options:["Devices are represented as files","Only text files exist","Directories cannot contain subdirectories","The root directory is optional"], answer:0, explanation:"Linux represents devices, processes, and other resources as files."},
+      {q:"Which command is mentioned for switching to root user?", options:["su -","sudo -s","root -s","login root"], answer:1, explanation:"The provided content mentions sudo -s for switching to root user."},
+      {q:"Which command changes the current directory to the root directory?", options:["cd /","cd root","cd ~","cd .."], answer:0, explanation:"cd / moves you to the root directory."},
+      {q:"Which top-level directory is responsible for system configuration?", options:["/etc","/proc","/usr","/var"], answer:0, explanation:"/etc holds system configuration files."},
+      {q:"Which top-level directory is mainly for user-space programs and data?", options:["/usr","/boot","/dev","/sys"], answer:0, explanation:"/usr contains user-space programs, libraries, and data."},
+      {q:"Which top-level directory contains virtual, process-related files?", options:["/proc","/etc","/bin","/tmp"], answer:0, explanation:"/proc is a virtual filesystem with process and kernel information."},
+      {q:"Which directory contains log files?", options:["/var/log","/usr/log","/etc/log","/proc/log"], answer:0, explanation:"Log files are generally stored in /var/log."},
+      {q:"Which directory is used to store boot-related files like the kernel?", options:["/boot","/root","/usr","/var"], answer:0, explanation:"/boot contains bootloader files and kernel-related files."},
+      {q:"Which file is described as the Linux kernel file?", options:["/boot/vmlinux","/etc/vmlinux","/usr/vmlinux","/proc/vmlinux"], answer:0, explanation:"The provided content identifies /boot/vmlinux as the Linux kernel file."},
+      {q:"Which of the following is a pseudo-device that redirects unwanted output to null?", options:["/dev/null","/dev/hda","/dev/sda1","/dev/zero"], answer:0, explanation:"/dev/null discards any data written to it."},
+      {q:"What is the role of /dev/hda in the provided content?", options:["First IDE HDD device file","User account file","DNS configuration file","Mounted filesystem file"], answer:0, explanation:"/dev/hda is described as the first IDE hard disk device file."},
+      {q:"Which directory is related to architecture-independent, shareable documentation?", options:["/usr/share","/usr/sbin","/etc/share","/proc/share"], answer:0, explanation:"/usr/share contains shareable, architecture-independent data and documentation."},
+      {q:"What is the most accurate description of Linux’s directory organization?", options:["It uses multiple independent roots","It follows a single-root tree hierarchy","It stores everything in the desktop folder","It only organizes files by file extension"], answer:1, explanation:"Linux uses a single-root tree hierarchy rooted at /."}
+    ];
+
+    const form = document.getElementById('quizForm');
+    const results = document.getElementById('results');
+    const answeredCount = document.getElementById('answeredCount');
+    const correctCount = document.getElementById('correctCount');
+    const wrongCount = document.getElementById('wrongCount');
+    const scoreText = document.getElementById('scoreText');
+    const accuracyText = document.getElementById('accuracyText');
+    const practiceText = document.getElementById('practiceText');
+    const reviewList = document.getElementById('reviewList');
+    const improvementList = document.getElementById('improvementList');
+
+    const state = Array(quizData.length).fill(null);
+    const locked = Array(quizData.length).fill(false);
+
+    function renderQuiz(){
+      form.innerHTML = '';
+      quizData.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+          <div class="q-head">
+            <div class="q-number">${index + 1}</div>
+            <div class="q-text">${item.q}</div>
+          </div>
+          <div class="options" role="radiogroup" aria-label="Question ${index + 1}">
+            ${item.options.map((opt, i) => `
+              <label class="option" data-q="${index}" data-i="${i}">
+                <input type="radio" name="q${index}" value="${i}" />
+                ${opt}
+              </label>
+            `).join('')}
+          </div>
+          <div class="feedback neutral" id="feedback-${index}"></div>
+        `;
+        form.appendChild(card);
+      });
+
+      document.querySelectorAll('.option').forEach(opt => {
+        opt.addEventListener('click', () => handleAnswer(parseInt(opt.dataset.q), parseInt(opt.dataset.i)));
+      });
+    }
+
+    function handleAnswer(qIndex, choiceIndex){
+      if (locked[qIndex]) return;
+      locked[qIndex] = true;
+      state[qIndex] = choiceIndex;
+
+      const item = quizData[qIndex];
+      const feedback = document.getElementById(`feedback-${qIndex}`);
+      const options = form.querySelectorAll(`.option[data-q="${qIndex}"]`);
+      const selected = choiceIndex === item.answer;
+
+      options.forEach(opt => {
+        const i = parseInt(opt.dataset.i);
+        const input = opt.querySelector('input');
+        input.disabled = true;
+        if (i === item.answer) opt.classList.add('correct');
+        if (i === choiceIndex && choiceIndex !== item.answer) opt.classList.add('wrong');
+      });
+
+      feedback.className = `feedback show ${selected ? 'correct' : 'wrong'}`;
+      feedback.innerHTML = selected
+        ? `<strong>Correct.</strong> ${item.explanation}`
+        : `<strong>Wrong.</strong> The correct answer is <strong>${item.options[item.answer]}</strong>. ${item.explanation}`;
+
+      updateCounters();
+    }
+
+    function updateCounters(){
+      const answered = state.filter(v => v !== null).length;
+      const correct = state.reduce((acc, v, i) => acc + (v === quizData[i].answer ? 1 : 0), 0);
+      const wrong = answered - correct;
+      answeredCount.textContent = answered;
+      correctCount.textContent = correct;
+      wrongCount.textContent = wrong;
+    }
+
+    function submitQuiz(){
+      const answered = state.filter(v => v !== null).length;
+      const correct = state.reduce((acc, v, i) => acc + (v === quizData[i].answer ? 1 : 0), 0);
+      const wrong = answered - correct;
+      const unanswered = quizData.length - answered;
+      const accuracy = answered ? Math.round((correct / quizData.length) * 100) : 0;
+
+      scoreText.textContent = `${correct} / ${quizData.length}`;
+      accuracyText.textContent = `${accuracy}%`;
+      practiceText.textContent = `${wrong + unanswered}`;
+
+      reviewList.innerHTML = '';
+      const weakAreas = [];
+
+      quizData.forEach((item, index) => {
+        const userAnswer = state[index];
+        const isCorrect = userAnswer === item.answer;
+        const isUnanswered = userAnswer === null;
+
+        if (!isCorrect) weakAreas.push(index + 1);
+
+        const div = document.createElement('div');
+        div.className = `review-item ${isCorrect ? 'correct' : isUnanswered ? 'unanswered' : 'wrong'}`;
+        div.innerHTML = `
+          <div class="meta">
+            <div><strong>Q${index + 1}.</strong> ${item.q}</div>
+            <div class="pill ${isCorrect ? 'correct' : isUnanswered ? 'unanswered' : 'wrong'}">
+              ${isCorrect ? 'Correct' : isUnanswered ? 'Unanswered' : 'Wrong'}
+            </div>
+          </div>
+          <div><strong>Your answer:</strong> ${isUnanswered ? 'Not answered' : item.options[userAnswer]}</div>
+          <div><strong>Correct answer:</strong> ${item.options[item.answer]}</div>
+          <div><strong>Explanation:</strong> ${item.explanation}</div>
+        `;
+        reviewList.appendChild(div);
+      });
+
+      improvementList.innerHTML = `
+        <strong>Focus on these question numbers:</strong><br/>
+        ${weakAreas.length ? weakAreas.join(', ') : 'Great job! No weak areas detected.'}
+        <br/><br/>
+        <strong>Suggested focus:</strong> Review /etc, /usr, /proc, /var/log, /dev, and FHS conventions, then revisit the missed questions.
+      `;
+
+      results.style.display = 'block';
+      results.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    function resetQuiz(){
+      state.fill(null);
+      locked.fill(false);
+      results.style.display = 'none';
+      renderQuiz();
+      updateCounters();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    document.getElementById('submitTop').addEventListener('click', submitQuiz);
+    document.getElementById('submitBottom').addEventListener('click', submitQuiz);
+    document.getElementById('resetBtn').addEventListener('click', resetQuiz);
+
+    renderQuiz();
+    updateCounters();
+  </script>
+</body>
+</html>

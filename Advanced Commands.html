@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linux Commands MCQ Quiz (60 Questions)</title>
+  <style>
+    :root{
+      --bg:#f7fbff;
+      --card:#ffffff;
+      --text:#16324f;
+      --muted:#5f7287;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --border:#d7e2ee;
+      --correct-bg:#e8f8ee;
+      --correct:#166534;
+      --wrong-bg:#fdecec;
+      --wrong:#b91c1c;
+      --info-bg:#eef5ff;
+      --shadow:0 10px 30px rgba(31, 41, 55, 0.08);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+      color:var(--text);
+    }
+
+    .page{
+      max-width:1200px;
+      margin:0 auto;
+      padding:24px 16px 120px;
+    }
+
+    .header{
+      background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:24px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .header h1{
+      margin:0 0 10px;
+      font-size:28px;
+      line-height:1.25;
+      color:#0f2f57;
+    }
+
+    .header p{
+      margin:6px 0;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .top-stats{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .stat{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px 16px;
+    }
+    .stat .label{font-size:13px;color:var(--muted);margin-bottom:6px;}
+    .stat .value{font-size:22px;font-weight:700;color:#0f2f57;}
+
+    .section{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
+    }
+
+    .section h2{
+      margin:0 0 14px;
+      font-size:22px;
+      color:#10345f;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    button, .nav-link{
+      border:none;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px 18px;
+      border-radius:12px;
+      font-weight:700;
+      transition: 0.2s ease;
+      font-size:15px;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+    }
+    .btn-primary:hover{background:var(--primary-dark);}
+    .btn-secondary{
+      background:#eaf2ff;
+      color:#154a96;
+      border:1px solid #cfe0ff;
+    }
+    .btn-secondary:hover{background:#dce9ff;}
+    .btn-light{
+      background:#f6f8fb;
+      color:#24415f;
+      border:1px solid #d9e3ee;
+    }
+
+    .quiz{
+      display:grid;
+      gap:14px;
+    }
+
+    .q-card{
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+    }
+
+    .q-title{
+      font-weight:700;
+      margin:0 0 12px;
+      line-height:1.5;
+      color:#12355b;
+    }
+
+    .options{
+      display:grid;
+      gap:10px;
+    }
+
+    .option{
+      border:1px solid #d9e3ee;
+      background:#fbfdff;
+      border-radius:14px;
+      padding:12px 14px;
+      text-align:left;
+      width:100%;
+      color:#1c3554;
+    }
+
+    .option:hover{border-color:#9fb9dd;background:#f4f8ff;}
+    .option.selected{outline:2px solid rgba(37,99,235,.2);}
+    .option.correct{
+      background:var(--correct-bg);
+      border-color:#9bd7ab;
+      color:var(--correct);
+    }
+    .option.wrong{
+      background:var(--wrong-bg);
+      border-color:#f2a4a4;
+      color:var(--wrong);
+    }
+
+    .feedback{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      display:none;
+      line-height:1.6;
+      font-size:14px;
+    }
+    .feedback.show{display:block;}
+    .feedback.correct{
+      background:var(--correct-bg);
+      color:var(--correct);
+      border:1px solid #9bd7ab;
+    }
+    .feedback.wrong{
+      background:var(--wrong-bg);
+      color:var(--wrong);
+      border:1px solid #f2a4a4;
+    }
+    .feedback strong{display:block;margin-bottom:4px;}
+
+    .recap{
+      display:grid;
+      gap:14px;
+    }
+
+    .recap-box{
+      background:var(--info-bg);
+      border:1px solid #cfe0ff;
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .recap-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .recap-item{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+    }
+
+    .recap-item .label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .recap-item .value{
+      font-size:18px;
+      font-weight:700;
+      color:#10345f;
+    }
+
+    .review-list{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .review-item{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      background:#fff;
+    }
+    .review-item.correct{
+      border-left:6px solid #22c55e;
+    }
+    .review-item.wrong{
+      border-left:6px solid #ef4444;
+    }
+    .review-item .q{
+      font-weight:700;
+      margin-bottom:8px;
+      line-height:1.5;
+    }
+    .review-item .a, .review-item .explain{
+      margin:4px 0;
+      color:#24415f;
+      line-height:1.6;
+      font-size:14px;
+    }
+    .review-item .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+    .badge.correct{background:#e8f8ee;color:#166534;}
+    .badge.wrong{background:#fdecec;color:#b91c1c;}
+
+    .bottom-bar{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      background:rgba(255,255,255,.95);
+      backdrop-filter: blur(10px);
+      border-top:1px solid var(--border);
+      box-shadow:0 -8px 24px rgba(0,0,0,.08);
+      z-index:1000;
+    }
+
+    .bottom-inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:12px 16px;
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .small-note{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .nav-link.index{
+      background:#eef5ff;
+      color:#154a96;
+      border:1px solid #cfe0ff;
+    }
+
+    .sticky-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width: 768px){
+      .header h1{font-size:22px;}
+      .section{padding:14px;}
+      .bottom-inner{justify-content:center;}
+      .sticky-actions{width:100%; justify-content:center;}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>Linux Commands MCQ Quiz</h1>
+      <p>60 English multiple-choice questions. Immediate feedback appears when you click an answer: correct/incorrect plus explanation.</p>
+      <p>You can submit anytime, even before answering all questions. The recap section shows detailed results and what to improve.</p>
+
+      <div class="top-stats">
+        <div class="stat">
+          <div class="label">Total Questions</div>
+          <div class="value" id="totalQuestions">60</div>
+        </div>
+        <div class="stat">
+          <div class="label">Answered</div>
+          <div class="value" id="answeredCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Correct</div>
+          <div class="value" id="correctCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Score</div>
+          <div class="value" id="scorePercent">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Quiz</h2>
+      <div class="controls">
+        <button class="btn-secondary" onclick="scrollToRecap()">Go to Recap</button>
+        <button class="btn-light" onclick="resetQuiz()">Reset Answers</button>
+      </div>
+      <div class="quiz" id="quiz"></div>
+    </div>
+
+    <div class="section" id="recapSection">
+      <h2>Recap</h2>
+      <div class="recap-box">
+        <div id="recapSummary">Submit the quiz to see a detailed recap.</div>
+        <div class="recap-grid">
+          <div class="recap-item">
+            <div class="label">Correct</div>
+            <div class="value" id="recapCorrect">0</div>
+          </div>
+          <div class="recap-item">
+            <div class="label">Wrong</div>
+            <div class="value" id="recapWrong">0</div>
+          </div>
+          <div class="recap-item">
+            <div class="label">Unanswered</div>
+            <div class="value" id="recapUnanswered">60</div>
+          </div>
+          <div class="recap-item">
+            <div class="label">Final Score</div>
+            <div class="value" id="recapScore">0%</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-list" id="reviewList"></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="bottom-inner">
+      <div class="small-note">Sticky actions: Index link and Submit button always visible.</div>
+      <div class="sticky-actions">
+        <a class="nav-link index" href="index.html">Index</a>
+        <button class="btn-primary" id="submitBtn" onclick="submitQuiz()">Submit Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [
+      { q: "Which command displays the current working directory?", options: ["pwd", "cd", "ls", "whoami"], answer: 0, explain: "pwd prints the full path of the current working directory." },
+      { q: "Which command changes the directory?", options: ["mv", "cd", "cp", "mkdir"], answer: 1, explain: "cd is used to change from one directory to another." },
+      { q: "Which command lists files in a directory?", options: ["ls", "cat", "grep", "less"], answer: 0, explain: "ls lists the contents of a directory." },
+      { q: "Which command creates a new directory?", options: ["rmdir", "mkdir", "touch", "pwd"], answer: 1, explain: "mkdir creates a new directory." },
+      { q: "Which command removes a file?", options: ["rm", "rmdir", "mv", "cp"], answer: 0, explain: "rm removes files." },
+      { q: "Which command removes an empty directory?", options: ["rm", "rmdir", "touch", "chmod"], answer: 1, explain: "rmdir removes empty directories." },
+      { q: "Which command copies a file?", options: ["mv", "cp", "cat", "grep"], answer: 1, explain: "cp copies files or directories." },
+      { q: "Which command renames or moves a file?", options: ["mv", "cp", "ln", "touch"], answer: 0, explain: "mv can rename or move files." },
+      { q: "Which command creates an empty file or updates timestamps?", options: ["chmod", "touch", "cat", "head"], answer: 1, explain: "touch creates empty files and updates timestamps." },
+      { q: "Which command displays the content of a file?", options: ["cat", "grep", "sort", "wc"], answer: 0, explain: "cat prints file contents to the terminal." },
+      { q: "Which command shows the beginning of a file?", options: ["tail", "head", "more", "less"], answer: 1, explain: "head shows the first lines of a file." },
+      { q: "Which command shows the end of a file?", options: ["tail", "head", "cat", "wc"], answer: 0, explain: "tail displays the last lines of a file." },
+      { q: "Which command scrolls through a file one page at a time?", options: ["more", "pwd", "cut", "tr"], answer: 0, explain: "more is used to view a file page by page." },
+      { q: "Which command is a scrollable file viewer?", options: ["less", "chmod", "ps", "whoami"], answer: 0, explain: "less lets you scroll both forward and backward through a file." },
+      { q: "Which command counts lines, words, and characters?", options: ["wc", "grep", "sort", "uniq"], answer: 0, explain: "wc reports counts for lines, words, and characters." },
+      { q: "Which command sorts lines alphabetically or numerically?", options: ["sort", "cat", "cut", "sed"], answer: 0, explain: "sort arranges lines in order." },
+      { q: "Which command removes identical adjacent lines?", options: ["uniq", "grep", "head", "find"], answer: 0, explain: "uniq removes duplicate adjacent lines." },
+      { q: "Which command extracts fields from text based on a delimiter?", options: ["cut", "tr", "awk", "sed"], answer: 0, explain: "cut extracts selected columns or fields from text." },
+      { q: "In cut -d\":\" -f1 /etc/passwd, what does -d specify?", options: ["Destination", "Delimiter", "Directory", "Data type"], answer: 1, explain: "-d defines the field delimiter character." },
+      { q: "In cut -d\":\" -f1 /etc/passwd, what does -f1 mean?", options: ["First folder", "First file", "First field", "First function"], answer: 2, explain: "-f1 selects the first field." },
+      { q: "Which command filters or searches text by pattern?", options: ["grep", "wc", "pwd", "mv"], answer: 0, explain: "grep searches text for matching patterns." },
+      { q: "Which command searches recursively in a folder?", options: ["grep -r", "grep -n", "grep -v", "grep -c"], answer: 0, explain: "-r makes grep search recursively through directories." },
+      { q: "Which option makes grep ignore case?", options: ["-v", "-i", "-n", "-c"], answer: 1, explain: "-i makes grep case-insensitive." },
+      { q: "Which option with grep shows line numbers?", options: ["-l", "-n", "-r", "-v"], answer: 1, explain: "-n shows line numbers in the output." },
+      { q: "Which option with grep counts matching lines?", options: ["-c", "-l", "-n", "-i"], answer: 0, explain: "-c counts the number of matching lines." },
+      { q: "Which option with grep shows lines that do NOT match?", options: ["-v", "-n", "-i", "-c"], answer: 0, explain: "-v inverts the match and shows non-matching lines." },
+      { q: "Which option with grep lists only filenames containing the pattern?", options: ["-l", "-r", "-n", "-v"], answer: 0, explain: "-l prints only the names of files with matches." },
+      { q: "Which command searches for files in the filesystem?", options: ["find", "grep", "whereis", "file"], answer: 0, explain: "find searches for files and directories based on criteria." },
+      { q: "Which command displays the file type?", options: ["file", "type", "which", "stat"], answer: 0, explain: "file identifies the type of a file." },
+      { q: "Which command shows the full path of a command?", options: ["which", "where", "locate", "type"], answer: 0, explain: "which shows the location of an executable in PATH." },
+      { q: "Which command displays your username?", options: ["whoami", "users", "id", "uname"], answer: 0, explain: "whoami prints the current effective username." },
+      { q: "Which command shows current process information?", options: ["ps", "fg", "bg", "sleep"], answer: 0, explain: "ps displays running processes." },
+      { q: "Which command displays shell variables?", options: ["printenv", "env", "set", "export"], answer: 0, explain: "printenv displays environment variables." },
+      { q: "Which command pauses execution for a while?", options: ["sleep", "fg", "bg", "more"], answer: 0, explain: "sleep suspends execution for a specified amount of time." },
+      { q: "Which command brings a suspended job to the foreground?", options: ["bg", "fg", "jobs", "ps"], answer: 1, explain: "fg resumes a job in the foreground." },
+      { q: "Which command sends a suspended job to the background?", options: ["fg", "bg", "kill", "sleep"], answer: 1, explain: "bg resumes a suspended job in the background." },
+      { q: "Which command changes file permissions?", options: ["chmod", "chown", "cp", "mv"], answer: 0, explain: "chmod changes file permissions." },
+      { q: "Which command combines and redirects output to a file, overwriting it?", options: [">>", ">", "<", "|"], answer: 1, explain: "> redirects output and overwrites the target file." },
+      { q: "Which redirection appends output to a file?", options: [">", ">>", "<", "|"], answer: 1, explain: ">> appends output to the end of a file." },
+      { q: "Which redirection sends input from a file into a command?", options: [">", ">>", "<", "|"], answer: 2, explain: "< redirects file contents into a command as input." },
+      { q: "What does ls > list.txt do?", options: ["Appends file list to list.txt", "Overwrites list.txt with output of ls", "Reads input from list.txt", "Sorts list.txt"], answer: 1, explain: "> overwrites list.txt with the output of ls." },
+      { q: "What does ls >> list.txt do?", options: ["Overwrites list.txt", "Deletes list.txt", "Appends output of ls to list.txt", "Counts lines in list.txt"], answer: 2, explain: ">> appends the output of ls to list.txt." },
+      { q: "What does wc -l < list.txt do?", options: ["Counts lines using list.txt as input", "Sorts the file", "Shows the last lines", "Removes duplicate lines"], answer: 0, explain: "wc -l counts the lines in the input file." },
+      { q: "What does command > output.txt 2>&1 do?", options: ["Sends only stdin to a file", "Combines stdout and stderr into one file", "Appends output to a file", "Sorts output and errors"], answer: 1, explain: "2>&1 redirects standard error to the same place as standard output." },
+      { q: "What is a pipe | used for?", options: ["Saving a file permanently", "Passing output of one command to another command", "Deleting files", "Changing permissions"], answer: 1, explain: "A pipe sends the output of one command as input to another." },
+      { q: "What does ls /etc | less do?", options: ["Deletes /etc", "Shows /etc one page at a time", "Counts files in /etc", "Sorts /etc"], answer: 1, explain: "The output of ls is passed to less for page-by-page viewing." },
+      { q: "What does cat /etc/passwd | wc -l do?", options: ["Counts users/lines in /etc/passwd", "Sorts usernames", "Displays file type", "Prints working directory"], answer: 0, explain: "wc -l counts lines, so it counts the entries in /etc/passwd." },
+      { q: "What does cat name.txt | sort do?", options: ["Deletes duplicate lines", "Sorts the lines in name.txt", "Counts the words", "Prints the first line only"], answer: 1, explain: "sort arranges the lines alphabetically." },
+      { q: "What does ls /usr/bin | tail -n 5 do?", options: ["Shows the first 5 items", "Shows the last 5 items", "Removes 5 items", "Counts 5 files"], answer: 1, explain: "tail -n 5 shows the last 5 lines/items." },
+      { q: "Which command is often preferred for direct file input instead of using a pipe?", options: ["sort names.txt", "sort < names.txt", "Both are equally valid, but direct file input is simpler", "grep names.txt"], answer: 0, explain: "sort names.txt is direct and simple for reading from a file." },
+      { q: "Which command is better for scripting when input comes from stdin?", options: ["sort names.txt", "sort < names.txt", "cat names.txt | sort", "ls | sort"], answer: 1, explain: "sort < names.txt works well with standard input and scripting." },
+      { q: "What does awk mainly do?", options: ["Manipulates text", "Deletes files", "Shows process IDs", "Changes permissions"], answer: 0, explain: "awk is a powerful text processing language." },
+      { q: "What does sed mainly do?", options: ["Creates directories", "Stream editing", "Displays username", "Lists processes"], answer: 1, explain: "sed is used for stream editing and text transformation." },
+      { q: "Which command is a text editor?", options: ["nano/pico", "ps", "grep", "wc"], answer: 0, explain: "nano and pico are simple terminal text editors." },
+      { q: "Which command is also a text editor?", options: ["vi/vim", "pwd", "cut", "more"], answer: 0, explain: "vi and vim are standard Linux text editors." },
+      { q: "Which command displays the list of most recent commands?", options: ["history", "printenv", "which", "man"], answer: 0, explain: "history shows previously run shell commands." },
+      { q: "Which command displays information about another command?", options: ["man", "cat", "file", "sleep"], answer: 0, explain: "man opens the manual page for a command." },
+      { q: "Which command is used to create a link to a file?", options: ["ln", "mv", "cp", "touch"], answer: 0, explain: "ln creates hard or symbolic links." },
+      { q: "Which command can print the file type and/or path of an executable?", options: ["which", "file", "find", "ps"], answer: 0, explain: "which shows the executable path for a command." },
+      { q: "Which command is used to search for a pattern in a file or command output?", options: ["grep", "wc", "sort", "uniq"], answer: 0, explain: "grep searches for matching text patterns." }
+    ];
+
+    const userAnswers = Array(quizData.length).fill(null);
+    const feedbackShown = Array(quizData.length).fill(false);
+
+    const quizEl = document.getElementById("quiz");
+    const answeredCountEl = document.getElementById("answeredCount");
+    const correctCountEl = document.getElementById("correctCount");
+    const scorePercentEl = document.getElementById("scorePercent");
+
+    function renderQuiz(){
+      quizEl.innerHTML = "";
+      quizData.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "q-card";
+        card.id = `q-${index}`;
+
+        const title = document.createElement("div");
+        title.className = "q-title";
+        title.textContent = `${index + 1}. ${item.q}`;
+        card.appendChild(title);
+
+        const options = document.createElement("div");
+        options.className = "options";
+
+        item.options.forEach((opt, optIndex) => {
+          const btn = document.createElement("button");
+          btn.className = "option";
+          btn.textContent = `${String.fromCharCode(65 + optIndex)}. ${opt}`;
+          btn.onclick = () => selectAnswer(index, optIndex);
+          options.appendChild(btn);
+        });
+
+        const feedback = document.createElement("div");
+        feedback.className = "feedback";
+        feedback.id = `feedback-${index}`;
+
+        card.appendChild(options);
+        card.appendChild(feedback);
+        quizEl.appendChild(card);
+      });
+    }
+
+    function selectAnswer(qIndex, optIndex){
+      userAnswers[qIndex] = optIndex;
+      const card = document.getElementById(`q-${qIndex}`);
+      const buttons = card.querySelectorAll(".option");
+      const feedback = document.getElementById(`feedback-${qIndex}`);
+      const correctIndex = quizData[qIndex].answer;
+
+      buttons.forEach((btn, i) => {
+        btn.classList.remove("selected", "correct", "wrong");
+        if(i === optIndex) btn.classList.add("selected");
+        if(i === correctIndex) btn.classList.add("correct");
+        if(i === optIndex && optIndex !== correctIndex) btn.classList.add("wrong");
+      });
+
+      const isCorrect = optIndex === correctIndex;
+      feedback.className = `feedback show ${isCorrect ? "correct" : "wrong"}`;
+      feedback.innerHTML = isCorrect
+        ? `<strong>Correct!</strong> ${quizData[qIndex].explain}`
+        : `<strong>Wrong!</strong> Correct answer: <b>${String.fromCharCode(65 + correctIndex)}. ${quizData[qIndex].options[correctIndex]}</b><br>${quizData[qIndex].explain}`;
+
+      feedbackShown[qIndex] = true;
+      updateStats();
+    }
+
+    function updateStats(){
+      const answered = userAnswers.filter(v => v !== null).length;
+      const correct = userAnswers.reduce((sum, ans, i) => sum + (ans === quizData[i].answer ? 1 : 0), 0);
+      const score = Math.round((correct / quizData.length) * 100);
+
+      answeredCountEl.textContent = answered;
+      correctCountEl.textContent = correct;
+      scorePercentEl.textContent = `${score}%`;
+    }
+
+    function submitQuiz(){
+      const answered = userAnswers.filter(v => v !== null).length;
+      const correct = userAnswers.reduce((sum, ans, i) => sum + (ans === quizData[i].answer ? 1 : 0), 0);
+      const wrong = answered - correct;
+      const unanswered = quizData.length - answered;
+      const score = Math.round((correct / quizData.length) * 100);
+
+      document.getElementById("recapCorrect").textContent = correct;
+      document.getElementById("recapWrong").textContent = wrong;
+      document.getElementById("recapUnanswered").textContent = unanswered;
+      document.getElementById("recapScore").textContent = `${score}%`;
+
+      const summary = document.getElementById("recapSummary");
+      summary.innerHTML = `
+        <strong>Detailed recap:</strong> You answered <b>${answered}</b> out of <b>${quizData.length}</b> questions.
+        <br>Correct: <b>${correct}</b>, Wrong: <b>${wrong}</b>, Unanswered: <b>${unanswered}</b>.
+        <br><b>Focus on the wrong and unanswered items below.</b>
+      `;
+
+      const reviewList = document.getElementById("reviewList");
+      reviewList.innerHTML = "";
+
+      quizData.forEach((item, i) => {
+        const userAns = userAnswers[i];
+        const isAnswered = userAns !== null;
+        const isCorrect = userAns === item.answer;
+
+        const div = document.createElement("div");
+        div.className = `review-item ${isAnswered ? (isCorrect ? "correct" : "wrong") : "wrong"}`;
+
+        const badge = document.createElement("div");
+        badge.className = `badge ${isAnswered ? (isCorrect ? "correct" : "wrong") : "wrong"}`;
+        badge.textContent = isAnswered ? (isCorrect ? "Correct" : "Wrong") : "Unanswered";
+        div.appendChild(badge);
+
+        div.innerHTML += `
+          <div class="q">${i + 1}. ${item.q}</div>
+          <div class="a"><b>Your answer:</b> ${isAnswered ? `${String.fromCharCode(65 + userAns)}. ${item.options[userAns]}` : "Not answered"}</div>
+          <div class="a"><b>Correct answer:</b> ${String.fromCharCode(65 + item.answer)}. ${item.options[item.answer]}</div>
+          <div class="explain"><b>Explanation:</b> ${item.explain}</div>
+        `;
+        reviewList.appendChild(div);
+      });
+
+      scrollToRecap();
+    }
+
+    function scrollToRecap(){
+      document.getElementById("recapSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function resetQuiz(){
+      userAnswers.fill(null);
+      feedbackShown.fill(false);
+      renderQuiz();
+      updateStats();
+      document.getElementById("recapCorrect").textContent = "0";
+      document.getElementById("recapWrong").textContent = "0";
+      document.getElementById("recapUnanswered").textContent = String(quizData.length);
+      document.getElementById("recapScore").textContent = "0%";
+      document.getElementById("recapSummary").innerHTML = "Submit the quiz to see a detailed recap.";
+      document.getElementById("reviewList").innerHTML = "";
+    }
+
+    renderQuiz();
+    updateStats();
+  </script>
+</body>
+</html>
