@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Networking Quiz</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#0f172a;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+      --green:#16a34a;
+      --red:#dc2626;
+      --yellow:#ca8a04;
+      --border:#c7d2fe;
+      --shadow: 0 14px 40px rgba(15, 23, 42, .18);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.22), transparent 25%),
+        radial-gradient(circle at top right, rgba(59,130,246,.18), transparent 24%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .topbar{
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 15, 30, .86);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      color: #fff;
+    }
+
+    .topbar-inner{
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .back-btn{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #fff;
+      background: linear-gradient(180deg, rgba(37,99,235,1), rgba(29,78,216,1));
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 10px 14px;
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(37,99,235,.25);
+      font-weight: 700;
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+      white-space: nowrap;
+    }
+
+    .back-btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(37,99,235,.32);
+    }
+
+    .status-area{
+      display: grid;
+      gap: 8px;
+    }
+
+    .status-row{
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      color: rgba(255,255,255,.9);
+      flex-wrap: wrap;
+    }
+
+    .progress-track{
+      width: 100%;
+      height: 12px;
+      background: rgba(255,255,255,.12);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .progress-fill{
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #60a5fa, #2563eb, #1d4ed8);
+      border-radius: 999px;
+      transition: width .28s ease;
+    }
+
+    .score-pill{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .page{
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 110px 18px 40px;
+    }
+
+    .hero{
+      text-align: center;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+
+    .hero h1{
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+      font-weight: 900;
+    }
+
+    .hero p{
+      margin: 0 auto;
+      max-width: 760px;
+      color: rgba(226,232,240,.86);
+      font-size: 1.03rem;
+      line-height: 1.7;
+    }
+
+    .layout{
+      display: grid;
+      grid-template-columns: 1.7fr .95fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid rgba(37,99,235,.22);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header{
+      padding: 18px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .panel-header h2{
+      margin: 0;
+      font-size: 1.1rem;
+      color: #0f172a;
+    }
+
+    .panel-body{
+      padding: 18px 20px 20px;
+    }
+
+    .quiz-wrap{
+      display: grid;
+      gap: 16px;
+    }
+
+    .question-card{
+      border: 1px solid #dbeafe;
+      border-radius: 16px;
+      padding: 16px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      box-shadow: 0 6px 18px rgba(37,99,235,.06);
+    }
+
+    .question-top{
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .question-index{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      color: var(--blue2);
+    }
+
+    .question-text{
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.55;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .options{
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .option{
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 14px;
+      background: #fff;
+      cursor: pointer;
+      transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+      user-select: none;
+    }
+
+    .option:hover{
+      transform: translateY(-1px);
+      border-color: #93c5fd;
+      box-shadow: 0 8px 18px rgba(37,99,235,.08);
+    }
+
+    .option input{
+      margin-top: 3px;
+      accent-color: var(--blue);
+      pointer-events: none;
+    }
+
+    .option-text{
+      flex: 1;
+      color: #111827;
+      line-height: 1.5;
+      font-size: .98rem;
+    }
+
+    .option.correct{
+      border-color: rgba(22,163,74,.6);
+      background: rgba(34,197,94,.08);
+    }
+
+    .option.wrong{
+      border-color: rgba(220,38,38,.62);
+      background: rgba(239,68,68,.08);
+    }
+
+    .option.locked{
+      cursor: default;
+    }
+
+    .feedback{
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      line-height: 1.65;
+      font-size: .95rem;
+      border: 1px solid #dbeafe;
+      background: #eff6ff;
+      color: #0f172a;
+    }
+
+    .feedback.show{
+      display: block;
+    }
+
+    .controls{
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .btn{
+      border: none;
+      border-radius: 14px;
+      padding: 13px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease, background .16s ease;
+      font-size: 1rem;
+    }
+
+    .btn:hover{ transform: translateY(-1px); }
+    .btn-primary{
+      background: linear-gradient(180deg, var(--blue), var(--blue2));
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(37,99,235,.25);
+    }
+
+    .btn-secondary{
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .btn:disabled{
+      cursor: not-allowed;
+      opacity: .7;
+      transform: none;
+    }
+
+    .side-card{
+      display: grid;
+      gap: 14px;
+    }
+
+    .result-box{
+      border: 1px solid #dbeafe;
+      border-radius: 16px;
+      padding: 16px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .result-box h3{
+      margin: 0 0 8px;
+      color: #0f172a;
+      font-size: 1rem;
+    }
+
+    .result-box p{
+      margin: 6px 0;
+      color: #334155;
+      line-height: 1.65;
+      font-size: .95rem;
+    }
+
+    .recap-list{
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .recap-item{
+      border-radius: 14px;
+      border: 1px solid #dbeafe;
+      background: #fff;
+      padding: 14px;
+    }
+
+    .recap-item.wrong{
+      border-color: rgba(220,38,38,.28);
+      background: rgba(254,242,242,.9);
+    }
+
+    .recap-item.skipped{
+      border-color: rgba(202,138,4,.26);
+      background: rgba(255,251,235,.95);
+    }
+
+    .recap-title{
+      font-weight: 800;
+      margin: 0 0 8px;
+      font-size: .95rem;
+      color: #0f172a;
+    }
+
+    .recap-meta{
+      font-size: .92rem;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .hidden{ display: none; }
+
+    .sticky-note{
+      font-size: .88rem;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    .mobile-only{
+      display: none;
+    }
+
+    @media (max-width: 980px){
+      .layout{
+        grid-template-columns: 1fr;
+      }
+      .side-card{
+        order: 2;
+      }
+    }
+
+    @media (max-width: 720px){
+      .topbar-inner{
+        grid-template-columns: 1fr;
+      }
+      .score-pill{
+        text-align: left;
+      }
+      .page{
+        padding-top: 154px;
+      }
+      .hero p{
+        font-size: .98rem;
+      }
+    }
+
+    @media (max-width: 560px){
+      .panel-body, .panel-header{
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+      .question-card, .result-box{
+        padding: 14px;
+      }
+      .controls .btn{
+        width: 100%;
+      }
+      .mobile-only{
+        display: inline;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="#" class="back-btn">← Back to index</a>
+
+      <div class="status-area">
+        <div class="status-row">
+          <div><strong id="answeredCount">0</strong> answered</div>
+          <div><strong id="totalCount">0</strong> questions</div>
+        </div>
+        <div class="progress-track" aria-label="Progress">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div class="score-pill">Score: <span id="scoreText">0</span></div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <h1>Networking Fundamentals Quiz</h1>
+      <p>
+        Test your understanding of networking concepts, protocols, addressing, and Linux network commands.
+        Answer all questions, then submit to see your score, skipped items, and a full recap of mistakes.
+      </p>
+    </section>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Quiz Area</h2>
+        </div>
+        <div class="panel-body">
+          <div class="quiz-wrap" id="quizArea"></div>
+
+          <div class="controls">
+            <button class="btn btn-primary" id="submitBtn">Submit &amp; See Results</button>
+            <button class="btn btn-secondary hidden" id="retryBtn">Retry Quiz</button>
+          </div>
+
+          <p class="sticky-note" style="margin-top:14px;">
+            Click an option to lock a question immediately. Correct answers turn green, wrong answers turn red.
+          </p>
+        </div>
+      </section>
+
+      <aside class="side-card">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Results Recap</h2>
+          </div>
+          <div class="panel-body">
+            <div class="result-box">
+              <h3>Summary</h3>
+              <p>Score: <strong id="resultScore">0</strong></p>
+              <p>Answered: <strong id="resultAnswered">0</strong></p>
+              <p>Skipped: <strong id="resultSkipped">0</strong></p>
+              <p>Correct: <strong id="resultCorrect">0</strong></p>
+            </div>
+            <div class="recap-list" id="recapList"></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const questions = [
+      { q: "What is the main purpose of networking?", opts: ["To store files locally only", "To enable communication and resource sharing", "To replace operating systems", "To increase screen resolution"], ans: 1, exp: "Networking enables devices to communicate and share resources such as files, printers, and internet access." },
+      { q: "Which of the following is an example of networking in daily life?", opts: ["Editing a text file offline", "Sharing files over a network", "Changing desktop wallpaper", "Installing a printer driver"], ans: 1, exp: "Sharing files over a network is a direct example of networking." },
+      { q: "TCP/IP is best described as:", opts: ["A text editor", "A foundational protocol suite for networking", "A file system", "A programming language"], ans: 1, exp: "TCP/IP is the core protocol suite that powers most modern networks and the internet." },
+      { q: "How many layers are in the TCP/IP model discussed in the lecture?", opts: ["2", "3", "4", "7"], ans: 2, exp: "The common TCP/IP model contains four layers." },
+      { q: "Which layer provides services to applications like web browsers and email clients?", opts: ["Link Layer", "Internet Layer", "Transport Layer", "Application Layer"], ans: 3, exp: "The Application Layer provides services directly to user applications." },
+      { q: "Which protocol is commonly used for secure remote login?", opts: ["FTP", "SSH", "DNS", "ICMP"], ans: 1, exp: "SSH is the standard protocol for secure remote login." },
+      { q: "Which of the following is an Application Layer protocol?", opts: ["Ethernet", "IP", "HTTP", "UDP"], ans: 2, exp: "HTTP operates at the Application Layer." },
+      { q: "Which transport protocol is reliable and connection-oriented?", opts: ["UDP", "TCP", "ICMP", "ARP"], ans: 1, exp: "TCP provides reliable, connection-oriented communication." },
+      { q: "Which transport protocol is lightweight and connectionless?", opts: ["TCP", "HTTP", "UDP", "DNS"], ans: 2, exp: "UDP is lightweight and does not establish a connection first." },
+      { q: "What is the main role of the Internet Layer?", opts: ["Managing physical cables", "Logical addressing and routing across networks", "Displaying web pages", "Encrypting user passwords"], ans: 1, exp: "The Internet Layer handles logical addressing and routing." },
+      { q: "Which protocol is used for diagnostics like ping and traceroute?", opts: ["SMTP", "ICMP", "FTP", "DHCP"], ans: 1, exp: "ICMP is used for network diagnostics and control messages." },
+      { q: "What does the Link Layer handle?", opts: ["Email delivery", "Communication with the physical network", "Browser rendering", "User authentication"], ans: 1, exp: "The Link Layer handles communication with the physical network." },
+      { q: "Which of the following is associated with the Link Layer?", opts: ["MAC addresses", "Domain names", "Ports only", "Web browsers"], ans: 0, exp: "MAC addresses belong to the Link Layer." },
+      { q: "A network is:", opts: ["A single computer", "A collection of connected devices that share resources and data", "A type of software", "A database table"], ans: 1, exp: "A network connects devices so they can share data and resources." },
+      { q: "LAN stands for:", opts: ["Large Area Network", "Local Area Network", "Logical Access Node", "Linked Application Network"], ans: 1, exp: "LAN means Local Area Network." },
+      { q: "WAN stands for:", opts: ["Wide Area Network", "Wired Access Node", "Web Application Network", "Wireless Area Node"], ans: 0, exp: "WAN means Wide Area Network." },
+      { q: "The Internet is an example of:", opts: ["LAN", "WAN", "Loopback device", "Port range"], ans: 1, exp: "The Internet spans huge geographic areas, so it is a WAN." },
+      { q: "What is an IP address?", opts: ["A password for a device", "A unique identifier for a device on a network", "A type of cable", "A software update"], ans: 1, exp: "An IP address uniquely identifies a device on a network." },
+      { q: "IPv4 uses how many bits?", opts: ["16 bits", "32 bits", "64 bits", "128 bits"], ans: 1, exp: "IPv4 addresses are 32 bits long." },
+      { q: "IPv6 uses how many bits?", opts: ["32 bits", "64 bits", "96 bits", "128 bits"], ans: 3, exp: "IPv6 addresses are 128 bits long." },
+      { q: "Which of the following is an IPv4 example?", opts: ["2001:0db8:85a3::8a2e:0370:7334", "127.0.0.1", "fe80::1", "fd17::abcd"], ans: 1, exp: "127.0.0.1 is an IPv4 address." },
+      { q: "Which of the following is an IPv6 example?", opts: ["192.168.1.1", "10.0.2.15", "2001:0db8:85a3::8a2e:0370:7334", "172.16.0.5"], ans: 2, exp: "The address with colons is an IPv6 example." },
+      { q: "Static IP addresses are:", opts: ["Automatically assigned by DHCP", "Manually configured", "Never used on servers", "Only for IPv6"], ans: 1, exp: "Static IPs are configured manually." },
+      { q: "Dynamic IP addresses are commonly assigned using:", opts: ["DNS", "DHCP", "SSH", "NAT"], ans: 1, exp: "DHCP commonly assigns dynamic IPs." },
+      { q: "Which device type commonly benefits from a static IP?", opts: ["A server", "A randomly used guest laptop", "A temporary client", "A moving mobile hotspot"], ans: 0, exp: "Servers often benefit from static IP addresses." },
+      { q: "The loopback IPv4 address is:", opts: ["192.168.0.1", "10.0.0.1", "127.0.0.1", "8.8.8.8"], ans: 2, exp: "127.0.0.1 is the standard IPv4 loopback address." },
+      { q: "The loopback IPv6 address is:", opts: ["::1", "fe80::1", "2001::1", "127::1"], ans: 0, exp: "::1 is the standard IPv6 loopback address." },
+      { q: "The loopback interface is used for:", opts: ["External internet access", "Internal communication within the same machine", "Printing documents", "Assigning public IPs"], ans: 1, exp: "Loopback is used for local communication on the same machine." },
+      { q: "In Linux, the command to view IP addresses and interfaces is:", opts: ["ls", "ip a", "pwd", "whoami"], ans: 1, exp: "ip a displays interface and IP information." },
+      { q: "In the example output, enp0s3 is:", opts: ["The loopback interface", "A physical network interface", "A DNS server", "A port number"], ans: 1, exp: "enp0s3 is a physical network interface." },
+      { q: "What does the MAC address represent?", opts: ["A domain name", "A unique identifier assigned to a network interface card", "A public IP address", "A firewall rule"], ans: 1, exp: "A MAC address uniquely identifies a network interface card." },
+      { q: "The IPv4 address 10.0.2.15/24 in the example is:", opts: ["A public IP", "A DHCP-assigned private IP", "A loopback address", "A multicast address"], ans: 1, exp: "10.0.2.15 is a private IP commonly assigned via DHCP." },
+      { q: "What does “scope global” usually indicate in the ip a output?", opts: ["Local-only address", "A globally usable address on the network", "A disabled interface", "A loopback address only"], ans: 1, exp: "scope global indicates the address is usable on the network." },
+      { q: "What do valid_lft and preferred_lft refer to?", opts: ["DNS cache size", "DHCP lease durations", "Port numbers", "CPU load"], ans: 1, exp: "They refer to lease lifetime values in DHCP-related output." },
+      { q: "Which IPv6 address type is only reachable on the local network?", opts: ["Global address", "Temporary address", "Link-local address", "Multicast address"], ans: 2, exp: "Link-local IPv6 addresses are only reachable on the local link." },
+      { q: "Private IP addresses are:", opts: ["Routable on the public internet", "Used inside LANs", "Assigned only by DNS", "Always IPv6"], ans: 1, exp: "Private IPs are used inside local networks." },
+      { q: "Which of the following is a private IPv4 range?", opts: ["8.8.8.8", "192.168.x.x", "1.1.1.1", "142.250.184.110"], ans: 1, exp: "192.168.x.x belongs to a private IPv4 range." },
+      { q: "Which command can display your public IP?", opts: ["ip a", "curl ifconfig.me", "ss -tuln", "ping 127.0.0.1"], ans: 1, exp: "curl ifconfig.me can show the public IP." },
+      { q: "What is NAT?", opts: ["Network Address Translation", "Network Access Table", "Node Address Transfer", "Name Allocation Tool"], ans: 0, exp: "NAT stands for Network Address Translation." },
+      { q: "DNS stands for:", opts: ["Digital Network System", "Domain Name System", "Data Name Server", "Dynamic Network Service"], ans: 1, exp: "DNS means Domain Name System." },
+      { q: "DNS is often called the:", opts: ["File manager", "Internet phonebook", "Port mapper", "Routing table"], ans: 1, exp: "DNS translates names like a phonebook for the internet." },
+      { q: "DNS translates:", opts: ["MAC addresses into ports", "Human-readable names into IP addresses", "IP addresses into passwords", "Ethernet into Wi-Fi"], ans: 1, exp: "DNS maps domain names to IP addresses." },
+      { q: "If pinging a domain name fails but pinging 8.8.8.8 works, the likely problem is:", opts: ["Hardware failure", "DNS problem", "SSH key problem", "Port 22 issue"], ans: 1, exp: "If IP works but domain does not, DNS is likely the issue." },
+      { q: "DHCP stands for:", opts: ["Dynamic Host Configuration Protocol", "Domain Host Control Program", "Data Host Communication Protocol", "Dynamic Hypertext Configuration Process"], ans: 0, exp: "DHCP means Dynamic Host Configuration Protocol." },
+      { q: "DHCP automatically assigns:", opts: ["Only the hostname", "IP address, subnet mask, gateway, and DNS settings", "Only the MAC address", "Only the port number"], ans: 1, exp: "DHCP can provide IP, subnet, gateway, and DNS settings." },
+      { q: "Which of the following is part of the DHCP process?", opts: ["DHCPDISCOVER", "DNSLOOKUP", "TCPACK", "ICMPREQ"], ans: 0, exp: "DHCPDISCOVER is the client's initial broadcast message." },
+      { q: "Which DHCP step is the server’s response with an available IP?", opts: ["DHCPREQUEST", "DHCPOFFER", "DHCPACK", "DHCPDISCOVER"], ans: 1, exp: "The server replies with DHCPOFFER." },
+      { q: "Which DHCP step is the client accepting the offered IP?", opts: ["DHCPDISCOVER", "DHCPOFFER", "DHCPREQUEST", "DHCPACK"], ans: 2, exp: "The client accepts the offer using DHCPREQUEST." },
+      { q: "Which DHCP step confirms the lease?", opts: ["DHCPACK", "DHCPDISCOVER", "DHCPOFFER", "DHCPREQUEST"], ans: 0, exp: "DHCPACK confirms the lease." },
+      { q: "Netplan is mainly used for:", opts: ["File compression", "Network configuration on Linux servers", "DNS caching only", "Port scanning"], ans: 1, exp: "Netplan is used to configure networking on Linux systems." },
+      { q: "Netplan configuration files are written in:", opts: ["JSON", "YAML", "XML", "CSV"], ans: 1, exp: "Netplan uses YAML files." },
+      { q: "Which command applies Netplan changes?", opts: ["sudo netplan apply", "sudo ipconfig apply", "sudo dns apply", "sudo route apply"], ans: 0, exp: "sudo netplan apply activates the configuration." },
+      { q: "NetworkManager can be managed using:", opts: ["nmcli and nmtui", "curl and wget", "grep and awk", "ping and traceroute only"], ans: 0, exp: "nmcli and nmtui are common NetworkManager tools." },
+      { q: "Which command shows interface details like IP and DNS?", opts: ["nmcli device show", "ss -tuln", "lsof -i", "ip r"], ans: 0, exp: "nmcli device show displays detailed interface information." },
+      { q: "Which command lists all saved connections?", opts: ["nmcli device status", "nmcli con show", "nmcli con up", "nmcli device show"], ans: 1, exp: "nmcli con show lists saved connections." },
+      { q: "Which command shows the connection state of all devices?", opts: ["nmcli device status", "nmcli con edit", "ip a", "traceroute"], ans: 0, exp: "nmcli device status shows the current device connection state." },
+      { q: "A port is:", opts: ["A physical cable", "A logical communication endpoint on a device", "A type of IP address", "A DNS record"], ans: 1, exp: "A port is a logical endpoint for communication." },
+      { q: "Port 22 is commonly used for:", opts: ["HTTP", "SSH", "DNS", "SMTP"], ans: 1, exp: "Port 22 is commonly used by SSH." },
+      { q: "Port 80 is commonly used for:", opts: ["HTTPS", "HTTP", "SSH", "FTP"], ans: 1, exp: "Port 80 is used for HTTP." },
+      { q: "Port 443 is commonly used for:", opts: ["DNS", "HTTPS", "SMTP", "Telnet"], ans: 1, exp: "Port 443 is used for HTTPS." },
+      { q: "Port 53 is commonly used for:", opts: ["DNS", "SSH", "FTP", "HTTP"], ans: 0, exp: "Port 53 is used for DNS." },
+      { q: "Port 25 is commonly used for:", opts: ["SMTP", "SSH", "HTTPS", "ICMP"], ans: 0, exp: "Port 25 is commonly used for SMTP." },
+      { q: "Which command shows open ports?", opts: ["ss -tuln", "cat /etc/resolv.conf", "curl ifconfig.me", "ip a"], ans: 0, exp: "ss -tuln lists listening sockets and open ports." },
+      { q: "Which command can show which processes use which ports?", opts: ["ping", "lsof -i", "nmcli con show", "netplan apply"], ans: 1, exp: "lsof -i can display processes associated with network ports." },
+      { q: "If an interface is down, a possible command to bring it up is:", opts: ["sudo ip link set enp0s3 up", "sudo ip link set enp0s3 down", "sudo ping enp0s3", "sudo route up"], ans: 0, exp: "sudo ip link set <interface> up brings the interface up." },
+      { q: "If no inet line appears in ip a, you may need to:", opts: ["Restart the monitor", "Request an IP with sudo dhclient -v", "Change the wallpaper", "Disable DNS"], ans: 1, exp: "sudo dhclient -v can request an IP address from DHCP." },
+      { q: "Which command shows the default route?", opts: ["ip r", "ss -tuln", "lsof -i", "curl ifconfig.me"], ans: 0, exp: "ip r shows the routing table, including the default route." },
+      { q: "If ping to the gateway fails, the problem may be:", opts: ["Only a browser issue", "Network connectivity or routing issue", "A printer issue", "A font issue"], ans: 1, exp: "Gateway ping failure usually indicates connectivity or routing problems." },
+      { q: "If SSH connection fails, which command can provide debug output?", opts: ["ssh -v", "ip a", "nmcli con show", "curl ifconfig.me"], ans: 0, exp: "ssh -v enables verbose debugging output." },
+      { q: "One common reason SSH fails is:", opts: ["The screen brightness is too low", "Firewall blocking port 22", "The keyboard language is wrong", "The hostname is too long"], ans: 1, exp: "A firewall blocking port 22 is a common SSH issue." }
+    ];
+
+    const quizArea = document.getElementById("quizArea");
+    const answeredCount = document.getElementById("answeredCount");
+    const totalCount = document.getElementById("totalCount");
+    const progressFill = document.getElementById("progressFill");
+    const scoreText = document.getElementById("scoreText");
+    const resultScore = document.getElementById("resultScore");
+    const resultAnswered = document.getElementById("resultAnswered");
+    const resultSkipped = document.getElementById("resultSkipped");
+    const resultCorrect = document.getElementById("resultCorrect");
+    const recapList = document.getElementById("recapList");
+    const submitBtn = document.getElementById("submitBtn");
+    const retryBtn = document.getElementById("retryBtn");
+
+    const state = questions.map(() => ({ answered: false, selected: null, locked: false }));
+
+    totalCount.textContent = questions.length;
+
+    function renderQuiz() {
+      quizArea.innerHTML = "";
+      questions.forEach((item, index) => {
+        const card = document.createElement("article");
+        card.className = "question-card";
+        card.dataset.index = index;
+
+        const optionsHtml = item.opts.map((opt, optIndex) => `
+          <label class="option" data-opt="${optIndex}">
+            <input type="radio" name="q${index}" value="${optIndex}" />
+            <div class="option-text">${String.fromCharCode(65 + optIndex)}. ${opt}</div>
+          </label>
+        `).join("");
+
+        card.innerHTML = `
+          <div class="question-top">
+            <div class="question-index">Question ${index + 1}</div>
+          </div>
+          <p class="question-text">${item.q}</p>
+          <div class="options">${optionsHtml}</div>
+          <div class="feedback" id="feedback-${index}"></div>
+        `;
+
+        quizArea.appendChild(card);
+      });
+
+      document.querySelectorAll(".option").forEach(optionEl => {
+        optionEl.addEventListener("click", handleOptionSelect);
+      });
+
+      updateTopbar();
+    }
+
+    function handleOptionSelect(e) {
+      const optionEl = e.currentTarget;
+      const card = optionEl.closest(".question-card");
+      const qIndex = Number(card.dataset.index);
+      const optIndex = Number(optionEl.dataset.opt);
+
+      if (state[qIndex].locked) return;
+
+      state[qIndex].answered = true;
+      state[qIndex].selected = optIndex;
+      state[qIndex].locked = true;
+
+      const correctIndex = questions[qIndex].ans;
+      const options = card.querySelectorAll(".option");
+      options.forEach((opt, idx) => {
+        opt.classList.add("locked");
+        const input = opt.querySelector("input");
+        input.disabled = true;
+        if (idx === correctIndex) opt.classList.add("correct");
+      });
+
+      optionEl.classList.add(optIndex === correctIndex ? "correct" : "wrong");
+
+      const feedback = card.querySelector(`#feedback-${qIndex}`);
+      feedback.classList.add("show");
+      if (optIndex === correctIndex) {
+        feedback.innerHTML = `<strong>Correct.</strong> ${questions[qIndex].exp}`;
+      } else {
+        feedback.innerHTML = `<strong>Incorrect.</strong> Correct answer: <strong>${String.fromCharCode(65 + correctIndex)}. ${questions[qIndex].opts[correctIndex]}</strong><br>${questions[qIndex].exp}`;
+      }
+
+      updateTopbar();
+    }
+
+    function updateTopbar() {
+      const answered = state.filter(x => x.answered).length;
+      answeredCount.textContent = answered;
+      const pct = Math.round((answered / questions.length) * 100);
+      progressFill.style.width = `${pct}%`;
+      const score = calculateScore();
+      scoreText.textContent = score;
+    }
+
+    function calculateScore() {
+      return state.reduce((sum, s, i) => sum + (s.answered && s.selected === questions[i].ans ? 1 : 0), 0);
+    }
+
+    function submitQuiz() {
+      const correct = calculateScore();
+      const answered = state.filter(x => x.answered).length;
+      const skipped = questions.length - answered;
+
+      resultScore.textContent = `${correct} / ${questions.length}`;
+      resultAnswered.textContent = answered;
+      resultSkipped.textContent = skipped;
+      resultCorrect.textContent = correct;
+
+      recapList.innerHTML = "";
+      questions.forEach((q, i) => {
+        const s = state[i];
+        if (!s.answered || s.selected !== q.ans) {
+          const item = document.createElement("div");
+          item.className = `recap-item ${!s.answered ? "skipped" : "wrong"}`;
+          item.innerHTML = `
+            <div class="recap-title">Question ${i + 1}: ${!s.answered ? "Skipped" : "Incorrect"}</div>
+            <div class="recap-meta">
+              <div><strong>Q:</strong> ${q.q}</div>
+              <div><strong>Correct:</strong> ${String.fromCharCode(65 + q.ans)}. ${q.opts[q.ans]}</div>
+              <div><strong>Explanation:</strong> ${q.exp}</div>
+            </div>
+          `;
+          recapList.appendChild(item);
+        }
+      });
+
+      submitBtn.disabled = true;
+      retryBtn.classList.remove("hidden");
+
+      document.querySelectorAll(".option").forEach(opt => {
+        opt.classList.add("locked");
+        const input = opt.querySelector("input");
+        input.disabled = true;
+      });
+
+      updateTopbar();
+    }
+
+    function retryQuiz() {
+      state.forEach(s => { s.answered = false; s.selected = null; s.locked = false; });
+
+      document.querySelectorAll(".question-card").forEach(card => {
+        card.querySelectorAll(".option").forEach(opt => {
+          opt.classList.remove("correct", "wrong", "locked");
+          const input = opt.querySelector("input");
+          input.disabled = false;
+          input.checked = false;
+        });
+        const feedback = card.querySelector(".feedback");
+        feedback.classList.remove("show");
+        feedback.innerHTML = "";
+      });
+
+      recapList.innerHTML = "";
+      resultScore.textContent = "0";
+      resultAnswered.textContent = "0";
+      resultSkipped.textContent = "0";
+      resultCorrect.textContent = "0";
+      submitBtn.disabled = false;
+      retryBtn.classList.add("hidden");
+      progressFill.style.width = "0%";
+      scoreText.textContent = "0";
+      answeredCount.textContent = "0";
+    }
+
+    submitBtn.addEventListener("click", submitQuiz);
+    retryBtn.addEventListener("click", retryQuiz);
+
+    renderQuiz();
+  </script>
+</body>
+</html>
