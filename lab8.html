@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 8 Quiz - Processes, Jobs, Signals, Services</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --bg2:#111a2e;
+      --card:#ffffff;
+      --text:#e9eefb;
+      --muted:#9aa8c7;
+      --primary:#3b82f6;
+      --primary2:#2563eb;
+      --border:#cfe0ff;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --skip:#f59e0b;
+      --shadow: 0 14px 40px rgba(0,0,0,.22);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.25), transparent 24%),
+        radial-gradient(circle at top right, rgba(37,99,235,.18), transparent 22%),
+        linear-gradient(180deg, var(--bg), #08101d 70%, #060b14);
+      color:var(--text);
+      min-height:100vh;
+    }
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:1000;
+      background: rgba(7, 13, 24, .78);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid rgba(207,224,255,.16);
+      box-shadow: 0 8px 30px rgba(0,0,0,.18);
+    }
+    .topbar-inner{
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:14px;
+      align-items:center;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      transition:.2s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .btn-back{
+      background:linear-gradient(180deg, #1d4ed8, #1e40af);
+      color:#fff;
+      box-shadow: 0 8px 18px rgba(37,99,235,.28);
+    }
+    .btn-back:hover{transform:translateY(-1px); filter:brightness(1.05)}
+    .top-info{
+      display:grid;
+      gap:8px;
+    }
+    .stats-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 16px;
+      align-items:center;
+      justify-content:space-between;
+      font-size:14px;
+      color:var(--text);
+    }
+    .stat{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-weight:600;
+    }
+    .progress-wrap{
+      height:12px;
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(207,224,255,.18);
+    }
+    .progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, #60a5fa, #2563eb);
+      border-radius:999px;
+      transition:width .25s ease;
+    }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:118px 16px 40px;
+    }
+    .hero{
+      text-align:center;
+      padding:24px 0 18px;
+    }
+    h1{
+      margin:0 0 12px;
+      font-size:clamp(2rem, 4vw, 3.6rem);
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+    .subtitle{
+      margin:0 auto;
+      max-width:780px;
+      color:var(--muted);
+      font-size:1.02rem;
+      line-height:1.7;
+    }
+    .panel{
+      background:var(--card);
+      color:#14213a;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      margin-top:22px;
+    }
+    .panel-head{
+      padding:20px 20px 14px;
+      border-bottom:1px solid #e7efff;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+    .panel-head h2{
+      margin:0;
+      font-size:1.15rem;
+    }
+    .panel-head p{
+      margin:8px 0 0;
+      color:#5c6b88;
+    }
+    .quiz-area{
+      padding:18px;
+      display:grid;
+      gap:14px;
+    }
+    .question-card{
+      border:1px solid #dbe7ff;
+      border-left:5px solid var(--primary);
+      border-radius:16px;
+      padding:18px;
+      background:linear-gradient(180deg, #fff, #fbfdff);
+      box-shadow: 0 8px 22px rgba(37,99,235,.06);
+    }
+    .question-title{
+      margin:0 0 14px;
+      font-size:1.05rem;
+      line-height:1.55;
+      color:#10203d;
+    }
+    .options{
+      display:grid;
+      gap:10px;
+    }
+    .option{
+      border:1px solid #d7e4ff;
+      background:#fff;
+      border-radius:14px;
+      padding:12px 14px;
+      cursor:pointer;
+      transition:.18s ease;
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      color:#1a2b49;
+    }
+    .option:hover{
+      transform:translateY(-1px);
+      border-color:#9fc0ff;
+      box-shadow:0 8px 18px rgba(37,99,235,.08);
+    }
+    .option.locked{cursor:default; pointer-events:none}
+    .option.correct{
+      border-color:rgba(22,163,74,.35);
+      background:rgba(22,163,74,.08);
+    }
+    .option.wrong{
+      border-color:rgba(220,38,38,.35);
+      background:rgba(220,38,38,.07);
+    }
+    .feedback{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:.96rem;
+      line-height:1.6;
+      display:none;
+    }
+    .feedback.show{display:block}
+    .feedback.correct{
+      background:rgba(22,163,74,.09);
+      border:1px solid rgba(22,163,74,.24);
+      color:#146c34;
+    }
+    .feedback.wrong{
+      background:rgba(220,38,38,.08);
+      border:1px solid rgba(220,38,38,.22);
+      color:#9b1c1c;
+    }
+    .feedback.skip{
+      background:rgba(245,158,11,.1);
+      border:1px solid rgba(245,158,11,.28);
+      color:#8a5b00;
+    }
+    .actions{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:20px;
+    }
+    .btn-submit{
+      background:linear-gradient(180deg, #3b82f6, #2563eb);
+      color:#fff;
+      box-shadow:0 10px 24px rgba(37,99,235,.25);
+      padding:13px 18px;
+      min-width:220px;
+    }
+    .btn-submit:hover{transform:translateY(-1px)}
+    .btn-retry{
+      background:#0f172a;
+      color:#fff;
+      padding:13px 18px;
+      min-width:180px;
+    }
+    .results{
+      margin-top:20px;
+      display:grid;
+      gap:14px;
+    }
+    .result-card{
+      background:#fff;
+      color:#15213a;
+      border:1px solid #dbe7ff;
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 10px 26px rgba(0,0,0,.06);
+    }
+    .result-card h3{margin:0 0 10px}
+    .result-summary{
+      display:grid;
+      gap:8px;
+      font-weight:600;
+    }
+    .recap-item{
+      border-top:1px solid #edf3ff;
+      padding-top:14px;
+      margin-top:14px;
+    }
+    .tag{
+      display:inline-block;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.02em;
+      padding:6px 10px;
+      border-radius:999px;
+      margin-bottom:8px;
+    }
+    .tag.bad{background:rgba(220,38,38,.1); color:#a4161a}
+    .tag.skip{background:rgba(245,158,11,.12); color:#8a5b00}
+    .tag.ok{background:rgba(22,163,74,.1); color:#146c34}
+    .hidden{display:none !important;}
+    .footer-space{height:20px}
+    @media (max-width: 760px){
+      .topbar-inner{
+        grid-template-columns:1fr;
+      }
+      .stats-row{
+        gap:8px 12px;
+      }
+      .container{
+        padding-top:170px;
+      }
+      .quiz-area{padding:14px}
+      .question-card{padding:16px}
+      .btn-submit,.btn-retry{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="btn btn-back" href="index.html">← Back to index</a>
+      <div class="top-info">
+        <div class="stats-row">
+          <div class="stat">Score: <span id="scoreText">0</span></div>
+          <div class="stat">Answered: <span id="answeredText">0</span>/<span id="totalText">70</span></div>
+        </div>
+        <div class="progress-wrap" aria-label="Progress bar">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <div class="stat" style="justify-self:end;">Quiz Status: <span id="statusText">In progress</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Lab 8: Processes, Jobs, Signals &amp; Services</h1>
+      <p class="subtitle">
+        Test your understanding of ps, top, foreground/background jobs, kill, nice/renice, trap, and systemd services.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Quiz Area</h2>
+        <p>Select an answer for each question. Each question locks after your choice and shows immediate feedback.</p>
+      </div>
+      <div class="quiz-area" id="quizArea"></div>
+      <div class="actions">
+        <button class="btn btn-submit" id="submitBtn">Submit &amp; See Results</button>
+      </div>
+    </section>
+
+    <section class="results" id="resultsSection"></section>
+    <div class="footer-space"></div>
+  </main>
+
+  <script>
+    const questions = [
+      {q:"1) What does ps aux mainly show?", opts:["Only processes started by the current user","All running processes in a detailed format","Only background jobs","Only processes consuming high CPU"], ans:1, exp:"ps aux shows a broad snapshot of running processes with detailed information."},
+      {q:"2) Which command helps you identify your shell process?", opts:["ps aux | grep bash","jobs","kill bash","top -u bash"], ans:0, exp:"Searching the process list for bash can help you locate your shell."},
+      {q:"3) In ps -o pid,ppid,ni,stat,cmd, what does ppid mean?", opts:["Process priority","Parent process ID","Process name","Process status"], ans:1, exp:"ppid means the parent process ID."},
+      {q:"4) What does ni represent in ps -o pid,ppid,ni,stat,cmd?", opts:["Network interface","Nice value","Number of interrupts","New instance ID"], ans:1, exp:"ni is the nice value used for process priority."},
+      {q:"5) In ps -o pid,ppid,ni,stat,cmd, what does stat show?", opts:["Memory usage only","Process state/status","Parent PID","CPU model"], ans:1, exp:"stat indicates process state, such as running or sleeping."},
+      {q:"6) Which command is used to view processes interactively and sort them?", opts:["top","jobs","nice","nohup"], ans:0, exp:"top is interactive and allows sorting."},
+      {q:"7) In top, pressing M sorts by:", opts:["CPU usage","Memory usage","PID","Nice value"], ans:1, exp:"M sorts by memory usage."},
+      {q:"8) In top, pressing P sorts by:", opts:["Parent PID","Process name","CPU usage","Priority class"], ans:2, exp:"P sorts by CPU usage."},
+      {q:"9) What key quits top?", opts:["x","q","esc","ctrl+d"], ans:1, exp:"q quits top."},
+      {q:"10) Which field helps show the relationship between a child process and its parent?", opts:["pid and ppid","ni and stat","cmd and top","aux and fg"], ans:0, exp:"pid identifies the process, and ppid identifies its parent."},
+
+      {q:"11) What does sleep 120 & do?", opts:["Runs sleep 120 in the foreground","Runs sleep 120 in the background","Stops sleep 120 immediately","Deletes the sleep process"], ans:1, exp:"& sends the command to the background."},
+      {q:"12) Which command lists current jobs managed by the shell?", opts:["ps","jobs","fg","bg"], ans:1, exp:"jobs displays jobs managed by the shell."},
+      {q:"13) What does fg %1 do?", opts:["Kills job 1","Brings job 1 to the foreground","Suspends job 1","Renices job 1"], ans:1, exp:"fg %1 resumes job 1 in the foreground."},
+      {q:"14) What keyboard shortcut suspends a foreground job?", opts:["Ctrl+C","Ctrl+Z","Ctrl+S","Ctrl+D"], ans:1, exp:"Ctrl+Z suspends the current foreground job."},
+      {q:"15) After suspending a job with Ctrl+Z, which command resumes it in the background?", opts:["fg","bg","ps","kill -9"], ans:1, exp:"bg resumes a stopped job in the background."},
+      {q:"16) Which statement about background jobs is correct?", opts:["They are always invisible to ps","They can still consume CPU and memory","They cannot be stopped","They cannot be brought to foreground"], ans:1, exp:"Background jobs can still use CPU and memory."},
+      {q:"17) Which command is most directly used for shell job control?", opts:["jobs","top","nice","renice"], ans:0, exp:"jobs is the shell’s job-control command."},
+      {q:"18) If a job is running in background, what is the likely output style?", opts:["The terminal is blocked until it finishes","The shell prompt returns immediately","The shell exits automatically","The process becomes root-owned"], ans:1, exp:"The prompt returns immediately when a job runs in the background."},
+
+      {q:"19) What is the purpose of kill -15 <PID>?", opts:["Forcefully terminate the process immediately","Request graceful termination","Suspend the process","Change the process priority"], ans:1, exp:"-15 sends SIGTERM, a polite termination request."},
+      {q:"20) What does kill -9 <PID> do?", opts:["Sends SIGTERM","Sends SIGKILL","Sends SIGINT","Sends SIGHUP"], ans:1, exp:"-9 means SIGKILL."},
+      {q:"21) Which signal is generally more graceful?", opts:["SIGKILL","SIGTERM","SIGSTOP","SIGSEGV"], ans:1, exp:"SIGTERM allows the process to clean up before exiting."},
+      {q:"22) Why is kill -9 considered a last resort?", opts:["It changes file permissions","The process cannot catch or ignore it","It logs more details than kill -15","It only works on background jobs"], ans:1, exp:"SIGKILL cannot be trapped or ignored."},
+      {q:"23) What does killall sleep do?", opts:["Kills the shell named sleep","Terminates all processes named sleep","Lists all sleep processes","Renices all sleep processes"], ans:1, exp:"It terminates all matching sleep processes."},
+      {q:"24) Which command is needed before kill -15 <PID> if you do not know the PID?", opts:["top","ps","bg","trap"], ans:1, exp:"ps helps you find the PID."},
+      {q:"25) What is the main difference between kill -15 and kill -9?", opts:["-15 is polite, -9 is forceful","-15 is for foreground jobs only, -9 is for background jobs only","-9 can be trapped, -15 cannot","Both are identical"], ans:0, exp:"SIGTERM is graceful; SIGKILL is forceful."},
+      {q:"26) Which signal is typically generated by pressing Ctrl+C?", opts:["SIGTERM","SIGINT","SIGKILL","SIGSTOP"], ans:1, exp:"Ctrl+C sends SIGINT."},
+
+      {q:"27) What does nice -n 10 sleep 300 & do?", opts:["Runs sleep 300 with lower priority","Runs sleep 300 as root","Immediately kills sleep 300","Changes the PID to 10"], ans:0, exp:"A higher nice value means lower priority."},
+      {q:"28) In general, a higher nice value means:", opts:["Higher priority","Lower priority","The process becomes a child of init","The process uses less memory automatically"], ans:1, exp:"A higher nice value means lower scheduling priority."},
+      {q:"29) Which command checks the nice value of a process?", opts:["ps -o pid,ni,cmd","jobs -ni","top -ni","kill -ni"], ans:0, exp:"ps -o pid,ni,cmd shows PID, nice value, and command."},
+      {q:"30) What does renice 5 <PID> do?", opts:["Kills the process","Changes the process nice value to 5","Changes the process name to 5","Brings the process to foreground"], ans:1, exp:"It changes the nice value of the running process."},
+      {q:"31) Which statement about renice is correct?", opts:["It changes priority of a running process","It starts a new process","It always works on root-owned processes without permission","It is used to trap signals"], ans:0, exp:"renice modifies the priority of an existing running process."},
+      {q:"32) Why might renice 5 <PID> fail on a root-owned process?", opts:["Because renice only works on sleep commands","Because you usually need elevated privileges to change another user’s process","Because PID numbers cannot be changed","Because renice is only for background jobs"], ans:1, exp:"Changing the priority of a root-owned or another user’s process usually requires privileges."},
+      {q:"33) If a process has a nice value of 10, compared to a process with nice 0, it is generally:", opts:["Higher priority","Lower priority","Exactly the same priority","Not schedulable"], ans:1, exp:"A nice value of 10 generally means lower priority than 0."},
+      {q:"34) Which concept is most closely related to nice and renice?", opts:["Process priority","File permissions","Network routing","Memory segmentation"], ans:0, exp:"Both commands are about process priority."},
+      {q:"35) What is the main purpose of lowering a process priority?", opts:["To make it run faster than others","To reduce its impact on system resources compared to other tasks","To stop the process permanently","To make it become a daemon"], ans:1, exp:"Lower priority gives other tasks more CPU preference."},
+
+      {q:"36) What is trap used for in a shell script?", opts:["To create new files","To catch signals and run custom actions","To list processes","To change user identity"], ans:1, exp:"trap captures signals and triggers custom behavior."},
+      {q:"37) Which signal is being caught in the lab’s trap_test.sh?", opts:["SIGINT","SIGKILL","SIGSTOP","SIGCHLD"], ans:0, exp:"The lab uses trap to catch SIGINT, usually from Ctrl+C."},
+      {q:"38) What happens when Ctrl+C is pressed in a script with a proper trap for SIGINT?", opts:["The script always ignores it silently","The trap action runs, such as printing a message","The script automatically becomes backgrounded","The process priority changes"], ans:1, exp:"The trap handler runs when SIGINT is received."},
+      {q:"39) In the lab, the loop prints what every 2 seconds?", opts:["Stopped...","Running...","Finished...","Paused..."], ans:1, exp:"The script prints Running...."},
+      {q:"40) What command is commonly used in the script to pause between prints?", opts:["sleep 2","kill 2","wait 2","pause 2"], ans:0, exp:"sleep 2 pauses execution for 2 seconds."},
+      {q:"41) Which line is conceptually correct in a trap script?", opts:["trap \"echo Interrupted\" SIGINT","trap \"kill -9\" SIGINT","trap \"ps aux\" SIGKILL","trap \"renice 10\" SIGSTOP"], ans:0, exp:"This matches the idea of catching SIGINT and printing a message."},
+      {q:"42) Which signal cannot be caught or handled by trap?", opts:["SIGINT","SIGTERM","SIGKILL","SIGHUP"], ans:2, exp:"SIGKILL cannot be caught."},
+      {q:"43) Why is trap useful in a script?", opts:["It lets the script respond gracefully to interrupts or cleanup events","It makes the script run faster automatically","It changes file ownership","It displays process trees"], ans:0, exp:"trap is useful for cleanup and custom responses to signals."},
+      {q:"44) If a script uses trap on SIGINT, what user action usually triggers it?", opts:["Pressing Ctrl+Z","Pressing Ctrl+C","Typing fg","Typing jobs"], ans:1, exp:"Ctrl+C generates SIGINT."},
+
+      {q:"45) What is the purpose of creating a custom systemd service?", opts:["To schedule shell aliases","To run and manage a program as a service","To edit kernel parameters directly","To list zombie processes"], ans:1, exp:"systemd services are used to run and manage background programs."},
+      {q:"46) Which path is used in the lab for the unit file?", opts:["/etc/systemd/system/timerlog.service","/usr/bin/timerlog.service","/tmp/systemd/timerlog","/var/log/systemd.timer"], ans:0, exp:"This is the service unit file location used in the lab."},
+      {q:"47) What does sudo systemctl daemon-reload do?", opts:["Restarts all services immediately","Makes systemd re-read unit files after changes","Deletes old logs","Changes the current process priority"], ans:1, exp:"It reloads systemd configuration and unit definitions."},
+      {q:"48) Why is daemon-reload needed after creating or editing a service file?", opts:["Because systemd caches unit definitions and must reload them","Because service files are automatically deleted otherwise","Because it formats the script code","Because it sets executable permissions"], ans:0, exp:"systemd must re-read its cached unit definitions."},
+      {q:"49) What does sudo systemctl enable timerlog do?", opts:["Starts the service immediately only once","Makes the service start automatically on boot","Stops the service from running","Deletes the unit file"], ans:1, exp:"enable configures the service to start at boot."},
+      {q:"50) What does sudo systemctl start timerlog do?", opts:["Activates the service right now","Enables boot startup only","Renices the service","Shows service logs"], ans:0, exp:"start launches the service immediately."},
+      {q:"51) Which command is used to check current status of the service?", opts:["systemctl status timerlog","ps timerlog","jobs timerlog","kill timerlog"], ans:0, exp:"systemctl status is the correct command to inspect a service."},
+      {q:"52) Where does the lab script write timestamp logs?", opts:["/tmp/log.txt","/etc/log.txt","/var/run/time.log","/home/user/time.txt"], ans:0, exp:"The lab specifies /tmp/log.txt."},
+      {q:"53) Which command follows the log file updates in real time?", opts:["tail -f /tmp/log.txt","cat /tmp/log.txt -f","ps -f /tmp/log.txt","watch kill /tmp/log.txt"], ans:0, exp:"tail -f continuously follows appended log lines."},
+      {q:"54) Why must the script be made executable?", opts:["So systemd can run it","So it becomes a service file","So it can be renamed automatically","So ps can detect it"], ans:0, exp:"An executable script can be launched by systemd."},
+      {q:"55) In a systemd unit, what is the role of the service script?", opts:["It defines kernel modules","It contains the command/workload that systemd launches","It lists users and groups only","It replaces the init system"], ans:1, exp:"The service script is the actual workload systemd starts."},
+      {q:"56) What is the main concept of the custom timerlog service?", opts:["Changing CPU frequency","Periodically logging the current time","Suspended job recovery","Process name filtering"], ans:1, exp:"The service logs the current time every 10 seconds."},
+
+      {q:"57) Which command combination is most appropriate for finding a process, checking its priority, and then changing that priority?", opts:["ps, ps -o pid,ni,cmd, renice","jobs, fg, bg","top, kill -9, trap","systemctl, daemon-reload, enable"], ans:0, exp:"ps finds the process, ps -o ... checks priority, and renice changes it."},
+      {q:"58) Which pair best matches the concept and the command?", opts:["Background jobs — jobs","Process priority — fg","Signal handling — renice","Service autostart — tail -f"], ans:0, exp:"jobs displays background and stopped jobs."},
+      {q:"59) Which statement is the most accurate about ps, top, and jobs?", opts:["All three are identical","ps is a snapshot, top is interactive/live, jobs is shell job control","jobs is used to kill processes","top only shows background jobs"], ans:1, exp:"ps gives a snapshot, top is interactive, and jobs is shell job control."},
+      {q:"60) What is the best reason to use SIGTERM before SIGKILL?", opts:["SIGTERM gives the process a chance to clean up","SIGTERM is always faster than SIGKILL","SIGTERM cannot be ignored","SIGTERM only works on services"], ans:0, exp:"SIGTERM allows graceful shutdown and cleanup."},
+
+      {q:"61) Which command shows all processes and their command lines in a common format?", opts:["ps aux","bg %1","fg %1","trap"], ans:0, exp:"ps aux is a standard process listing command."},
+      {q:"62) What does the cmd field in ps -o pid,ppid,ni,stat,cmd show?", opts:["The command used to start the process","The process’s memory map","The parent PID","The current terminal size"], ans:0, exp:"cmd displays the command line."},
+      {q:"63) Which result is expected after pressing Ctrl+Z on a running foreground process?", opts:["The process is killed","The process is stopped/suspended","The process becomes a daemon","The process becomes root-owned"], ans:1, exp:"Ctrl+Z suspends the process."},
+      {q:"64) Which command resumes a stopped job in the background rather than the foreground?", opts:["fg","bg","ps","systemctl start"], ans:1, exp:"bg resumes in the background."},
+      {q:"65) Which command is most useful to inspect CPU and memory usage dynamically?", opts:["top","killall","renice","trap"], ans:0, exp:"top is designed for live CPU and memory monitoring."},
+      {q:"66) Which command is most appropriate for terminating all processes of a given name?", opts:["killall <name>","fg <name>","jobs <name>","nice <name>"], ans:0, exp:"killall targets processes by name."},
+      {q:"67) What is the safest general strategy when stopping a process?", opts:["Use kill -9 first","Use kill -15 first, then kill -9 only if needed","Use renice first","Use jobs first"], ans:1, exp:"Try graceful termination first, then force kill if necessary."},
+      {q:"68) Which command pair corresponds to “monitoring” and “control”?", opts:["top and kill","fg and bg","trap and renice","systemctl enable and tail -f"], ans:0, exp:"top monitors, and kill controls termination."},
+      {q:"69) Which command would help you observe a process tree relationship indirectly using parent IDs?", opts:["ps -o pid,ppid,ni,stat,cmd","kill -15 <PID>","jobs","top q"], ans:0, exp:"ppid reveals parent-child relationships."},
+      {q:"70) Which of the following is a correct concept-match?", opts:["systemctl enable — start automatically on boot","tail -f — change process priority","renice — catch SIGINT","trap — list running services"], ans:0, exp:"systemctl enable sets a service to start automatically at boot."}
+    ];
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const quizData = questions.map((item) => {
+      const paired = item.opts.map((opt, idx) => ({ opt, isCorrect: idx === item.ans }));
+      const shuffled = shuffleArray(paired);
+      return {
+        ...item,
+        shuffledOpts: shuffled.map(x => x.opt),
+        correctIndex: shuffled.findIndex(x => x.isCorrect)
+      };
+    });
+
+    const quizArea = document.getElementById("quizArea");
+    const resultsSection = document.getElementById("resultsSection");
+    const scoreText = document.getElementById("scoreText");
+    const answeredText = document.getElementById("answeredText");
+    const totalText = document.getElementById("totalText");
+    const progressBar = document.getElementById("progressBar");
+    const statusText = document.getElementById("statusText");
+    const submitBtn = document.getElementById("submitBtn");
+
+    totalText.textContent = quizData.length;
+
+    const state = {
+      answered: Array(quizData.length).fill(null),
+      locked: Array(quizData.length).fill(false),
+      submitted: false,
+      score: 0
+    };
+
+    function renderQuiz(){
+      quizArea.innerHTML = "";
+      quizData.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "question-card";
+        card.innerHTML = `
+          <h3 class="question-title">${item.q}</h3>
+          <div class="options" id="options-${index}"></div>
+          <div class="feedback" id="feedback-${index}"></div>
+        `;
+        quizArea.appendChild(card);
+
+        const optionsWrap = card.querySelector(`#options-${index}`);
+        item.shuffledOpts.forEach((opt, optIndex) => {
+          const label = document.createElement("label");
+          label.className = "option";
+          label.innerHTML = `
+            <input type="radio" name="q-${index}" value="${optIndex}" />
+            <span><strong>${String.fromCharCode(65 + optIndex)}.</strong> ${opt}</span>
+          `;
+          label.addEventListener("click", () => selectAnswer(index, optIndex));
+          optionsWrap.appendChild(label);
+        });
+      });
+    }
+
+    function selectAnswer(qIndex, optIndex){
+      if (state.locked[qIndex] || state.submitted) return;
+      state.answered[qIndex] = optIndex;
+      state.locked[qIndex] = true;
+
+      const item = quizData[qIndex];
+      const options = document.querySelectorAll(`#options-${qIndex} .option`);
+      const feedback = document.getElementById(`feedback-${qIndex}`);
+
+      options.forEach((el, idx) => {
+        el.classList.add("locked");
+        if (idx === item.correctIndex) el.classList.add("correct");
+        if (idx === optIndex && optIndex !== item.correctIndex) el.classList.add("wrong");
+        const input = el.querySelector("input");
+        input.checked = idx === optIndex;
+        input.disabled = true;
+      });
+
+      const isCorrect = optIndex === item.correctIndex;
+      feedback.className = `feedback show ${isCorrect ? "correct" : "wrong"}`;
+      feedback.innerHTML = isCorrect
+        ? `<strong>Correct.</strong> ${item.exp}`
+        : `<strong>Incorrect.</strong> ${item.exp}`;
+      updateTopbar();
+    }
+
+    function updateTopbar(){
+      const answeredCount = state.answered.filter(v => v !== null).length;
+      const score = state.answered.reduce((acc, val, idx) => acc + (val === quizData[idx].correctIndex ? 1 : 0), 0);
+      state.score = score;
+      scoreText.textContent = score;
+      answeredText.textContent = answeredCount;
+      progressBar.style.width = `${(answeredCount / quizData.length) * 100}%`;
+    }
+
+    function submitQuiz(){
+      state.submitted = true;
+      let score = 0;
+      const wrong = [];
+      const skipped = [];
+
+      quizData.forEach((q, idx) => {
+        const userAns = state.answered[idx];
+        if (userAns === null) {
+          skipped.push(idx);
+        } else if (userAns === q.correctIndex) {
+          score++;
+        } else {
+          wrong.push(idx);
+        }
+
+        const feedback = document.getElementById(`feedback-${idx}`);
+        const options = document.querySelectorAll(`#options-${idx} .option`);
+
+        if (userAns === null) {
+          options[q.correctIndex].classList.add("correct");
+          feedback.className = "feedback show skip";
+          feedback.innerHTML = `<strong>Skipped.</strong> ${q.exp}`;
+        } else {
+          options.forEach((el, optIndex) => {
+            if (optIndex === q.correctIndex) el.classList.add("correct");
+            if (optIndex === userAns && userAns !== q.correctIndex) el.classList.add("wrong");
+            el.classList.add("locked");
+            el.querySelector("input").disabled = true;
+          });
+        }
+      });
+
+      state.score = score;
+      scoreText.textContent = score;
+      answeredText.textContent = quizData.length;
+      progressBar.style.width = `100%`;
+      statusText.textContent = "Completed";
+
+      resultsSection.innerHTML = `
+        <div class="result-card">
+          <h3>Results Summary</h3>
+          <div class="result-summary">
+            <div>Score: ${score} / ${quizData.length}</div>
+            <div>Correct: ${score}</div>
+            <div>Wrong: ${wrong.length}</div>
+            <div>Skipped: ${skipped.length}</div>
+          </div>
+          <div class="actions" style="justify-content:flex-start; margin-top:16px;">
+            <button class="btn btn-retry" id="retryBtn">Retry Quiz</button>
+          </div>
+        </div>
+        ${wrong.length ? `
+          <div class="result-card">
+            <h3>Incorrect Answers Recap</h3>
+            ${wrong.map(i => `
+              <div class="recap-item">
+                <div class="tag bad">Wrong</div>
+                <div><strong>Q${i + 1}.</strong> ${quizData[i].q}</div>
+                <div><strong>Your answer:</strong> ${quizData[i].shuffledOpts[state.answered[i]]}</div>
+                <div><strong>Correct answer:</strong> ${quizData[i].shuffledOpts[quizData[i].correctIndex]}</div>
+                <div><strong>Explanation:</strong> ${quizData[i].exp}</div>
+              </div>
+            `).join("")}
+          </div>` : ""}
+        ${skipped.length ? `
+          <div class="result-card">
+            <h3>Skipped Questions Recap</h3>
+            ${skipped.map(i => `
+              <div class="recap-item">
+                <div class="tag skip">Skipped</div>
+                <div><strong>Q${i + 1}.</strong> ${quizData[i].q}</div>
+                <div><strong>Correct answer:</strong> ${quizData[i].shuffledOpts[quizData[i].correctIndex]}</div>
+                <div><strong>Explanation:</strong> ${quizData[i].exp}</div>
+              </div>
+            `).join("")}
+          </div>` : ""}
+      `;
+
+      document.getElementById("retryBtn").addEventListener("click", retryQuiz);
+      submitBtn.classList.add("hidden");
+      quizArea.querySelectorAll(".option").forEach(el => el.classList.add("locked"));
+    }
+
+    function retryQuiz(){
+      state.answered = Array(quizData.length).fill(null);
+      state.locked = Array(quizData.length).fill(false);
+      state.submitted = false;
+      state.score = 0;
+      resultsSection.innerHTML = "";
+      statusText.textContent = "In progress";
+      submitBtn.classList.remove("hidden");
+      renderQuiz();
+      updateTopbar();
+    }
+
+    submitBtn.addEventListener("click", submitQuiz);
+    renderQuiz();
+    updateTopbar();
+  </script>
+</body>
+</html>
