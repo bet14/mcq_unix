@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 12 Quiz - wget, rsync, scp, tar, Shell scripts, PATH, aliases, curl, APIs</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --bg2:#111a2e;
+      --card:#ffffff;
+      --text:#e9eefb;
+      --muted:#9aa8c7;
+      --primary:#3b82f6;
+      --primary2:#2563eb;
+      --border:#cfe0ff;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --skip:#f59e0b;
+      --shadow: 0 14px 40px rgba(0,0,0,.22);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.25), transparent 24%),
+        radial-gradient(circle at top right, rgba(37,99,235,.18), transparent 22%),
+        linear-gradient(180deg, var(--bg), #08101d 70%, #060b14);
+      color:var(--text);
+      min-height:100vh;
+    }
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:1000;
+      background: rgba(7, 13, 24, .78);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid rgba(207,224,255,.16);
+      box-shadow: 0 8px 30px rgba(0,0,0,.18);
+    }
+    .topbar-inner{
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:14px;
+      align-items:center;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      transition:.2s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .btn-back{
+      background:linear-gradient(180deg, #1d4ed8, #1e40af);
+      color:#fff;
+      box-shadow: 0 8px 18px rgba(37,99,235,.28);
+    }
+    .btn-back:hover{transform:translateY(-1px); filter:brightness(1.05)}
+    .top-info{
+      display:grid;
+      gap:8px;
+    }
+    .stats-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 16px;
+      align-items:center;
+      justify-content:space-between;
+      font-size:14px;
+      color:var(--text);
+    }
+    .stat{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-weight:600;
+    }
+    .progress-wrap{
+      height:12px;
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(207,224,255,.18);
+    }
+    .progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, #60a5fa, #2563eb);
+      border-radius:999px;
+      transition:width .25s ease;
+    }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:118px 16px 40px;
+    }
+    .hero{
+      text-align:center;
+      padding:24px 0 18px;
+    }
+    h1{
+      margin:0 0 12px;
+      font-size:clamp(2rem, 4vw, 3.6rem);
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+    .subtitle{
+      margin:0 auto;
+      max-width:780px;
+      color:var(--muted);
+      font-size:1.02rem;
+      line-height:1.7;
+    }
+    .panel{
+      background:var(--card);
+      color:#14213a;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      margin-top:22px;
+    }
+    .panel-head{
+      padding:20px 20px 14px;
+      border-bottom:1px solid #e7efff;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+    .panel-head h2{
+      margin:0;
+      font-size:1.15rem;
+    }
+    .panel-head p{
+      margin:8px 0 0;
+      color:#5c6b88;
+    }
+    .quiz-area{
+      padding:18px;
+      display:grid;
+      gap:14px;
+    }
+    .question-card{
+      border:1px solid #dbe7ff;
+      border-left:5px solid var(--primary);
+      border-radius:16px;
+      padding:18px;
+      background:linear-gradient(180deg, #fff, #fbfdff);
+      box-shadow: 0 8px 22px rgba(37,99,235,.06);
+    }
+    .question-title{
+      margin:0 0 14px;
+      font-size:1.05rem;
+      line-height:1.55;
+      color:#10203d;
+    }
+    .options{
+      display:grid;
+      gap:10px;
+    }
+    .option{
+      border:1px solid #d7e4ff;
+      background:#fff;
+      border-radius:14px;
+      padding:12px 14px;
+      cursor:pointer;
+      transition:.18s ease;
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      color:#1a2b49;
+    }
+    .option:hover{
+      transform:translateY(-1px);
+      border-color:#9fc0ff;
+      box-shadow:0 8px 18px rgba(37,99,235,.08);
+    }
+    .option.locked{cursor:default; pointer-events:none}
+    .option.correct{
+      border-color:rgba(22,163,74,.35);
+      background:rgba(22,163,74,.08);
+    }
+    .option.wrong{
+      border-color:rgba(220,38,38,.35);
+      background:rgba(220,38,38,.07);
+    }
+    .feedback{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:.96rem;
+      line-height:1.6;
+      display:none;
+    }
+    .feedback.show{display:block}
+    .feedback.correct{
+      background:rgba(22,163,74,.09);
+      border:1px solid rgba(22,163,74,.24);
+      color:#146c34;
+    }
+    .feedback.wrong{
+      background:rgba(220,38,38,.08);
+      border:1px solid rgba(220,38,38,.22);
+      color:#9b1c1c;
+    }
+    .feedback.skip{
+      background:rgba(245,158,11,.1);
+      border:1px solid rgba(245,158,11,.28);
+      color:#8a5b00;
+    }
+    .actions{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:20px;
+    }
+    .btn-submit{
+      background:linear-gradient(180deg, #3b82f6, #2563eb);
+      color:#fff;
+      box-shadow:0 10px 24px rgba(37,99,235,.25);
+      padding:13px 18px;
+      min-width:220px;
+    }
+    .btn-submit:hover{transform:translateY(-1px)}
+    .btn-retry{
+      background:#0f172a;
+      color:#fff;
+      padding:13px 18px;
+      min-width:180px;
+    }
+    .results{
+      margin-top:20px;
+      display:grid;
+      gap:14px;
+    }
+    .result-card{
+      background:#fff;
+      color:#15213a;
+      border:1px solid #dbe7ff;
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 10px 26px rgba(0,0,0,.06);
+    }
+    .result-card h3{margin:0 0 10px}
+    .result-summary{
+      display:grid;
+      gap:8px;
+      font-weight:600;
+    }
+    .recap-item{
+      border-top:1px solid #edf3ff;
+      padding-top:14px;
+      margin-top:14px;
+    }
+    .tag{
+      display:inline-block;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.02em;
+      padding:6px 10px;
+      border-radius:999px;
+      margin-bottom:8px;
+    }
+    .tag.bad{background:rgba(220,38,38,.1); color:#a4161a}
+    .tag.skip{background:rgba(245,158,11,.12); color:#8a5b00}
+    .tag.ok{background:rgba(22,163,74,.1); color:#146c34}
+    .hidden{display:none !important;}
+    .footer-space{height:20px}
+    @media (max-width: 760px){
+      .topbar-inner{
+        grid-template-columns:1fr;
+      }
+      .stats-row{
+        gap:8px 12px;
+      }
+      .container{
+        padding-top:170px;
+      }
+      .quiz-area{padding:14px}
+      .question-card{padding:16px}
+      .btn-submit,.btn-retry{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="btn btn-back" href="index.html">← Back to index</a>
+      <div class="top-info">
+        <div class="stats-row">
+          <div class="stat">Score: <span id="scoreText">0</span></div>
+          <div class="stat">Answered: <span id="answeredText">0</span>/<span id="totalText">45</span></div>
+        </div>
+        <div class="progress-wrap" aria-label="Progress bar">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <div class="stat" style="justify-self:end;">Quiz Status: <span id="statusText">In progress</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Lab 12 Quiz</h1>
+      <p class="subtitle">
+        Practice wget, rsync, scp, tar, shell scripts, PATH, aliases, backup automation, curl, and API basics.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Quiz Area</h2>
+        <p>Select an answer for each question. Each question locks after your choice and shows immediate feedback.</p>
+      </div>
+      <div class="quiz-area" id="quizArea"></div>
+      <div class="actions">
+        <button class="btn btn-submit" id="submitBtn">Submit &amp; See Results</button>
+      </div>
+    </section>
+
+    <section class="results" id="resultsSection"></section>
+    <div class="footer-space"></div>
+  </main>
+
+  <script>
+    const questions = [
+      {q:"1. Which command downloads a file from a URL and saves it as air.csv?", opts:["curl -o air.csv URL","wget -O air.csv URL","scp air.csv URL","rsync URL air.csv"], ans:1, exp:"wget -O lets you specify the output filename. It is the command focused on in this exercise."},
+      {q:"2. What does wget -O air.csv https://.../airtravel.csv do?", opts:["Downloads the file and names it air.csv","Opens the file in a browser","Copies the file to a remote server","Compresses the file"], ans:0, exp:"-O in wget means output document. It saves the downloaded content under the filename you choose."},
+      {q:"3. Which command shows the first 3 lines of a file?", opts:["head -n 3 air.csv","tail -n 3 air.csv","cat -n 3 air.csv","less -3 air.csv"], ans:0, exp:"head -n 3 prints the first 3 lines."},
+      {q:"4. Which command lists file details such as size, permissions, and timestamp?", opts:["ls -l","ls -a","pwd","find ."], ans:0, exp:"ls -l shows long listing format with metadata."},
+      {q:"5. What is the main purpose of rsync?", opts:["To compile source code","To synchronize files and folders efficiently","To encrypt files","To edit text files"], ans:1, exp:"rsync is used for copying and synchronizing data between locations efficiently."},
+      {q:"6. Which rsync command copies all files from src/ to dest/?", opts:["rsync src dest","rsync -r src/ dest/","rsync -a src/ dest/","rsync dest/ src/"], ans:2, exp:"-a means archive mode and is the common choice for folder synchronization."},
+      {q:"7. Why is the trailing slash in rsync src/ dest/ important?", opts:["It deletes the destination folder","It changes how the contents are copied","It compresses the files","It makes rsync run faster by default"], ans:1, exp:"A trailing slash often means copy the contents of the folder."},
+      {q:"8. Which rsync option preserves permissions, timestamps, and symbolic links?", opts:["-a","-d","-p","-x"], ans:0, exp:"-a = archive mode, which preserves many useful attributes."},
+      {q:"9. After modifying one file in src, what is the advantage of running rsync again?", opts:["It copies everything from scratch every time","It only transfers the changed parts","It deletes the old files in source","It converts text files to binary"], ans:1, exp:"rsync compares source and destination and transfers only differences or changed files."},
+      {q:"10. Which command creates a file named log.txt?", opts:["touch log.txt","make log.txt","create log.txt","newfile log.txt"], ans:0, exp:"touch creates an empty file if it doesn’t exist."},
+      {q:"11. What is scp mainly used for?", opts:["Securely copying files between hosts","Viewing file contents","Synchronizing local folders only","Creating archives"], ans:0, exp:"scp = secure copy over SSH. It transfers files between machines."},
+      {q:"12. Which is a valid scp syntax to copy a file to localhost?", opts:["scp log.txt user@localhost:/tmp/","scp localhost:log.txt /tmp/","scp /tmp/ user@localhost:log.txt","scp log.txt /tmp/"], ans:0, exp:"scp source destination where destination can be user@host:path."},
+      {q:"13. Which protocol does scp normally rely on?", opts:["FTP","SSH","HTTP","SMB"], ans:1, exp:"scp works over SSH."},
+      {q:"14. Which command creates a compressed tar archive named src.tar.gz?", opts:["tar -czf src.tar.gz src","zip src.tar.gz src","gzip src src.tar.gz","tar -xf src.tar.gz src"], ans:0, exp:"-c create archive, -z gzip compression, -f filename."},
+      {q:"15. What does tar -xzf src.tar.gz do?", opts:["Creates a new archive","Extracts a gzip-compressed tar archive","Deletes the archive","Renames the archive"], ans:1, exp:"-x extract, -z gzip, -f file. So this extracts the archive."},
+      {q:"16. Why do we use tar.gz instead of plain tar in many cases?", opts:["Because .tar.gz encrypts files","Because .tar.gz compresses the archive","Because .tar.gz makes files executable","Because plain .tar cannot store folders"], ans:1, exp:".tar bundles files; .tar.gz bundles and compresses them."},
+      {q:"17. What happens if you delete the original src folder after archiving it?", opts:["The archive is deleted too","The archive can still be used to restore src","The archive becomes corrupted automatically","tar cannot extract it anymore"], ans:1, exp:"Once created, the archive is independent and can be used to restore the folder later."},
+
+      {q:"18. What is the first line usually called in a shell script?", opts:["The header","The shebang","The footer","The compiler line"], ans:1, exp:"The first line such as #!/bin/bash is called the shebang."},
+      {q:"19. Which line correctly makes a script use Bash?", opts:["#bash/bin","#!/bin/bash","!#/bin/bash","bash #!/bin"], ans:1, exp:"#!/bin/bash is the correct shebang syntax."},
+      {q:"20. What command makes hello.sh executable?", opts:["chmod +x hello.sh","chmod 777 hello.sh","run hello.sh","make executable hello.sh"], ans:0, exp:"chmod +x adds execute permission."},
+      {q:"21. How do you run an executable script in the current folder?", opts:["hello.sh always works","./hello.sh","bashfolder hello.sh","run ./hello.sh"], ans:1, exp:"./hello.sh runs the script from the current directory."},
+      {q:"22. What does echo \"Hello Linux!\" do?", opts:["Deletes a file","Prints text to the terminal","Compiles a script","Opens a file editor"], ans:1, exp:"echo displays text to the terminal."},
+      {q:"23. What is the purpose of $PATH?", opts:["It stores the current date","It lists directories where the shell searches for commands","It stores file contents","It encrypts passwords"], ans:1, exp:"$PATH tells the shell where to find executables."},
+      {q:"24. How do you temporarily add ~/scripts to the current shell’s PATH?", opts:["export PATH=~/scripts","PATH=~/scripts:$PATH","export PATH=~/scripts:$PATH","addpath ~/scripts"], ans:2, exp:"export PATH=~/scripts:$PATH adds the folder and makes it available to subprocesses."},
+      {q:"25. How do you make the PATH change permanent?", opts:["Restart the computer","Add the export line to ~/.bashrc","Delete .bashrc","Edit /bin/bash"], ans:1, exp:"Adding the export line to ~/.bashrc makes the change persistent."},
+      {q:"26. After editing .bashrc, what should you do to apply changes immediately?", opts:["logout only","source ~/.bashrc","rm ~/.bashrc","cat ~/.bashrc"], ans:1, exp:"source ~/.bashrc reloads the file in the current shell."},
+      {q:"27. Why might hello.sh run from any folder after adding ~/scripts to PATH?", opts:["Because the file becomes hidden","Because the shell can find it by name in PATH","Because chmod moved it automatically","Because .bashrc renamed the file"], ans:1, exp:"When a directory is in $PATH, the shell searches it for commands."},
+      {q:"28. What is an alias in shell?", opts:["A compressed folder","A shortcut for a command","A file permission","A network connection"], ans:1, exp:"Aliases let you define short names for longer commands."},
+      {q:"29. What does alias ll='ls -lh' do?", opts:["Deletes files in long format","Creates a shortcut for ls -lh","Replaces ls permanently","Sorts files by size automatically"], ans:1, exp:"It creates a shortcut named ll that runs ls -lh."},
+      {q:"30. What does ls -lh display?", opts:["A hidden-only list","A long listing with human-readable file sizes","Files in reverse order","Only directories"], ans:1, exp:"-l = long format, -h = human-readable sizes."},
+      {q:"31. What does alias g='grep' help with?", opts:["Creating folders","Searching text faster by typing less","Compressing files","Listing hidden files"], ans:1, exp:"g becomes a shortcut for grep."},
+      {q:"32. After adding aliases to .bashrc, how do you test them?", opts:["source ~/.bashrc and run ll or g","chmod +x ~/.bashrc","tar -xf ~/.bashrc","scp ~/.bashrc localhost:"], ans:0, exp:"Reload the shell config, then use the alias names."},
+
+      {q:"33. What is the goal of a backup script using rsync?", opts:["To delete source data after syncing","To copy and synchronize data reliably","To format a disk","To mount a USB drive"], ans:1, exp:"Backup scripts often use rsync because it is efficient and flexible."},
+      {q:"34. What should a script backup.sh typically accept?", opts:["Two folder arguments","One URL and one email","Three passwords","One archive name only"], ans:0, exp:"The lab says the script should take two folder arguments: source and destination."},
+      {q:"35. In a backup script, what is the role of a timestamp in the log filename?", opts:["It makes the file smaller","It helps identify when the backup happened","It encrypts the log","It deletes old logs automatically"], ans:1, exp:"A timestamp makes logs unique and traceable by date and time."},
+      {q:"36. Which command is commonly used to download data from a web API in the terminal?", opts:["curl","mv","chmod","nano"], ans:0, exp:"curl is a standard tool for HTTP requests."},
+      {q:"37. What does curl wttr.in/Paris do?", opts:["Sends a weather request for Paris","Opens a text editor","Copies a folder","Creates a tar archive"], ans:0, exp:"wttr.in is a weather service usable from the terminal."},
+      {q:"38. What is the output type of curl wttr.in/Paris by default?", opts:["JSON only","Plain text/terminal-friendly output","Excel format","Binary archive"], ans:1, exp:"By default, wttr.in returns readable terminal output."},
+      {q:"39. How do you request JSON output from wttr.in?", opts:["curl wttr.in/Paris?json","curl wttr.in/Paris?format=j1","curl wttr.in/Paris --json","curl -j wttr.in/Paris"], ans:1, exp:"?format=j1 is the standard JSON format for wttr.in."},
+      {q:"40. What does curl wttr.in/Paris?format=j1 > paris_weather.json do?", opts:["Downloads weather data in JSON and saves it to a file","Encrypts the weather file","Converts JSON into CSV automatically","Sends a POST request to wttr.in"], ans:0, exp:"The output redirection saves the data locally as paris_weather.json."},
+      {q:"41. Which HTTP method is typically used by default in curl when no method is specified?", opts:["POST","PUT","GET","DELETE"], ans:2, exp:"By default, curl sends a GET request."},
+      {q:"42. What command option is commonly used to send data in a POST request with curl?", opts:["--data or -d","--list","--path","--filetype"], ans:0, exp:"-d or --data sends request body data and usually triggers POST behavior."},
+      {q:"43. Which command is a valid example of posting JSON-like data to an API?", opts:["curl -d '{\"name\":\"Thomas\"}' https://reqres.in/api/users","curl ls '{\"name\":\"Thomas\"}' https://reqres.in/api/users","curl -x '{\"name\":\"Thomas\"}' https://reqres.in/api/users","curl --tar '{\"name\":\"Thomas\"}' https://reqres.in/api/users"], ans:0, exp:"-d sends the data to the API; this is the correct conceptual pattern for POSTing content."},
+      {q:"44. Why do APIs often return a response after a POST request?", opts:["To confirm the server received and processed the data","To delete the local file","To reboot the client machine","To compress the request body"], ans:0, exp:"POST requests usually create or submit data, so the response confirms success."},
+      {q:"45. Which practice is best when testing an API POST request?", opts:["Ignore the response","Save and read the reply to verify the server output","Only use ls afterward","Rename .bashrc"], ans:1, exp:"Reading the response lets you verify what the server accepted and returned."}
+    ];
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const quizData = questions.map((item) => {
+      const paired = item.opts.map((opt, idx) => ({ opt, isCorrect: idx === item.ans }));
+      const shuffled = shuffleArray(paired);
+      return {
+        ...item,
+        shuffledOpts: shuffled.map(x => x.opt),
+        correctIndex: shuffled.findIndex(x => x.isCorrect)
+      };
+    });
+
+    const quizArea = document.getElementById("quizArea");
+    const resultsSection = document.getElementById("resultsSection");
+    const scoreText = document.getElementById("scoreText");
+    const answeredText = document.getElementById("answeredText");
+    const totalText = document.getElementById("totalText");
+    const progressBar = document.getElementById("progressBar");
+    const statusText = document.getElementById("statusText");
+    const submitBtn = document.getElementById("submitBtn");
+
+    totalText.textContent = quizData.length;
+
+    const state = {
+      answered: Array(quizData.length).fill(null),
+      locked: Array(quizData.length).fill(false),
+      submitted: false,
+      score: 0
+    };
+
+    function renderQuiz(){
+      quizArea.innerHTML = "";
+      quizData.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "question-card";
+        card.innerHTML = `
+          <h3 class="question-title">${item.q}</h3>
+          <div class="options" id="options-${index}"></div>
+          <div class="feedback" id="feedback-${index}"></div>
+        `;
+        quizArea.appendChild(card);
+
+        const optionsWrap = card.querySelector(`#options-${index}`);
+        item.shuffledOpts.forEach((opt, optIndex) => {
+          const label = document.createElement("label");
+          label.className = "option";
+          label.innerHTML = `
+            <input type="radio" name="q-${index}" value="${optIndex}" />
+            <span><strong>${String.fromCharCode(65 + optIndex)}.</strong> ${opt}</span>
+          `;
+          label.addEventListener("click", () => selectAnswer(index, optIndex));
+          optionsWrap.appendChild(label);
+        });
+      });
+    }
+
+    function selectAnswer(qIndex, optIndex){
+      if (state.locked[qIndex] || state.submitted) return;
+      state.answered[qIndex] = optIndex;
+      state.locked[qIndex] = true;
+
+      const item = quizData[qIndex];
+      const options = document.querySelectorAll(`#options-${qIndex} .option`);
+      const feedback = document.getElementById(`feedback-${qIndex}`);
+
+      options.forEach((el, idx) => {
+        el.classList.add("locked");
+        if (idx === item.correctIndex) el.classList.add("correct");
+        if (idx === optIndex && optIndex !== item.correctIndex) el.classList.add("wrong");
+        const input = el.querySelector("input");
+        input.checked = idx === optIndex;
+        input.disabled = true;
+      });
+
+      const isCorrect = optIndex === item.correctIndex;
+      feedback.className = `feedback show ${isCorrect ? "correct" : "wrong"}`;
+      feedback.innerHTML = isCorrect
+        ? `<strong>Correct.</strong> ${item.exp}`
+        : `<strong>Incorrect.</strong> ${item.exp}`;
+      updateTopbar();
+    }
+
+    function updateTopbar(){
+      const answeredCount = state.answered.filter(v => v !== null).length;
+      const score = state.answered.reduce((acc, val, idx) => acc + (val === quizData[idx].correctIndex ? 1 : 0), 0);
+      state.score = score;
+      scoreText.textContent = score;
+      answeredText.textContent = answeredCount;
+      progressBar.style.width = `${(answeredCount / quizData.length) * 100}%`;
+    }
+
+    function submitQuiz(){
+      state.submitted = true;
+      let score = 0;
+      const wrong = [];
+      const skipped = [];
+
+      quizData.forEach((q, idx) => {
+        const userAns = state.answered[idx];
+        if (userAns === null) {
+          skipped.push(idx);
+        } else if (userAns === q.correctIndex) {
+          score++;
+        } else {
+          wrong.push(idx);
+        }
+
+        const feedback = document.getElementById(`feedback-${idx}`);
+        const options = document.querySelectorAll(`#options-${idx} .option`);
+
+        if (userAns === null) {
+          options[q.correctIndex].classList.add("correct");
+          feedback.className = "feedback show skip";
+          feedback.innerHTML = `<strong>Skipped.</strong> ${q.exp}`;
+        } else {
+          options.forEach((el, optIndex) => {
+            if (optIndex === q.correctIndex) el.classList.add("correct");
+            if (optIndex === userAns && userAns !== q.correctIndex) el.classList.add("wrong");
+            el.classList.add("locked");
+            el.querySelector("input").disabled = true;
+          });
+        }
+      });
+
+      state.score = score;
+      scoreText.textContent = score;
+      answeredText.textContent = quizData.length;
+      progressBar.style.width = `100%`;
+      statusText.textContent = "Completed";
+
+      resultsSection.innerHTML = `
+        <div class="result-card">
+          <h3>Results Summary</h3>
+          <div class="result-summary">
+            <div>Score: ${score} / ${quizData.length}</div>
+            <div>Correct: ${score}</div>
+            <div>Wrong: ${wrong.length}</div>
+            <div>Skipped: ${skipped.length}</div>
+          </div>
+          <div class="actions" style="justify-content:flex-start; margin-top:16px;">
+            <button class="btn btn-retry" id="retryBtn">Retry Quiz</button>
+          </div>
+        </div>
+        ${wrong.length ? `
+          <div class="result-card">
+            <h3>Incorrect Answers Recap</h3>
+            ${wrong.map(i => `
+              <div class="recap-item">
+                <div class="tag bad">Wrong</div>
+                <div><strong>Q${i + 1}.</strong> ${quizData[i].q}</div>
+                <div><strong>Your answer:</strong> ${quizData[i].shuffledOpts[state.answered[i]]}</div>
+                <div><strong>Correct answer:</strong> ${quizData[i].shuffledOpts[quizData[i].correctIndex]}</div>
+                <div><strong>Explanation:</strong> ${quizData[i].exp}</div>
+              </div>
+            `).join("")}
+          </div>` : ""}
+        ${skipped.length ? `
+          <div class="result-card">
+            <h3>Skipped Questions Recap</h3>
+            ${skipped.map(i => `
+              <div class="recap-item">
+                <div class="tag skip">Skipped</div>
+                <div><strong>Q${i + 1}.</strong> ${quizData[i].q}</div>
+                <div><strong>Correct answer:</strong> ${quizData[i].shuffledOpts[quizData[i].correctIndex]}</div>
+                <div><strong>Explanation:</strong> ${quizData[i].exp}</div>
+              </div>
+            `).join("")}
+          </div>` : ""}
+      `;
+
+      document.getElementById("retryBtn").addEventListener("click", retryQuiz);
+      submitBtn.classList.add("hidden");
+      quizArea.querySelectorAll(".option").forEach(el => el.classList.add("locked"));
+    }
+
+    function retryQuiz(){
+      state.answered = Array(quizData.length).fill(null);
+      state.locked = Array(quizData.length).fill(false);
+      state.submitted = false;
+      state.score = 0;
+      resultsSection.innerHTML = "";
+      statusText.textContent = "In progress";
+      submitBtn.classList.remove("hidden");
+      renderQuiz();
+      updateTopbar();
+    }
+
+    submitBtn.addEventListener("click", submitQuiz);
+    renderQuiz();
+    updateTopbar();
+  </script>
+</body>
+</html>
