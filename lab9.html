@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linux Permissions & Ownership Quiz</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --bg2:#111a2e;
+      --card:#ffffff;
+      --text:#e9eefb;
+      --muted:#9aa8c7;
+      --primary:#3b82f6;
+      --primary2:#2563eb;
+      --border:#cfe0ff;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --skip:#f59e0b;
+      --shadow: 0 14px 40px rgba(0,0,0,.22);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.25), transparent 24%),
+        radial-gradient(circle at top right, rgba(37,99,235,.18), transparent 22%),
+        linear-gradient(180deg, var(--bg), #08101d 70%, #060b14);
+      color:var(--text);
+      min-height:100vh;
+    }
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:1000;
+      background: rgba(7, 13, 24, .78);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid rgba(207,224,255,.16);
+      box-shadow: 0 8px 30px rgba(0,0,0,.18);
+    }
+    .topbar-inner{
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:14px;
+      align-items:center;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      transition:.2s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .btn-back{
+      background:linear-gradient(180deg, #1d4ed8, #1e40af);
+      color:#fff;
+      box-shadow: 0 8px 18px rgba(37,99,235,.28);
+    }
+    .btn-back:hover{transform:translateY(-1px); filter:brightness(1.05)}
+    .top-info{
+      display:grid;
+      gap:8px;
+    }
+    .stats-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 16px;
+      align-items:center;
+      justify-content:space-between;
+      font-size:14px;
+      color:var(--text);
+    }
+    .stat{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-weight:600;
+    }
+    .progress-wrap{
+      height:12px;
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(207,224,255,.18);
+    }
+    .progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, #60a5fa, #2563eb);
+      border-radius:999px;
+      transition:width .25s ease;
+    }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:118px 16px 40px;
+    }
+    .hero{
+      text-align:center;
+      padding:24px 0 18px;
+    }
+    h1{
+      margin:0 0 12px;
+      font-size:clamp(2rem, 4vw, 3.6rem);
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+    .subtitle{
+      margin:0 auto;
+      max-width:780px;
+      color:var(--muted);
+      font-size:1.02rem;
+      line-height:1.7;
+    }
+    .panel{
+      background:var(--card);
+      color:#14213a;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      margin-top:22px;
+    }
+    .panel-head{
+      padding:20px 20px 14px;
+      border-bottom:1px solid #e7efff;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+    .panel-head h2{
+      margin:0;
+      font-size:1.15rem;
+    }
+    .panel-head p{
+      margin:8px 0 0;
+      color:#5c6b88;
+    }
+    .quiz-area{
+      padding:18px;
+      display:grid;
+      gap:14px;
+    }
+    .question-card{
+      border:1px solid #dbe7ff;
+      border-left:5px solid var(--primary);
+      border-radius:16px;
+      padding:18px;
+      background:linear-gradient(180deg, #fff, #fbfdff);
+      box-shadow: 0 8px 22px rgba(37,99,235,.06);
+    }
+    .question-title{
+      margin:0 0 14px;
+      font-size:1.05rem;
+      line-height:1.55;
+      color:#10203d;
+    }
+    .options{
+      display:grid;
+      gap:10px;
+    }
+    .option{
+      border:1px solid #d7e4ff;
+      background:#fff;
+      border-radius:14px;
+      padding:12px 14px;
+      cursor:pointer;
+      transition:.18s ease;
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      color:#1a2b49;
+    }
+    .option:hover{
+      transform:translateY(-1px);
+      border-color:#9fc0ff;
+      box-shadow:0 8px 18px rgba(37,99,235,.08);
+    }
+    .option.locked{cursor:default; pointer-events:none}
+    .option.correct{
+      border-color:rgba(22,163,74,.35);
+      background:rgba(22,163,74,.08);
+    }
+    .option.wrong{
+      border-color:rgba(220,38,38,.35);
+      background:rgba(220,38,38,.07);
+    }
+    .feedback{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:.96rem;
+      line-height:1.6;
+      display:none;
+    }
+    .feedback.show{display:block}
+    .feedback.correct{
+      background:rgba(22,163,74,.09);
+      border:1px solid rgba(22,163,74,.24);
+      color:#146c34;
+    }
+    .feedback.wrong{
+      background:rgba(220,38,38,.08);
+      border:1px solid rgba(220,38,38,.22);
+      color:#9b1c1c;
+    }
+    .feedback.skip{
+      background:rgba(245,158,11,.1);
+      border:1px solid rgba(245,158,11,.28);
+      color:#8a5b00;
+    }
+    .actions{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:20px;
+    }
+    .btn-submit{
+      background:linear-gradient(180deg, #3b82f6, #2563eb);
+      color:#fff;
+      box-shadow:0 10px 24px rgba(37,99,235,.25);
+      padding:13px 18px;
+      min-width:220px;
+    }
+    .btn-submit:hover{transform:translateY(-1px)}
+    .btn-retry{
+      background:#0f172a;
+      color:#fff;
+      padding:13px 18px;
+      min-width:180px;
+    }
+    .results{
+      margin-top:20px;
+      display:grid;
+      gap:14px;
+    }
+    .result-card{
+      background:#fff;
+      color:#15213a;
+      border:1px solid #dbe7ff;
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 10px 26px rgba(0,0,0,.06);
+    }
+    .result-card h3{margin:0 0 10px}
+    .result-summary{
+      display:grid;
+      gap:8px;
+      font-weight:600;
+    }
+    .recap-item{
+      border-top:1px solid #edf3ff;
+      padding-top:14px;
+      margin-top:14px;
+    }
+    .tag{
+      display:inline-block;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.02em;
+      padding:6px 10px;
+      border-radius:999px;
+      margin-bottom:8px;
+    }
+    .tag.bad{background:rgba(220,38,38,.1); color:#a4161a}
+    .tag.skip{background:rgba(245,158,11,.12); color:#8a5b00}
+    .tag.ok{background:rgba(22,163,74,.1); color:#146c34}
+    .hidden{display:none !important;}
+    .footer-space{height:20px}
+    @media (max-width: 760px){
+      .topbar-inner{
+        grid-template-columns:1fr;
+      }
+      .stats-row{
+        gap:8px 12px;
+      }
+      .container{
+        padding-top:170px;
+      }
+      .quiz-area{padding:14px}
+      .question-card{padding:16px}
+      .btn-submit,.btn-retry{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="btn btn-back" href="index.html">← Back to index</a>
+      <div class="top-info">
+        <div class="stats-row">
+          <div class="stat">Score: <span id="scoreText">0</span></div>
+          <div class="stat">Answered: <span id="answeredText">0</span>/<span id="totalText">70</span></div>
+        </div>
+        <div class="progress-wrap" aria-label="Progress bar">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <div class="stat" style="justify-self:end;">Quiz Status: <span id="statusText">In progress</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Linux Permissions & Ownership Quiz</h1>
+      <p class="subtitle">
+        Practice Linux permissions, ownership, chmod/chown/chgrp, directory access, umask, and essential access-control concepts with immediate feedback.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Quiz Area</h2>
+        <p>Select an answer for each question. Each question locks after your choice and shows immediate feedback.</p>
+      </div>
+      <div class="quiz-area" id="quizArea"></div>
+      <div class="actions">
+        <button class="btn btn-submit" id="submitBtn">Submit &amp; See Results</button>
+      </div>
+    </section>
+
+    <section class="results" id="resultsSection"></section>
+    <div class="footer-space"></div>
+  </main>
+
+  <script>
+    const questions = [
+      {q:"1) Which command is used to create an empty file named file1.txt?", opts:["mkdir file1.txt","touch file1.txt","cp file1.txt","rm file1.txt"], ans:1, exp:"touch creates an empty file if it does not exist."},
+      {q:"2) Which command shows file permissions, owners, and groups in long format?", opts:["ls -l","pwd","cat","grep"], ans:0, exp:"ls -l shows permissions, owner, group, size, and more."},
+      {q:"3) In a long listing, what does the first character of the permissions string mean?", opts:["File size","File type","Owner name","Group name"], ans:1, exp:"The first character indicates file type, such as - for file and d for directory."},
+      {q:"4) In permissions like -rwxr-xr--, what does the first rwx group represent?", opts:["Others","Group","Owner","Root only"], ans:2, exp:"The first triplet is for the owner."},
+      {q:"5) In -rwxr-xr--, what does the second triplet r-x represent?", opts:["Owner permissions","Group permissions","Others permissions","Directory permissions"], ans:1, exp:"The second triplet is for the group."},
+      {q:"6) In -rwxr-xr--, what does the third triplet r-- represent?", opts:["Owner permissions","Group permissions","Others permissions","Root permissions"], ans:2, exp:"The third triplet is for others."},
+      {q:"7) Which command changes a file’s permissions?", opts:["chmod","chown","chgrp","ls"], ans:0, exp:"chmod changes permission bits."},
+      {q:"8) Which command changes the owner of a file?", opts:["chmod","chown","chgrp","touch"], ans:1, exp:"chown changes owner."},
+      {q:"9) Which command changes the group ownership of a file?", opts:["chmod","chown","chgrp","mv"], ans:2, exp:"chgrp changes the group."},
+      {q:"10) If a file is writable by you, which permission symbol is present?", opts:["r","w","x","-"], ans:1, exp:"w means write permission."},
+      {q:"11) Which permission allows you to view file contents?", opts:["r","w","x","s"], ans:0, exp:"Read permission is needed to view file contents."},
+      {q:"12) Which permission is needed to run a script file?", opts:["r","w","x","d"], ans:2, exp:"Execute permission is required to run a script."},
+      {q:"13) What does the command cp /etc/passwd ~/datafile.txt do?", opts:["Moves the file","Copies the file","Deletes the file","Renames the system file"], ans:1, exp:"cp copies content into a new file."},
+      {q:"14) Why might mv /etc/passwd ~/ fail?", opts:["mv cannot move text files","You may lack permission to modify /etc/passwd","mv only works inside the home directory","mv requires root only for copying, not moving"], ans:1, exp:"/etc/passwd is protected, so you usually cannot move it without proper privileges."},
+      {q:"15) Why can cp /etc/passwd ~/datafile.txt often work even if mv fails?", opts:["Copying only needs read access to source and write access to destination","Copying deletes the original automatically","Copying requires no permissions at all","Copying changes file ownership automatically"], ans:0, exp:"To copy, you generally need to read the source and write the destination."},
+      {q:"16) After copying a file into your home directory, who usually owns the new copy?", opts:["The original system owner","Your user account","Root always","The group root always"], ans:1, exp:"The new file is typically owned by the user who created it."},
+      {q:"17) If you remove your own read permission from a file, what happens when you try to read it?", opts:["It reads normally","Access is denied","The file is deleted","The file becomes executable"], ans:1, exp:"Without read permission, reading the file fails."},
+      {q:"18) Which command can remove read permission for the owner only?", opts:["chmod u-r file","chmod g-r file","chmod o-r file","chmod a+x file"], ans:0, exp:"u-r removes read from user/owner."},
+      {q:"19) Which command makes a file readable but not writable by anyone?", opts:["chmod 444 file","chmod 777 file","chmod 222 file","chmod 755 file"], ans:0, exp:"444 means read-only for owner, group, and others."},
+      {q:"20) What does chmod 644 file mean?", opts:["Owner can read/write; group and others can read only","Everyone can read/write","Only owner can read/write/execute","No one can access the file"], ans:0, exp:"6=rw, 4=r, 4=r."},
+      {q:"21) What does chmod 755 directory usually mean?", opts:["Owner has full access; group and others can read and execute","Everyone has full access","Only owner can access","No one can enter the directory"], ans:0, exp:"7=rwx, 5=r-x, 5=r-x."},
+      {q:"22) Why is execute permission important on a directory?", opts:["It allows the directory to store more files","It allows you to enter/traverse the directory","It allows you to rename the directory only","It allows file contents to be encrypted"], ans:1, exp:"Directory execute means traversal/access to items inside."},
+      {q:"23) If a directory lacks execute permission, what is most likely blocked?", opts:["Creating any files anywhere","Entering the directory and accessing items inside","Deleting your account","Changing the time zone"], ans:1, exp:"Without execute, you cannot traverse the directory."},
+      {q:"24) Can you list a directory’s contents without execute permission?", opts:["Always yes","Sometimes no, depending on read permission and system behavior","Never, even with read permission","Only if the directory is empty"], ans:1, exp:"Read lets you list names, execute lets you access inside."},
+      {q:"25) What does removing read permission from a directory do?", opts:["Prevents listing the filenames inside","Prevents entering the directory only","Deletes the directory","Gives full access to files inside"], ans:0, exp:"Read permission on a directory allows listing its contents."},
+      {q:"26) What does a directory need to allow access to a file inside it?", opts:["Read permission only","Execute permission only","Write permission only","No permission at all"], ans:1, exp:"Execute on the directory allows traversal to the file."},
+      {q:"27) Which command creates a directory named project?", opts:["mkdir project","touch project","rm project","cp project"], ans:0, exp:"mkdir creates directories."},
+      {q:"28) Which command recursively changes permissions for all files in a directory tree?", opts:["chmod -R","chown -R","ls -R","pwd -R"], ans:0, exp:"chmod -R applies changes recursively."},
+      {q:"29) Which command recursively changes group ownership?", opts:["chgrp -R","chmod -R","cp -R","mv -R"], ans:0, exp:"chgrp -R changes group ownership recursively."},
+      {q:"30) What is the concept of ownership in Linux permissions?", opts:["Only root can own files","Files have an owner and a group associated with them","Ownership means the file is encrypted","Ownership is the same as file size"], ans:1, exp:"Each file has an owner and a group."},
+      {q:"31) If a file is owned by you, can the group still have permissions on it?", opts:["No, group permissions never exist","Yes, group permissions are separate from ownership","Only if the file is executable","Only if the file is hidden"], ans:1, exp:"Owner, group, and others are separate permission categories."},
+      {q:"32) What does chmod o-r file do?", opts:["Removes read permission from others","Removes read permission from owner","Removes read permission from group","Adds read permission to others"], ans:0, exp:"o means others."},
+      {q:"33) What does chmod g+x script.sh do?", opts:["Removes execute from group","Adds execute to group","Adds execute to owner only","Adds read to group"], ans:1, exp:"g+x grants execute permission to the group."},
+      {q:"34) Which permission pattern is most suitable for a script that only owner and group can run?", opts:["r--r--r--","rwxrwx---","rw-r--r--","---------"], ans:1, exp:"owner and group can read/write/execute, others have none."},
+      {q:"35) Which pattern best matches “only owner can modify, others may read or traverse” for a folder?", opts:["Owner rwx, group r-x, others r-x","Owner rw-, group r--, others r--","Owner r--, group rwx, others rwx","Owner --- , group --- , others ---"], ans:0, exp:"Owner can modify, others can read/traverse."},
+      {q:"36) Why is r-x common for directories?", opts:["Because directories need read to be encrypted","Because read lists names and execute allows traversal","Because execute deletes files","Because write is impossible on directories"], ans:1, exp:"Directory read = list contents, execute = enter/traverse."},
+      {q:"37) Which command can display the current umask value?", opts:["umask","mask","chmod","whoami"], ans:0, exp:"umask prints the current mask."},
+      {q:"38) What is umask used for?", opts:["To encrypt files","To define default permission restrictions for newly created files/directories","To delete hidden files","To change usernames"], ans:1, exp:"umask controls which permission bits are removed from default permissions."},
+      {q:"39) If the umask is 022, what is the usual default result for new files?", opts:["Files are created with no permissions","Files are typically 644 and directories 755","Files are typically 777 and directories 777","Files are always executable"], ans:1, exp:"Common default calculation is 666-022=644 for files and 777-022=755 for directories."},
+      {q:"40) What does umask 000 generally mean?", opts:["New files are maximally restricted","No permission bits are masked out, so defaults are permissive","Files become read-only","Only root can create files"], ans:1, exp:"000 removes no permissions from the base default."},
+      {q:"41) Why might a newly created regular file not be executable by default?", opts:["Because default file permissions usually start from a non-executable base","Because Linux never allows executable files","Because execute permission is reserved for directories only","Because files inherit 000 by default always"], ans:0, exp:"Regular files commonly start from 666 before umask, which does not include execute."},
+      {q:"42) Which is the best description of chmod 000 file?", opts:["Owner can read/write/execute","No one can read, write, or execute","Only group can read","Only others can execute"], ans:1, exp:"All permission bits are removed."},
+      {q:"43) If a file is 444, what can you do?", opts:["Read it only","Write and execute it","Delete it automatically","Rename it without permission"], ans:0, exp:"444 means read-only for all."},
+      {q:"44) Which command can make only the owner able to read/write/execute a file?", opts:["chmod 700 file","chmod 777 file","chmod 444 file","chmod 222 file"], ans:0, exp:"700 gives full access only to owner."},
+      {q:"45) For a directory, what does write permission allow?", opts:["Entering the directory","Creating, deleting, or renaming entries in the directory","Reading file contents only","Running scripts automatically"], ans:1, exp:"Write on a directory controls modifications to its entries."},
+      {q:"46) Which combination is most needed to access a file named inside a directory path?", opts:["Read on file only","Execute on each directory in the path, plus appropriate file permissions","Write on file only","Ownership only, regardless of permissions"], ans:1, exp:"Path traversal requires execute on directories, and file access needs its own permissions."},
+      {q:"47) What happens when a group has execute permission on a directory but no read permission?", opts:["They can enter/traverse the directory, but may not list contents","They can list contents but not enter","They can delete the directory automatically","They can read file contents without file permissions"], ans:0, exp:"Execute enables traversal; read enables listing."},
+      {q:"48) What does chown user1 file do?", opts:["Changes the group to user1","Changes the owner to user1","Changes permissions to user1","Copies the file to user1"], ans:1, exp:"chown changes ownership."},
+      {q:"49) Which of the following best describes “others” in permissions?", opts:["Only the file owner","The file’s group members only","All users who are neither the owner nor in the group","Root only"], ans:2, exp:"Others means everyone outside owner/group."},
+      {q:"50) Which command is most appropriate to remove all files and folders created during cleanup?", opts:["rm -r foldername","touch foldername","chmod foldername","cat foldername"], ans:0, exp:"rm -r removes directories recursively."},
+      {q:"51) What does ls -l help you inspect during the lab?", opts:["File permissions, owner, group, size, and timestamps","Only file contents","Only hidden passwords","Only disk partitions"], ans:0, exp:"Long listing shows metadata useful for permissions labs."},
+      {q:"52) Why might /etc/passwd be readable by regular users but not writable?", opts:["It is designed to be a public executable","Read access is often allowed for system identity lookup, but write access is restricted","Because Linux ignores permissions for system files","Because it is always owned by the current user"], ans:1, exp:"Many systems allow reading /etc/passwd for user lookup, but protect writes."},
+      {q:"53) Which permission is required to modify a file?", opts:["Read only","Write","Execute only","No permission required"], ans:1, exp:"Write permission is needed to modify content."},
+      {q:"54) Which statement about chmod 640 file is correct?", opts:["Owner can read/write, group can read, others have no access","Everyone can read","Owner can execute, group can write","Others can read/write"], ans:0, exp:"6=rw, 4=r, 0=---."},
+      {q:"55) What is the main concept behind permissions in Linux?", opts:["They only control file names","They control who can read, write, and execute resources","They only matter for text files","They are only used by GUI applications"], ans:1, exp:"Permissions define access rights."},
+      {q:"56) If you need “only you can read and write a file,” which mode is the best match?", opts:["600","644","755","777"], ans:0, exp:"600 = owner read/write, group and others none."},
+      {q:"57) If you want “others may read but not write,” which mode is appropriate?", opts:["666","644","600","700"], ans:1, exp:"Owner read/write, others read-only."},
+      {q:"58) Which chmod symbol changes permissions for all three categories at once?", opts:["u","g","o","a"], ans:3, exp:"a means all."},
+      {q:"59) What does chmod a+r file do?", opts:["Removes read from all","Adds read to all","Adds execute to owner only","Changes the owner to r"], ans:1, exp:"a+r grants read to everyone."},
+      {q:"60) Which is the best summary of the lab’s core learning?", opts:["How to install Linux from scratch","How ownership, permissions, directories, and umask affect access control","How to write C programs","How to configure DNS servers"], ans:1, exp:"The lab focuses on access control concepts and commands."},
+      {q:"61) Why is execute permission on a file different from execute on a directory?", opts:["They mean the same thing","File execute lets you run a program/script; directory execute lets you traverse the directory","Directory execute deletes files","File execute only changes timestamps"], ans:1, exp:"File execute runs a program; directory execute allows traversal."},
+      {q:"62) Which permission is the most important for “seeing filenames” inside a directory?", opts:["Read on directory","Write on directory","Execute on file","Read on file only"], ans:0, exp:"Read on a directory allows listing filenames."},
+      {q:"63) Which permission is the most important for “opening a file by path” through a folder?", opts:["Read on directory only","Execute on directory","Write on file only","Execute on file only"], ans:1, exp:"Execute on a directory is required to traverse the path."},
+      {q:"64) Which command shows the current user identity?", opts:["whoami","chmod","ls","mkdir"], ans:0, exp:"whoami prints the current username."},
+      {q:"65) If a file is owned by root and you are a normal user, which is usually true?", opts:["You can always change its permissions","You may be blocked from changing ownership or permissions","You automatically become owner after copying it","You cannot read any file owned by root"], ans:1, exp:"Privileged files often require root to modify."},
+      {q:"66) Which pair is correct?", opts:["chmod changes owner, chown changes permissions","chmod changes permissions, chown changes owner","chgrp changes permissions, chmod changes group","ls changes permissions, mv changes owner"], ans:1, exp:"chmod changes permissions, chown changes owner."},
+      {q:"67) Which numeric mode means rwxr-xr-x?", opts:["644","700","755","666"], ans:2, exp:"755 corresponds to rwxr-xr-x."},
+      {q:"68) Which numeric mode means rw-r--r--?", opts:["644","600","755","444"], ans:0, exp:"644 corresponds to rw-r--r--."},
+      {q:"69) Which numeric mode means rwx------?", opts:["700","777","644","666"], ans:0, exp:"700 corresponds to rwx------."},
+      {q:"70) Which numeric mode means r--r--r--?", opts:["777","444","600","755"], ans:1, exp:"444 corresponds to r--r--r--."}
+    ];
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const quizData = questions.map((item) => {
+      const paired = item.opts.map((opt, idx) => ({ opt, isCorrect: idx === item.ans }));
+      const shuffled = shuffleArray(paired);
+      return {
+        ...item,
+        shuffledOpts: shuffled.map(x => x.opt),
+        correctIndex: shuffled.findIndex(x => x.isCorrect)
+      };
+    });
+
+    const quizArea = document.getElementById("quizArea");
+    const resultsSection = document.getElementById("resultsSection");
+    const scoreText = document.getElementById("scoreText");
+    const answeredText = document.getElementById("answeredText");
+    const totalText = document.getElementById("totalText");
+    const progressBar = document.getElementById("progressBar");
+    const statusText = document.getElementById("statusText");
+    const submitBtn = document.getElementById("submitBtn");
+
+    totalText.textContent = quizData.length;
+
+    const state = {
+      answered: Array(quizData.length).fill(null),
+      locked: Array(quizData.length).fill(false),
+      submitted: false,
+      score: 0
+    };
+
+    function renderQuiz(){
+      quizArea.innerHTML = "";
+      quizData.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "question-card";
+        card.innerHTML = `
+          <h3 class="question-title">${item.q}</h3>
+          <div class="options" id="options-${index}"></div>
+          <div class="feedback" id="feedback-${index}"></div>
+        `;
+        quizArea.appendChild(card);
+
+        const optionsWrap = card.querySelector(`#options-${index}`);
+        item.shuffledOpts.forEach((opt, optIndex) => {
+          const label = document.createElement("label");
+          label.className = "option";
+          label.innerHTML = `
+            <input type="radio" name="q-${index}" value="${optIndex}" />
+            <span><strong>${String.fromCharCode(65 + optIndex)}.</strong> ${opt}</span>
+          `;
+          label.addEventListener("click", () => selectAnswer(index, optIndex));
+          optionsWrap.appendChild(label);
+        });
+      });
+    }
+
+    function selectAnswer(qIndex, optIndex){
+      if (state.locked[qIndex] || state.submitted) return;
+      state.answered[qIndex] = optIndex;
+      state.locked[qIndex] = true;
+
+      const item = quizData[qIndex];
+      const options = document.querySelectorAll(`#options-${qIndex} .option`);
+      const feedback = document.getElementById(`feedback-${qIndex}`);
+
+      options.forEach((el, idx) => {
+        el.classList.add("locked");
+        if (idx === item.correctIndex) el.classList.add("correct");
+        if (idx === optIndex && optIndex !== item.correctIndex) el.classList.add("wrong");
+        const input = el.querySelector("input");
+        input.checked = idx === optIndex;
+        input.disabled = true;
+      });
+
+      const isCorrect = optIndex === item.correctIndex;
+      feedback.className = `feedback show ${isCorrect ? "correct" : "wrong"}`;
+      feedback.innerHTML = isCorrect
+        ? `<strong>Correct.</strong> ${item.exp}`
+        : `<strong>Incorrect.</strong> ${item.exp}`;
+      updateTopbar();
+    }
+
+    function updateTopbar(){
+      const answeredCount = state.answered.filter(v => v !== null).length;
+      const score = state.answered.reduce((acc, val, idx) => acc + (val === quizData[idx].correctIndex ? 1 : 0), 0);
+      state.score = score;
+      scoreText.textContent = score;
+      answeredText.textContent = answeredCount;
+      progressBar.style.width = `${(answeredCount / quizData.length) * 100}%`;
+    }
+
+    function submitQuiz(){
+      state.submitted = true;
+      let score = 0;
+      const wrong = [];
+      const skipped = [];
+
+      quizData.forEach((q, idx) => {
+        const userAns = state.answered[idx];
+        if (userAns === null) {
+          skipped.push(idx);
+        } else if (userAns === q.correctIndex) {
+          score++;
+        } else {
+          wrong.push(idx);
+        }
+
+        const feedback = document.getElementById(`feedback-${idx}`);
+        const options = document.querySelectorAll(`#options-${idx} .option`);
+
+        if (userAns === null) {
+          options[q.correctIndex].classList.add("correct");
+          feedback.className = "feedback show skip";
+          feedback.innerHTML = `<strong>Skipped.</strong> ${q.exp}`;
+        } else {
+          options.forEach((el, optIndex) => {
+            if (optIndex === q.correctIndex) el.classList.add("correct");
+            if (optIndex === userAns && userAns !== q.correctIndex) el.classList.add("wrong");
+            el.classList.add("locked");
+            el.querySelector("input").disabled = true;
+          });
+        }
+      });
+
+      state.score = score;
+      scoreText.textContent = score;
+      answeredText.textContent = quizData.length;
+      progressBar.style.width = `100%`;
+      statusText.textContent = "Completed";
+
+      resultsSection.innerHTML = `
+        <div class="result-card">
+          <h3>Results Summary</h3>
+          <div class="result-summary">
+            <div>Score: ${score} / ${quizData.length}</div>
+            <div>Correct: ${score}</div>
+            <div>Wrong: ${wrong.length}</div>
+            <div>Skipped: ${skipped.length}</div>
+          </div>
+          <div class="actions" style="justify-content:flex-start; margin-top:16px;">
+            <button class="btn btn-retry" id="retryBtn">Retry Quiz</button>
+          </div>
+        </div>
+        ${wrong.length ? `
+          <div class="result-card">
+            <h3>Incorrect Answers Recap</h3>
+            ${wrong.map(i => `
+              <div class="recap-item">
+                <div class="tag bad">Wrong</div>
+                <div><strong>Q${i + 1}.</strong> ${quizData[i].q}</div>
+                <div><strong>Your answer:</strong> ${quizData[i].shuffledOpts[state.answered[i]]}</div>
+                <div><strong>Correct answer:</strong> ${quizData[i].shuffledOpts[quizData[i].correctIndex]}</div>
+                <div><strong>Explanation:</strong> ${quizData[i].exp}</div>
+              </div>
+            `).join("")}
+          </div>` : ""}
+        ${skipped.length ? `
+          <div class="result-card">
+            <h3>Skipped Questions Recap</h3>
+            ${skipped.map(i => `
+              <div class="recap-item">
+                <div class="tag skip">Skipped</div>
+                <div><strong>Q${i + 1}.</strong> ${quizData[i].q}</div>
+                <div><strong>Correct answer:</strong> ${quizData[i].shuffledOpts[quizData[i].correctIndex]}</div>
+                <div><strong>Explanation:</strong> ${quizData[i].exp}</div>
+              </div>
+            `).join("")}
+          </div>` : ""}
+      `;
+
+      document.getElementById("retryBtn").addEventListener("click", retryQuiz);
+      submitBtn.classList.add("hidden");
+      quizArea.querySelectorAll(".option").forEach(el => el.classList.add("locked"));
+    }
+
+    function retryQuiz(){
+      state.answered = Array(quizData.length).fill(null);
+      state.locked = Array(quizData.length).fill(false);
+      state.submitted = false;
+      state.score = 0;
+      resultsSection.innerHTML = "";
+      statusText.textContent = "In progress";
+      submitBtn.classList.remove("hidden");
+      renderQuiz();
+      updateTopbar();
+    }
+
+    submitBtn.addEventListener("click", submitQuiz);
+    renderQuiz();
+    updateTopbar();
+  </script>
+</body>
+</html>
