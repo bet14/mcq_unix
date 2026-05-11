@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 6</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --bg2:#111a2e;
+      --card:#ffffff;
+      --text:#e9eefb;
+      --muted:#9aa8c7;
+      --primary:#3b82f6;
+      --primary2:#2563eb;
+      --border:#cfe0ff;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --skip:#f59e0b;
+      --shadow: 0 14px 40px rgba(0,0,0,.22);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.25), transparent 24%),
+        radial-gradient(circle at top right, rgba(37,99,235,.18), transparent 22%),
+        linear-gradient(180deg, var(--bg), #08101d 70%, #060b14);
+      color:var(--text);
+      min-height:100vh;
+    }
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:1000;
+      background: rgba(7, 13, 24, .78);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid rgba(207,224,255,.16);
+      box-shadow: 0 8px 30px rgba(0,0,0,.18);
+    }
+    .topbar-inner{
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:14px;
+      align-items:center;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      transition:.2s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .btn-back{
+      background:linear-gradient(180deg, #1d4ed8, #1e40af);
+      color:#fff;
+      box-shadow: 0 8px 18px rgba(37,99,235,.28);
+    }
+    .btn-back:hover{transform:translateY(-1px); filter:brightness(1.05)}
+    .top-info{
+      display:grid;
+      gap:8px;
+    }
+    .stats-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 16px;
+      align-items:center;
+      justify-content:space-between;
+      font-size:14px;
+      color:var(--text);
+    }
+    .stat{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-weight:600;
+    }
+    .progress-wrap{
+      height:12px;
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(207,224,255,.18);
+    }
+    .progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, #60a5fa, #2563eb);
+      border-radius:999px;
+      transition:width .25s ease;
+    }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:118px 16px 40px;
+    }
+    .hero{
+      text-align:center;
+      padding:24px 0 18px;
+    }
+    h1{
+      margin:0 0 12px;
+      font-size:clamp(2rem, 4vw, 3.6rem);
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+    .subtitle{
+      margin:0 auto;
+      max-width:780px;
+      color:var(--muted);
+      font-size:1.02rem;
+      line-height:1.7;
+    }
+    .panel{
+      background:var(--card);
+      color:#14213a;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      margin-top:22px;
+    }
+    .panel-head{
+      padding:20px 20px 14px;
+      border-bottom:1px solid #e7efff;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+    .panel-head h2{
+      margin:0;
+      font-size:1.15rem;
+    }
+    .panel-head p{
+      margin:8px 0 0;
+      color:#5c6b88;
+    }
+    .quiz-area{
+      padding:18px;
+      display:grid;
+      gap:14px;
+    }
+    .question-card{
+      border:1px solid #dbe7ff;
+      border-left:5px solid var(--primary);
+      border-radius:16px;
+      padding:18px;
+      background:linear-gradient(180deg, #fff, #fbfdff);
+      box-shadow: 0 8px 22px rgba(37,99,235,.06);
+    }
+    .question-title{
+      margin:0 0 14px;
+      font-size:1.05rem;
+      line-height:1.55;
+      color:#10203d;
+    }
+    .options{
+      display:grid;
+      gap:10px;
+    }
+    .option{
+      border:1px solid #d7e4ff;
+      background:#fff;
+      border-radius:14px;
+      padding:12px 14px;
+      cursor:pointer;
+      transition:.18s ease;
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      color:#1a2b49;
+    }
+    .option:hover{
+      transform:translateY(-1px);
+      border-color:#9fc0ff;
+      box-shadow:0 8px 18px rgba(37,99,235,.08);
+    }
+    .option.locked{cursor:default; pointer-events:none}
+    .option.correct{
+      border-color:rgba(22,163,74,.35);
+      background:rgba(22,163,74,.08);
+    }
+    .option.wrong{
+      border-color:rgba(220,38,38,.35);
+      background:rgba(220,38,38,.07);
+    }
+    .feedback{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:.96rem;
+      line-height:1.6;
+      display:none;
+    }
+    .feedback.show{display:block}
+    .feedback.correct{
+      background:rgba(22,163,74,.09);
+      border:1px solid rgba(22,163,74,.24);
+      color:#146c34;
+    }
+    .feedback.wrong{
+      background:rgba(220,38,38,.08);
+      border:1px solid rgba(220,38,38,.22);
+      color:#9b1c1c;
+    }
+    .feedback.skip{
+      background:rgba(245,158,11,.1);
+      border:1px solid rgba(245,158,11,.28);
+      color:#8a5b00;
+    }
+    .actions{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:20px;
+    }
+    .btn-submit{
+      background:linear-gradient(180deg, #3b82f6, #2563eb);
+      color:#fff;
+      box-shadow:0 10px 24px rgba(37,99,235,.25);
+      padding:13px 18px;
+      min-width:220px;
+    }
+    .btn-submit:hover{transform:translateY(-1px)}
+    .btn-retry{
+      background:#0f172a;
+      color:#fff;
+      padding:13px 18px;
+      min-width:180px;
+    }
+    .results{
+      margin-top:20px;
+      display:grid;
+      gap:14px;
+    }
+    .result-card{
+      background:#fff;
+      color:#15213a;
+      border:1px solid #dbe7ff;
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 10px 26px rgba(0,0,0,.06);
+    }
+    .result-card h3{margin:0 0 10px}
+    .result-summary{
+      display:grid;
+      gap:8px;
+      font-weight:600;
+    }
+    .recap-item{
+      border-top:1px solid #edf3ff;
+      padding-top:14px;
+      margin-top:14px;
+    }
+    .tag{
+      display:inline-block;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.02em;
+      padding:6px 10px;
+      border-radius:999px;
+      margin-bottom:8px;
+    }
+    .tag.bad{background:rgba(220,38,38,.1); color:#a4161a}
+    .tag.skip{background:rgba(245,158,11,.12); color:#8a5b00}
+    .tag.ok{background:rgba(22,163,74,.1); color:#146c34}
+    .hidden{display:none !important;}
+    .footer-space{height:20px}
+    @media (max-width: 760px){
+      .topbar-inner{
+        grid-template-columns:1fr;
+      }
+      .stats-row{
+        gap:8px 12px;
+      }
+      .container{
+        padding-top:170px;
+      }
+      .quiz-area{padding:14px}
+      .question-card{padding:16px}
+      .btn-submit,.btn-retry{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="btn btn-back" href="index.html">← Back to index</a>
+      <div class="top-info">
+        <div class="stats-row">
+          <div class="stat">Score: <span id="scoreText">0</span></div>
+          <div class="stat">Answered: <span id="answeredText">0</span>/<span id="totalText">70</span></div>
+        </div>
+        <div class="progress-wrap" aria-label="Progress bar">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <div class="stat" style="justify-self:end;">Quiz Status: <span id="statusText">In progress</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Lab 6 Quiz</h1>
+      <p class="subtitle">
+        
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Quiz Area</h2>
+        <p>Select an answer for each question. Each question locks after your choice and shows immediate feedback.</p>
+      </div>
+      <div class="quiz-area" id="quizArea"></div>
+      <div class="actions">
+        <button class="btn btn-submit" id="submitBtn">Submit &amp; See Results</button>
+      </div>
+    </section>
+
+    <section class="results" id="resultsSection"></section>
+    <div class="footer-space"></div>
+  </main>
+
+  
+
+<script>
+  const questions = [
+    {
+      q: "1) Purpose of swap.sh: What is the main purpose of the swap.sh script in the lab?",
+      opts: [
+        "Convert Fahrenheit to Celsius",
+        "Swap two user-entered values",
+        "Find the biggest of three numbers",
+        "Count lines and words in a file"
+      ],
+      ans: 1,
+      exp: "swap.sh asks for two values and exchanges their contents."
+    },
+    {
+      q: "2) User input in shell scripting: Which command is commonly used to read user input into a shell script variable?",
+      opts: ["echo", "read", "wc", "case"],
+      ans: 1,
+      exp: "read takes input from the user and stores it in variables."
+    },
+    {
+      q: "3) Swapping two variables: Which sequence is the standard way to swap two shell variables A and B?",
+      opts: [
+        "A=$B; B=$A",
+        "temp=$A; A=$B; B=$temp",
+        "swap A B",
+        "A,B = B,A"
+      ],
+      ans: 1,
+      exp: "A temporary variable stores one value safely before reassignment."
+    },
+    {
+      q: "4) Swapping logic: Why is a temporary variable used when swapping two values in shell scripting?",
+      opts: [
+        "To make the script run faster",
+        "To avoid losing one of the original values",
+        "To convert strings into integers",
+        "To print the result automatically"
+      ],
+      ans: 1,
+      exp: "It preserves one original value while the other is reassigned."
+    },
+    {
+      q: "5) Fahrenheit to Celsius formula: Which formula is used to convert Fahrenheit to Celsius?",
+      opts: [
+        "C = 5/9(F − 32)",
+        "C = 9/5(F − 32)",
+        "C = F + 32",
+        "C = F/32"
+      ],
+      ans: 0,
+      exp: "This is the correct Fahrenheit-to-Celsius conversion formula."
+    },
+    {
+      q: "6) Lab for temperature conversion: Which script is designed to ask for Fahrenheit and display Celsius?",
+      opts: ["swap.sh", "degconv.sh", "calc.sh", "grade.sh"],
+      ans: 1,
+      exp: "degconv.sh is the temperature conversion script."
+    },
+    {
+      q: "7) Arithmetic evaluation in shell: Which syntax is commonly used for integer arithmetic in shell scripts?",
+      opts: ["$(())", "[[ ]]", "{}", "<>"],
+      ans: 0,
+      exp: "$(()) is arithmetic expansion for integer calculations."
+    },
+    {
+      q: "8) Calculator menu structure: Which control structure is most suitable for a menu-driven calculator with options like add, subtract, multiply, and divide?",
+      opts: ["case", "while only", "for only", "until only"],
+      ans: 0,
+      exp: "case is ideal for selecting among multiple menu choices."
+    },
+    {
+      q: "9) Purpose of calc.sh: What does the calc.sh script do?",
+      opts: [
+        "Checks whether a file exists",
+        "Displays a letter grade",
+        "Performs basic arithmetic operations using a menu",
+        "Determines vowel or consonant"
+      ],
+      ans: 2,
+      exp: "calc.sh asks for two numbers and performs arithmetic based on menu selection."
+    },
+    {
+      q: "10) Addition in shell arithmetic: Which operator is used for addition in shell arithmetic?",
+      opts: ["+", "-", "*", "/"],
+      ans: 0,
+      exp: "+ adds two numeric values."
+    },
+    {
+      q: "11) Division in shell arithmetic: Which operator is used for division in shell arithmetic?",
+      opts: ["+", "-", "*", "/"],
+      ans: 3,
+      exp: "/ performs division."
+    },
+    {
+      q: "12) Big3 program logic: What is the main task of big3.sh?",
+      opts: [
+        "Find the biggest among three numbers",
+        "Convert Fahrenheit to Celsius",
+        "Count lines and words in a file",
+        "Determine whether a letter is a vowel"
+      ],
+      ans: 0,
+      exp: "The script compares three numbers and displays the largest."
+    },
+    {
+      q: "13) Conditional structure for biggest number: Which structure is used in big3.sh to compare three numbers?",
+      opts: ["if statements", "case only", "select", "break"],
+      ans: 0,
+      exp: "if statements are used to test comparisons between numbers."
+    },
+    {
+      q: "14) Grade script input: What range of marks does grade.sh expect from the user?",
+      opts: ["1–10", "0–100", "0–10", "50–100 only"],
+      ans: 1,
+      exp: "The lab explicitly uses marks from 0 to 100."
+    },
+    {
+      q: "15) Grade script control structure: Which structure is used in grade.sh?",
+      opts: ["if/elif/else", "for/do/done", "case/esac", "until/do/done"],
+      ans: 0,
+      exp: "if/elif/else is used to decide grade categories based on marks."
+    },
+    {
+      q: "16) Purpose of vowel.sh: What does vowel.sh determine?",
+      opts: [
+        "Whether a file exists",
+        "Whether a lowercase letter is a vowel or consonant",
+        "Whether a number is prime",
+        "Whether a word has more than 10 letters"
+      ],
+      ans: 1,
+      exp: "vowel.sh classifies one lowercase letter as vowel or consonant."
+    },
+    {
+      q: "17) Case structure syntax: Which keyword closes a case block in shell scripting?",
+      opts: ["done", "fi", "esac", "end"],
+      ans: 2,
+      exp: "esac is case spelled backward and closes the block."
+    },
+    {
+      q: "18) File existence check: Before running wc on a file, what should the script first check?",
+      opts: [
+        "Whether the file exists",
+        "Whether the file is executable",
+        "Whether the file is compressed",
+        "Whether the file is hidden"
+      ],
+      ans: 0,
+      exp: "The script must confirm that the file exists before counting."
+    },
+    {
+      q: "19) Command for counting lines and words: Which command is used in filecount.sh to count lines and words?",
+      opts: ["ls", "wc", "cat", "grep"],
+      ans: 1,
+      exp: "wc counts lines, words, and characters."
+    },
+    {
+      q: "20) Meaning of wc: What does wc stand for conceptually?",
+      opts: ["Word count", "Write contents", "Work command", "Wide check"],
+      ans: 0,
+      exp: "wc is the standard command used for word and line counting."
+    },
+    {
+      q: "21) Shell script input-output flow: Which sequence best describes a typical lab script flow?",
+      opts: [
+        "Compute first, ask user later",
+        "Ask input, process it, display result",
+        "Display result, then ask input",
+        "Run wc, then swap variables"
+      ],
+      ans: 1,
+      exp: "This is the standard interactive script pattern."
+    },
+    {
+      q: "22) Variable assignment syntax: Which is the correct shell variable assignment syntax?",
+      opts: ["A = 5", "A=5", "set A=5", "let A to 5"],
+      ans: 1,
+      exp: "This is the correct syntax for assigning a value."
+    },
+    {
+      q: "23) Reading two values: Which command is suitable for reading two values entered by the user?",
+      opts: ["read A B", "echo A B", "wc A B", "case A B"],
+      ans: 0,
+      exp: "read A B stores user input into two variables."
+    },
+    {
+      q: "24) Comparing numbers in shell: Which type of statement is used to compare numeric values in the biggest-of-three lab?",
+      opts: ["if", "echo", "cat", "touch"],
+      ans: 0,
+      exp: "if is used for conditional numeric comparison."
+    },
+    {
+      q: "25) elif purpose: Why is elif used in grade.sh?",
+      opts: [
+        "To repeat a loop",
+        "To test multiple grade conditions in sequence",
+        "To read file content",
+        "To define a function"
+      ],
+      ans: 1,
+      exp: "It allows multiple conditional branches for different mark ranges."
+    },
+    {
+      q: "26) Vowel identification input: What kind of input does vowel.sh expect?",
+      opts: ["A full sentence", "One lowercase letter", "A positive integer", "A file name"],
+      ans: 1,
+      exp: "The lab explicitly asks for one lowercase letter."
+    },
+    {
+      q: "27) Case usage in vowel checking: Why is case useful in vowel.sh?",
+      opts: [
+        "It handles many specific letter patterns efficiently",
+        "It performs floating-point arithmetic",
+        "It counts words in a file",
+        "It swaps variables automatically"
+      ],
+      ans: 0,
+      exp: "case can match the input against several letter patterns."
+    },
+    {
+      q: "28) Expected vowel cases: Which set represents the lowercase vowels typically checked in vowel.sh?",
+      opts: ["a, e, i, o, u", "a, b, c, d, e", "x, y, z, w, v", "1, 2, 3, 4, 5"],
+      ans: 0,
+      exp: "These are the standard lowercase vowels."
+    },
+    {
+      q: "29) File count script check: What should filecount.sh do if the file does not exist?",
+      opts: [
+        "Run wc anyway",
+        "Display an appropriate error or message",
+        "Automatically create the file and continue",
+        "Convert it to uppercase"
+      ],
+      ans: 1,
+      exp: "The script should inform the user that the file is absent."
+    },
+    {
+      q: "30) wc output components: Which counts are explicitly mentioned in the file-count lab?",
+      opts: ["Lines and words", "Lines and bytes only", "Words and folders", "Characters and permissions"],
+      ans: 0,
+      exp: "The lab asks for number of lines and words."
+    },
+    {
+      q: "31) Division by zero: In a calculator script, what special case should be handled during division?",
+      opts: ["Division by zero", "Addition by zero", "Multiplication by one", "Subtraction by two"],
+      ans: 0,
+      exp: "Division by zero must be avoided because it causes an error."
+    },
+    {
+      q: "32) Menu selection in calculator: What best describes the menu in calc.sh?",
+      opts: [
+        "A file selection menu",
+        "An operation selection menu",
+        "A directory listing menu",
+        "A login menu"
+      ],
+      ans: 1,
+      exp: "It allows the user to choose an arithmetic operation."
+    },
+    {
+      q: "33) Common structure for a shell script: Which of the following is most likely present in all the lab scripts?",
+      opts: [
+        "User input using read",
+        "Machine learning model training",
+        "Network socket programming",
+        "Image rendering"
+      ],
+      ans: 0,
+      exp: "All these scripts are interactive and ask the user for input."
+    },
+    {
+      q: "34) Biggest-of-three comparison: When finding the biggest of three numbers, what is the main idea?",
+      opts: [
+        "Compare all three values using conditions",
+        "Sort a file alphabetically",
+        "Count words in a file",
+        "Use a case statement on letters"
+      ],
+      ans: 0,
+      exp: "The script compares the numbers and identifies the largest."
+    },
+    {
+      q: "35) Grade boundaries concept: In grade.sh, what is the purpose of using ranges of marks?",
+      opts: [
+        "To determine which grade category applies",
+        "To rename the file",
+        "To count the number of words",
+        "To swap values"
+      ],
+      ans: 0,
+      exp: "Marks are mapped to grade categories using ranges."
+    },
+    {
+      q: "36) Shell numeric comparisons: Which type of comparison is most relevant in big3.sh and grade.sh?",
+      opts: ["String comparisons only", "Numeric comparisons", "File permission comparisons only", "Pattern matching only"],
+      ans: 1,
+      exp: "The scripts compare numeric values and ranges."
+    },
+    {
+      q: "37) Pattern matching is most useful for: Which lab most directly uses pattern matching?",
+      opts: ["vowel.sh", "big3.sh", "grade.sh", "degconv.sh"],
+      ans: 0,
+      exp: "case in vowel.sh matches letters to patterns."
+    },
+    {
+      q: "38) Script for file-related input: Which script asks the user for a file name?",
+      opts: ["swap.sh", "filecount.sh", "calc.sh", "vowel.sh"],
+      ans: 1,
+      exp: "filecount.sh asks for a file name."
+    },
+    {
+      q: "39) Script names and purpose: Which script name best matches “Grade Determination”?",
+      opts: ["grade.sh", "big3.sh", "degconv.sh", "filecount.sh"],
+      ans: 0,
+      exp: "grade.sh is the grade determination script."
+    },
+    {
+      q: "40) Shell script output command: Which command is most commonly used to display messages or results in these lab scripts?",
+      opts: ["echo", "read", "case", "wc"],
+      ans: 0,
+      exp: "echo prints text and results to the terminal."
+    },
+    {
+      q: "41) Calculator input values: How many numeric values does calc.sh ask for before showing the menu?",
+      opts: ["One", "Two", "Three", "Four"],
+      ans: 1,
+      exp: "The calculator uses two numbers for its operations."
+    },
+    {
+      q: "42) Swap script input values: How many values does swap.sh ask the user to enter?",
+      opts: ["One", "Two", "Three", "Four"],
+      ans: 1,
+      exp: "The script specifically asks for two values, A and B."
+    },
+    {
+      q: "43) Fahrenheit conversion input: What does degconv.sh ask the user to enter?",
+      opts: ["Celsius temperature", "Fahrenheit temperature", "A file name", "A lowercase letter"],
+      ans: 1,
+      exp: "The user enters a Fahrenheit temperature for conversion."
+    },
+    {
+      q: "44) What if can do in grade.sh: What is the main role of if/elif/else in the grade script?",
+      opts: [
+        "Choose between grade ranges",
+        "Count file lines",
+        "Display a menu of arithmetic operations",
+        "Identify vowels"
+      ],
+      ans: 0,
+      exp: "It checks the mark against grade thresholds."
+    },
+    {
+      q: "45) Temperature conversion direction: In the lab, the temperature conversion goes from:",
+      opts: [
+        "Celsius to Fahrenheit",
+        "Fahrenheit to Celsius",
+        "Kelvin to Celsius",
+        "Kelvin to Fahrenheit"
+      ],
+      ans: 1,
+      exp: "The lab explicitly asks for Fahrenheit and converts to Celsius."
+    },
+    {
+      q: "46) Structure for multiple conditions: Which structure is best when a script needs several ordered conditions, such as grade thresholds?",
+      opts: ["if/elif/else", "case/esac", "for/do/done", "break/continue"],
+      ans: 0,
+      exp: "It is ideal for ordered comparisons and ranges."
+    },
+    {
+      q: "47) Letter classification script: Which script classifies a single lowercase letter as vowel or consonant?",
+      opts: ["grade.sh", "vowel.sh", "calc.sh", "swap.sh"],
+      ans: 1,
+      exp: "vowel.sh does letter classification."
+    },
+    {
+      q: "48) File counting output: What does filecount.sh display if the file exists?",
+      opts: [
+        "Its permissions only",
+        "Number of lines and words",
+        "Only the first line",
+        "Only the filename"
+      ],
+      ans: 1,
+      exp: "The lab asks for line and word counts using wc."
+    },
+    {
+      q: "49) Use of wc with a file: What is the most appropriate reason to use wc in filecount.sh?",
+      opts: [
+        "To rename the file",
+        "To count lines and words in the file",
+        "To execute the file",
+        "To compress the file"
+      ],
+      ans: 1,
+      exp: "It is used to count file contents."
+    },
+    {
+      q: "50) Main reason to use a menu in calc.sh: Why does calc.sh display a menu?",
+      opts: [
+        "To let the user choose an arithmetic operation",
+        "To list all files in the directory",
+        "To display system memory",
+        "To select a grade boundary"
+      ],
+      ans: 0,
+      exp: "The menu lets the user choose add, subtract, multiply, or divide."
+    },
+    {
+      q: "51) case and fixed options: Which statement about case is most accurate in the lab context?",
+      opts: [
+        "It is useful for selecting among fixed menu options",
+        "It is required for counting words",
+        "It is the only way to perform arithmetic",
+        "It can replace wc for file counting"
+      ],
+      ans: 0,
+      exp: "case is a natural fit for menu choices and letter classification."
+    },
+    {
+      q: "52) Big3 script logic: In big3.sh, what does the script do after receiving three numbers?",
+      opts: [
+        "Sorts a file",
+        "Determines the largest value",
+        "Converts temperature",
+        "Counts letters in a file"
+      ],
+      ans: 1,
+      exp: "The script compares three numbers and prints the biggest."
+    },
+    {
+      q: "53) Grade determination purpose: What is the purpose of grade.sh?",
+      opts: [
+        "To convert degrees to radians",
+        "To assign a grade from a mark",
+        "To check vowel/consonant status",
+        "To count lines in a file"
+      ],
+      ans: 1,
+      exp: "The script maps numeric marks to grades."
+    },
+    {
+      q: "54) Lowercase input requirement: Why does vowel.sh specify a lowercase letter?",
+      opts: [
+        "To simplify pattern matching in case",
+        "To allow file counting",
+        "To perform division",
+        "To swap variables"
+      ],
+      ans: 0,
+      exp: "Restricting to lowercase makes matching easier and more predictable."
+    },
+    {
+      q: "55) File existence test before wc: Which is the most appropriate reason for checking if a file exists before using wc?",
+      opts: [
+        "wc only works on directories",
+        "To avoid errors when the file is missing",
+        "To convert the file to a different format",
+        "To make the file executable"
+      ],
+      ans: 1,
+      exp: "The existence test prevents errors from a missing file."
+    },
+    {
+      q: "56) Arithmetic operator for multiplication: Which operator is used for multiplication in calc.sh?",
+      opts: ["+", "-", "*", "%"],
+      ans: 2,
+      exp: "* is multiplication."
+    },
+    {
+      q: "57) What if compares in big3.sh: What does if compare in the biggest-of-three script?",
+      opts: ["File names", "Numeric values", "Directory paths only", "Characters in a sentence only"],
+      ans: 1,
+      exp: "The script compares numbers to find the maximum."
+    },
+    {
+      q: "58) What is required for degconv.sh: Which arithmetic step is needed in degconv.sh?",
+      opts: [
+        "Multiply by 9 and divide by 5 after subtracting 32",
+        "Add 32 to the Fahrenheit value",
+        "Divide by 32 only",
+        "Multiply by 100 and divide by 9"
+      ],
+      ans: 0,
+      exp: "This matches the standard formula C = 5/9(F − 32)."
+    },
+    {
+      q: "59) Why read is used multiple times: In these labs, why might a script use read more than once?",
+      opts: [
+        "To accept different user inputs for different tasks",
+        "To count words automatically",
+        "To close a case block",
+        "To define variables without values"
+      ],
+      ans: 0,
+      exp: "Different labs require different inputs such as numbers, letters, or file names."
+    },
+    {
+      q: "60) Script that uses a file name: Which lab script is directly related to checking a user-provided file name?",
+      opts: ["swap.sh", "filecount.sh", "vowel.sh", "grade.sh"],
+      ans: 1,
+      exp: "filecount.sh asks for a file name and checks whether it exists."
+    },
+    {
+      q: "61) Basic purpose of shell scripting labs: What is the overall goal of these shell scripting labs?",
+      opts: [
+        "Practice interactive scripting, conditions, arithmetic, and file handling",
+        "Build a database application",
+        "Train a neural network",
+        "Design a web browser"
+      ],
+      ans: 0,
+      exp: "The labs focus on core shell scripting skills."
+    },
+    {
+      q: "62) Sequence in a calculator script: Which sequence is most logical in calc.sh?",
+      opts: [
+        "Ask for two numbers, then ask for an operation",
+        "Ask for a file name, then count words",
+        "Ask for a letter, then determine vowel",
+        "Ask for a mark, then display a grade"
+      ],
+      ans: 0,
+      exp: "The calculator needs two numbers and an operation choice."
+    },
+    {
+      q: "63) Meaning of “biggest of three”: What does “biggest of three” mean in the lab?",
+      opts: [
+        "Find the longest word",
+        "Find the largest numeric value among three inputs",
+        "Find the newest file",
+        "Find the most common letter"
+      ],
+      ans: 1,
+      exp: "The script compares three numbers and prints the largest one."
+    },
+    {
+      q: "64) Grade script output: What does grade.sh output after evaluating the mark?",
+      opts: ["A grade category", "A word count", "A temperature conversion", "A list of files"],
+      ans: 0,
+      exp: "The script displays a grade based on the mark."
+    },
+    {
+      q: "65) Final lab topic coverage: Which of the following is included in the lab set?",
+      opts: [
+        "Swapping variables, temperature conversion, calculator, biggest of three, grade determination, vowel check, file count",
+        "Database queries, HTML forms, networking, encryption",
+        "Image editing, video processing, audio compression",
+        "Artificial intelligence model building"
+      ],
+      ans: 0,
+      exp: "This exactly matches the listed lab topics."
+    }
+  ];
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const quizData = questions.map((item) => {
+      const paired = item.opts.map((opt, idx) => ({ opt, isCorrect: idx === item.ans }));
+      const shuffled = shuffleArray(paired);
+      return {
+        ...item,
+        shuffledOpts: shuffled.map(x => x.opt),
+        correctIndex: shuffled.findIndex(x => x.isCorrect)
+      };
+    });
+
+    const quizArea = document.getElementById("quizArea");
+    const resultsSection = document.getElementById("resultsSection");
+    const scoreText = document.getElementById("scoreText");
+    const answeredText = document.getElementById("answeredText");
+    const totalText = document.getElementById("totalText");
+    const progressBar = document.getElementById("progressBar");
+    const statusText = document.getElementById("statusText");
+    const submitBtn = document.getElementById("submitBtn");
+
+    totalText.textContent = quizData.length;
+
+    const state = {
+      answered: Array(quizData.length).fill(null),
+      locked: Array(quizData.length).fill(false),
+      submitted: false,
+      score: 0
+    };
+
+    function renderQuiz(){
+      quizArea.innerHTML = "";
+      quizData.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "question-card";
+        card.innerHTML = `
+          <h3 class="question-title">${item.q}</h3>
+          <div class="options" id="options-${index}"></div>
+          <div class="feedback" id="feedback-${index}"></div>
+        `;
+        quizArea.appendChild(card);
+
+        const optionsWrap = card.querySelector(`#options-${index}`);
+        item.shuffledOpts.forEach((opt, optIndex) => {
+          const label = document.createElement("label");
+          label.className = "option";
+          label.innerHTML = `
+            <input type="radio" name="q-${index}" value="${optIndex}" />
+            <span><strong>${String.fromCharCode(65 + optIndex)}.</strong> ${opt}</span>
+          `;
+          label.addEventListener("click", () => selectAnswer(index, optIndex));
+          optionsWrap.appendChild(label);
+        });
+      });
+    }
+
+    function selectAnswer(qIndex, optIndex){
+      if (state.locked[qIndex] || state.submitted) return;
+      state.answered[qIndex] = optIndex;
+      state.locked[qIndex] = true;
+
+      const item = quizData[qIndex];
+      const options = document.querySelectorAll(`#options-${qIndex} .option`);
+      const feedback = document.getElementById(`feedback-${qIndex}`);
+
+      options.forEach((el, idx) => {
+        el.classList.add("locked");
+        if (idx === item.correctIndex) el.classList.add("correct");
+        if (idx === optIndex && optIndex !== item.correctIndex) el.classList.add("wrong");
+        const input = el.querySelector("input");
+        input.checked = idx === optIndex;
+        input.disabled = true;
+      });
+
+      const isCorrect = optIndex === item.correctIndex;
+      feedback.className = `feedback show ${isCorrect ? "correct" : "wrong"}`;
+      feedback.innerHTML = isCorrect
+        ? `<strong>Correct.</strong> ${item.exp}`
+        : `<strong>Incorrect.</strong> ${item.exp}`;
+      updateTopbar();
+    }
+
+    function updateTopbar(){
+      const answeredCount = state.answered.filter(v => v !== null).length;
+      const score = state.answered.reduce((acc, val, idx) => acc + (val === quizData[idx].correctIndex ? 1 : 0), 0);
+      state.score = score;
+      scoreText.textContent = score;
+      answeredText.textContent = answeredCount;
+      progressBar.style.width = `${(answeredCount / quizData.length) * 100}%`;
+    }
+
+    function submitQuiz(){
+      state.submitted = true;
+      let score = 0;
+      const wrong = [];
+      const skipped = [];
+
+      quizData.forEach((q, idx) => {
+        const userAns = state.answered[idx];
+        if (userAns === null) {
+          skipped.push(idx);
+        } else if (userAns === q.correctIndex) {
+          score++;
+        } else {
+          wrong.push(idx);
+        }
+
+        const feedback = document.getElementById(`feedback-${idx}`);
+        const options = document.querySelectorAll(`#options-${idx} .option`);
+
+        if (userAns === null) {
+          options[q.correctIndex].classList.add("correct");
+          feedback.className = "feedback show skip";
+          feedback.innerHTML = `<strong>Skipped.</strong> ${q.exp}`;
+        } else {
+          options.forEach((el, optIndex) => {
+            if (optIndex === q.correctIndex) el.classList.add("correct");
+            if (optIndex === userAns && userAns !== q.correctIndex) el.classList.add("wrong");
+            el.classList.add("locked");
+            el.querySelector("input").disabled = true;
+          });
+        }
+      });
+
+      state.score = score;
+      scoreText.textContent = score;
+      answeredText.textContent = quizData.length;
+      progressBar.style.width = `100%`;
+      statusText.textContent = "Completed";
+
+      resultsSection.innerHTML = `
+        <div class="result-card">
+          <h3>Results Summary</h3>
+          <div class="result-summary">
+            <div>Score: ${score} / ${quizData.length}</div>
+            <div>Correct: ${score}</div>
+            <div>Wrong: ${wrong.length}</div>
+            <div>Skipped: ${skipped.length}</div>
+          </div>
+          <div class="actions" style="justify-content:flex-start; margin-top:16px;">
+            <button class="btn btn-retry" id="retryBtn">Retry Quiz</button>
+          </div>
+        </div>
+        ${wrong.length ? `
+          <div class="result-card">
+            <h3>Incorrect Answers Recap</h3>
+            ${wrong.map(i => `
+              <div class="recap-item">
+                <div class="tag bad">Wrong</div>
+                <div><strong>Q${i + 1}.</strong> ${quizData[i].q}</div>
+                <div><strong>Your answer:</strong> ${quizData[i].shuffledOpts[state.answered[i]]}</div>
+                <div><strong>Correct answer:</strong> ${quizData[i].shuffledOpts[quizData[i].correctIndex]}</div>
+                <div><strong>Explanation:</strong> ${quizData[i].exp}</div>
+              </div>
+            `).join("")}
+          </div>` : ""}
+        ${skipped.length ? `
+          <div class="result-card">
+            <h3>Skipped Questions Recap</h3>
+            ${skipped.map(i => `
+              <div class="recap-item">
+                <div class="tag skip">Skipped</div>
+                <div><strong>Q${i + 1}.</strong> ${quizData[i].q}</div>
+                <div><strong>Correct answer:</strong> ${quizData[i].shuffledOpts[quizData[i].correctIndex]}</div>
+                <div><strong>Explanation:</strong> ${quizData[i].exp}</div>
+              </div>
+            `).join("")}
+          </div>` : ""}
+      `;
+
+      document.getElementById("retryBtn").addEventListener("click", retryQuiz);
+      submitBtn.classList.add("hidden");
+      quizArea.querySelectorAll(".option").forEach(el => el.classList.add("locked"));
+    }
+
+    function retryQuiz(){
+      state.answered = Array(quizData.length).fill(null);
+      state.locked = Array(quizData.length).fill(false);
+      state.submitted = false;
+      state.score = 0;
+      resultsSection.innerHTML = "";
+      statusText.textContent = "In progress";
+      submitBtn.classList.remove("hidden");
+      renderQuiz();
+      updateTopbar();
+    }
+
+    submitBtn.addEventListener("click", submitQuiz);
+    renderQuiz();
+    updateTopbar();
+  </script>
+</body>
+</html>

@@ -314,9 +314,9 @@
 
   <main class="container">
     <section class="hero">
-      <h1> Lab 7 Quiz</h1>
+      <h1> Quiz</h1>
       <p class="subtitle">
-        Test your understanding of Linux functions, 
+        Test your understanding of Linux 
       </p>
     </section>
 
@@ -335,7 +335,7 @@
     <div class="footer-space"></div>
   </main>
 
-<script>
+ <script>
   const questions = [
     {
       q: "1. Which shell parameter represents the first command-line argument?",
@@ -351,7 +351,414 @@
     },
     {
       q: "3. What does $0 usually contain in a shell script?",
-      opts: ["The first argument", "The script name", 
+      opts: ["The first argument", "The script name", "The number of arguments", "All arguments as separate words"],
+      ans: 1,
+      exp: "$1 is the first argument. $0 usually contains the script name or the command used to launch it. $# is the number of arguments, and $@ is closer to all arguments as separate words."
+    },
+    {
+      q: "4. What is the main purpose of shift in shell scripting?",
+      opts: ["To delete a file", "To move positional parameters left", "To sort arguments alphabetically", "To pause the script"],
+      ans: 1,
+      exp: "shift has nothing to do with file deletion. It removes $1 and shifts the rest one position left. It does not sort anything, and pausing is done with commands like sleep."
+    },
+    {
+      q: "5. After running shift once, what happens to the arguments?",
+      opts: ["$2 becomes $1", "$1 becomes $2", "All arguments are deleted", "$0 becomes $1"],
+      ans: 0,
+      exp: "After shifting, $2 becomes $1. Only the first argument is removed per shift. $0 remains unchanged."
+    },
+    {
+      q: "6. What does $@ represent in shell scripts?",
+      opts: ["The script name", "The number of arguments", "All positional parameters as separate words", "The last argument only"],
+      ans: 2,
+      exp: "$0 is the script name. $# is the number of arguments. $@ expands to all positional parameters as separate words, not just the last one."
+    },
+    {
+      q: "7. Which command is used to make a script executable?",
+      opts: ["chmod +x script.sh", "touch +x script.sh", "run script.sh", "exec script.sh"],
+      ans: 0,
+      exp: "chmod +x script.sh adds execute permission. touch creates or updates timestamps, run is not standard for this purpose, and exec replaces the shell process."
+    },
+    {
+      q: "8. Which syntax is correct to run a script named args.sh with three arguments A B C?",
+      opts: ["./args.sh A B C", "bash A B C args.sh", "args.sh ./A ./B ./C", "./args.sh \"A B C\" only"],
+      ans: 0,
+      exp: "./args.sh A B C is the correct invocation with three separate arguments. The other choices either use the wrong order or pass one combined argument."
+    },
+    {
+      q: "9. What is the effect of quoting \"hello world\" as a single argument?",
+      opts: ["It becomes two arguments", "It becomes one argument with a space inside", "It is ignored by the shell", "It becomes $0"],
+      ans: 1,
+      exp: "Quotes prevent word splitting. \"hello world\" becomes one argument with a space inside. It is not ignored, and it does not become $0."
+    },
+    {
+      q: "10. In the command ./args.sh \"hello\" \"world\", how many arguments are passed to the script?",
+      opts: ["1", "2", "3", "0"],
+      ans: 1,
+      exp: "\"hello\" and \"world\" are two distinct arguments. The script receives two arguments."
+    },
+    {
+      q: "11. What is the main purpose of defining a function in shell scripting?",
+      opts: ["To store files", "To reuse a block of commands", "To change terminal colors", "To create environment variables automatically"],
+      ans: 1,
+      exp: "Functions do not store files. Their key purpose is to reuse a block of commands. They may change terminal colors indirectly, but that is not the main purpose."
+    },
+    {
+      q: "12. Which syntax is used to define a shell function named greet_user?",
+      opts: ["function greet_user { ... }", "greet_user() { ... }", "def greet_user: ...", "greet_user[] { ... }"],
+      ans: 1,
+      exp: "function greet_user { ... } is valid in some shells, but the common POSIX-style form is greet_user() { ... }. The other syntaxes are not shell syntax."
+    },
+    {
+      q: "13. In a shell script, what does if [ -z \"$1\" ] test?",
+      opts: ["Whether the first argument is numeric", "Whether the first argument is empty", "Whether the first argument is longer than zero", "Whether the script name is missing"],
+      ans: 1,
+      exp: "-z checks whether the string length is zero, so it tests whether the first argument is empty. It does not test the script name."
+    },
+    {
+      q: "14. Why is it safer to write if [ -z \"$1\" ] instead of if [ -z $1 ]?",
+      opts: ["Because quotes are required around command names", "Because quotes prevent word splitting and errors when empty", "Because quotes make the script faster", "Because $1 must always be inside braces"],
+      ans: 1,
+      exp: "Quotes prevent word splitting and syntax errors when the argument is empty. Speed is not the reason, and braces are not required here."
+    },
+    {
+      q: "15. Which command prints a message to the terminal in shell scripts?",
+      opts: ["print()", "echo", "show", "display"],
+      ans: 1,
+      exp: "echo is the standard command commonly used to print output in shell scripts."
+    },
+    {
+      q: "16. What does the command date do?",
+      opts: ["Deletes files by date", "Prints the current date and time", "Shows the system uptime only", "Changes the system clock automatically"],
+      ans: 1,
+      exp: "date prints the current date and time. It does not delete files or show uptime. It does not automatically change the system clock."
+    },
+    {
+      q: "17. In Lab 3, what is the purpose of the add_a_user function?",
+      opts: ["To delete users from the system", "To simulate creating a user using arguments", "To list all system users", "To change the password policy"],
+      ans: 1,
+      exp: "The lab describes creating users by simulation, not deleting or listing system users. The function simulates user creation using arguments."
+    },
+    {
+      q: "18. In Lab 3, what should $1 be assigned to inside add_a_user?",
+      opts: ["USER", "PASSWORD", "COMMENTS", "DATE"],
+      ans: 0,
+      exp: "The first argument is assigned to USER. PASSWORD comes from $2. Date is not part of the Lab 3 assignment."
+    },
+    {
+      q: "19. In Lab 3, what should $2 be assigned to inside add_a_user?",
+      opts: ["USER", "PASSWORD", "COMMENTS", "HOME"],
+      ans: 1,
+      exp: "USER comes from $1. The second argument is assigned to PASSWORD. COMMENTS are collected from the remaining arguments."
+    },
+    {
+      q: "20. Why is shift used twice in Lab 3?",
+      opts: ["To remove the first two arguments before capturing the rest", "To sort the remaining arguments", "To duplicate the first two arguments", "To convert arguments into uppercase"],
+      ans: 0,
+      exp: "Shift is used twice to remove the first two arguments so the remaining parameters can be captured as comments."
+    },
+    {
+      q: "21. After assigning USER=$1 and PASSWORD=$2, what should be done before assigning COMMENTS=$@?",
+      opts: ["exit", "shift twice", "unset $@", "pwd"],
+      ans: 1,
+      exp: "Shift twice removes the first two positional parameters, leaving the rest in $@. exit would stop the function, and pwd is unrelated."
+    },
+    {
+      q: "22. What does COMMENTS=$@ capture after two shifts in Lab 3?",
+      opts: ["Only the first argument", "Only the second argument", "All remaining arguments", "The script name"],
+      ans: 2,
+      exp: "After two shifts, the first two original parameters are removed. $@ now contains all remaining arguments."
+    },
+    {
+      q: "23. Which statement best describes shift?",
+      opts: ["It removes the current $1 and renumbers the rest", "It adds one to every argument", "It changes $0 into $1", "It combines all arguments into one string"],
+      ans: 0,
+      exp: "shift removes the current $1 and renumbers the rest. It does not change $0 or combine arguments."
+    },
+    {
+      q: "24. What is the main difference between $* and $@ in shell scripting?",
+      opts: ["They are always identical in every context", "$@ preserves separate arguments better than $*", "$* is for variables and $@ is for constants", "$@ only works in functions"],
+      ans: 1,
+      exp: "$@ preserves separate arguments better than $*, especially when quoted. They are not always identical."
+    },
+    {
+      q: "25. Which command is most likely used in Lab 3 to simulate user creation?",
+      opts: ["useradd", "echo", "passwd", "cat"],
+      ans: 1,
+      exp: "The lab explicitly mentions simulating with echo commands. useradd creates real users, passwd changes passwords, and cat displays file contents."
+    },
+    {
+      q: "26. What should adduser.sh contain according to Lab 3?",
+      opts: ["Only global variables", "A function named add_a_user", "A loop that reads from a file", "Only the date command"],
+      ans: 1,
+      exp: "The lab specifically requires a function named add_a_user."
+    },
+    {
+      q: "27. Which call style is consistent with Lab 3’s requirement to call the function twice with different arguments?",
+      opts: ["Call add_a_user once and stop", "Call add_a_user two times using different values", "Call add_a_user only inside another script", "Avoid calling the function"],
+      ans: 1,
+      exp: "The lab requires calling add_a_user two times using different values. Calling it once or avoiding it does not satisfy the requirement."
+    },
+    {
+      q: "28. In Lab 4, what is the name of the function to define?",
+      opts: ["add_a_user", "greet_user", "say_date", "validate_name"],
+      ans: 1,
+      exp: "add_a_user is from Lab 3. The function required in Lab 4 is greet_user."
+    },
+    {
+      q: "29. What should happen in greet_user if the name is missing?",
+      opts: ["Print a random greeting", "Show an error", "Create a new file", "Exit silently without any output"],
+      ans: 1,
+      exp: "The lab requires validation. If the name is missing, greet_user should show an error message."
+    },
+    {
+      q: "30. What should greet_user print when a name is provided?",
+      opts: ["Hello, NAME. Today is DATE.", "Goodbye, NAME.", "USER created successfully", "Today is NAME."],
+      ans: 0,
+      exp: "This matches the required output format: Hello, NAME. Today is DATE."
+    },
+    {
+      q: "31. What does the example ./greet.sh Thomas demonstrate?",
+      opts: ["Passing no arguments", "Passing one argument to the script", "Running the script as root", "Passing two arguments with quotes"],
+      ans: 1,
+      exp: "The example shows one argument, Thomas, being passed to the script."
+    },
+    {
+      q: "32. What should the output of ./greet.sh Thomas look like conceptually?",
+      opts: ["Hello, Thomas. Today is <current date>.", "Hello, World.", "Error: no name", "Thomas says hello"],
+      ans: 0,
+      exp: "The lab description matches Hello, Thomas. Today is <current date>."
+    },
+    {
+      q: "33. Which test is most appropriate to check whether an argument is missing in shell?",
+      opts: ["[ -z \"$1\" ]", "[ \"$1\" -gt 0 ]", "[ \"$1\" = \"missing\" ]", "[ -f \"$1\" ]"],
+      ans: 0,
+      exp: "[ -z \"$1\" ] checks whether the argument is empty. The other tests check numeric comparison, string equality, or file existence."
+    },
+    {
+      q: "34. Which statement best describes positional parameters?",
+      opts: ["They are the same as environment variables", "They are arguments passed to a script or function", "They are only used in Python", "They cannot be accessed inside functions"],
+      ans: 1,
+      exp: "Positional parameters are arguments passed to a script or function. They are not the same as environment variables."
+    },
+    {
+      q: "35. Which of the following is the best reason to use functions in shell scripts?",
+      opts: ["To avoid writing repeated code", "To make the script longer", "To reduce the number of variables to zero", "To prevent the use of arguments"],
+      ans: 0,
+      exp: "One of the main benefits of functions is avoiding repeated code. They do not exist to make the script longer or prevent arguments."
+    },
+    {
+      q: "36. What does shift do if there are no arguments left to shift?",
+      opts: ["It creates a new argument", "It has no useful effect", "It crashes the operating system", "It prints the current date"],
+      ans: 1,
+      exp: "If nothing remains, shifting does not help and has no useful effect."
+    },
+    {
+      q: "37. Which command-line pattern keeps arguments with spaces together as one argument?",
+      opts: ["No quotes", "Single or double quotes", "Backspace characters", "Semicolons only"],
+      ans: 1,
+      exp: "Quotes preserve the argument as one unit. Without quotes, spaces split arguments."
+    },
+    {
+      q: "38. Which command best fits the lab requirement to “simulate creating users with echo commands”?",
+      opts: ["echo \"Creating user...\"", "mkdir user", "rm user", "cp user"],
+      ans: 0,
+      exp: "echo is the correct simulation method. mkdir makes directories, rm deletes, and cp copies files."
+    },
+    {
+      q: "39. What is the purpose of validation in Lab 4?",
+      opts: ["To ensure the name argument exists before greeting", "To rename the script automatically", "To count the number of files in the directory", "To make the date command faster"],
+      ans: 0,
+      exp: "Validation ensures the name argument exists before greeting. The other choices are unrelated."
+    },
+    {
+      q: "40. Which variable typically stores the name passed to greet_user?",
+      opts: ["$0", "$1", "$#", "$@"],
+      ans: 1,
+      exp: "$0 is the script name. $1 is the first argument, likely the name. $# is the number of arguments, and $@ represents all arguments."
+    },
+    {
+      q: "41. Which command would most likely be used to display the current system date in the greeting script?",
+      opts: ["date", "time", "calendar", "clock"],
+      ans: 0,
+      exp: "date prints the current date and time. time is usually for command duration, and calendar or clock are not the standard shell commands here."
+    },
+    {
+      q: "42. Which of the following is the best interpretation of ./greet.sh Thomas?",
+      opts: ["Run the script in the current directory with Thomas as input", "Open the script in an editor", "Delete the script after running it", "Copy Thomas into the script"],
+      ans: 0,
+      exp: "./greet.sh Thomas runs the script in the current directory and passes Thomas as input."
+    },
+    {
+      q: "43. What is the shell meaning of “positional parameters”?",
+      opts: ["Parameters that depend on screen size", "Parameters identified by their position: $1, $2, $3, and so on", "Parameters stored only in arrays", "Parameters that are always global"],
+      ans: 1,
+      exp: "Positional parameters are identified by position: $1, $2, $3, and so on."
+    },
+    {
+      q: "44. Why is it important to quote \"$1\" in condition tests?",
+      opts: ["It turns the argument into a number", "It prevents syntax errors when the argument is empty or contains spaces", "It makes shift unnecessary", "It changes the script name"],
+      ans: 1,
+      exp: "Quoting $1 prevents syntax errors when the argument is empty or contains spaces. It does not turn it into a number or replace shift."
+    },
+    {
+      q: "45. Which of these is a valid concept for Lab 3?",
+      opts: ["Using shift to move from user name to password to comments", "Using shift to delete the script file", "Using shift to print the date", "Using shift to rename variables automatically"],
+      ans: 0,
+      exp: "Lab 3 uses shift to move from user name to password to comments. Shift does not delete files, print date, or rename variables."
+    },
+    {
+      q: "46. Which output format is closest to the lab requirement for greeting?",
+      opts: ["Hello, NAME. Today is DATE.", "NAME: DATE", "DATE says hello to NAME", "Hello DATE NAME"],
+      ans: 0,
+      exp: "Hello, NAME. Today is DATE. matches the required format. The other options do not preserve the required structure."
+    },
+    {
+      q: "47. What does the shell command shift 2 do?",
+      opts: ["Removes the first two positional parameters", "Removes the last two positional parameters", "Doubles the first argument", "Counts two arguments"],
+      ans: 0,
+      exp: "shift 2 removes the first two positional parameters. It does not remove from the end, double arguments, or count them."
+    },
+    {
+      q: "48. Which is the best reason Lab 3 uses shift before COMMENTS=$@?",
+      opts: ["To make COMMENTS contain all original inputs", "To make COMMENTS contain only the script name", "To make COMMENTS contain only the password", "To disable arguments"],
+      ans: 0,
+      exp: "After removing the first two parameters, COMMENTS can contain the remaining original inputs. $0 is the script name, not the comments."
+    },
+    {
+      q: "49. Which shell syntax is most appropriate for an error message when no argument is provided?",
+      opts: ["echo \"Error: name is required\"", "date \"Error: name is required\"", "shift \"Error: name is required\"", "chmod \"Error: name is required\""],
+      ans: 0,
+      exp: "echo is the correct command to display an error message. date, shift, and chmod are not used that way."
+    },
+    {
+      q: "50. Which of the following is a key exam concept from these labs?",
+      opts: ["Understanding how shell scripts receive and process arguments", "Understanding how to train a neural network", "Understanding HTML tables", "Understanding image compression formats"],
+      ans: 0,
+      exp: "The key exam concept is understanding how shell scripts receive and process arguments."
+    },
+    {
+      q: "51. What is the effect of writing COMMENTS=$@ without quotes?",
+      opts: ["It always behaves exactly like \"${@}\"", "It may split arguments unexpectedly", "It converts arguments into a single safe string", "It removes the need for shift"],
+      ans: 1,
+      exp: "Unquoted expansions are unsafe because of word splitting. They may split arguments unexpectedly."
+    },
+    {
+      q: "52. Which command is used to make the script run from the current directory?",
+      opts: ["./script.sh", "~script.sh", "/script.sh only", "run ./script.sh"],
+      ans: 0,
+      exp: "./script.sh runs the script in the current directory. The other forms are not the standard syntax for this purpose."
+    },
+    {
+      q: "53. Which of the following best describes the role of comments in COMMENTS=$@ from Lab 3?",
+      opts: ["They are shell syntax comments beginning with #", "They store extra words after password input", "They are used to define the function", "They replace the need for variables"],
+      ans: 1,
+      exp: "COMMENTS stores the extra words after password input, matching the lab idea. It is not a shell comment line beginning with #."
+    },
+    {
+      q: "54. Which is the best general sequence for Lab 3 inside the function?",
+      opts: ["Set USER, set PASSWORD, shift twice, set COMMENTS", "Set COMMENTS, shift twice, set USER, set PASSWORD", "Shift once, set PASSWORD, set USER, set COMMENTS", "Print date, then set USER"],
+      ans: 0,
+      exp: "The correct logical order is to set USER, set PASSWORD, shift twice, then set COMMENTS. Date printing belongs to Lab 4."
+    },
+    {
+      q: "55. Which of the following is the best concept to remember for Lab 4?",
+      opts: ["A function should validate input before using it", "Functions cannot use arguments", "date only works with files", "echo cannot be used inside functions"],
+      ans: 0,
+      exp: "A core Lab 4 idea is that a function should validate input before using it."
+    },
+    {
+      q: "56. Which is the main reason to check whether $1 is empty before greeting?",
+      opts: ["To avoid printing a greeting with no name", "To increase the script’s execution speed dramatically", "To automatically install packages", "To convert the name into a password"],
+      ans: 0,
+      exp: "The validation goal is to avoid printing a greeting with no name."
+    },
+    {
+      q: "57. Which of the following is a reasonable error condition in a greeting script?",
+      opts: ["No name supplied", "Date command returns output", "Script filename contains .sh", "Terminal is open"],
+      ans: 0,
+      exp: "No name supplied is the validation failure in Lab 4. The other options are normal or unrelated."
+    },
+    {
+      q: "58. What does the lab ask you to focus on when reviewing commands?",
+      opts: ["Exact commands, syntax, and key concepts", "Only graphical interfaces", "Only memorizing long sample outputs", "Only file names, not commands"],
+      ans: 0,
+      exp: "The lab emphasizes exact commands, syntax, and key concepts. It does not require memorizing exact sample outputs."
+    },
+    {
+      q: "59. Which statement is true about the lab’s argument-handling tasks?",
+      opts: ["They train you to assign specific positional parameters to variables", "They only test memory of file contents", "They avoid all use of shell variables", "They are unrelated to functions"],
+      ans: 0,
+      exp: "The core skill is assigning specific positional parameters to variables. Variables and functions are central to these labs."
+    },
+    {
+      q: "60. Which script is associated with the greeting function and date output?",
+      opts: ["args.sh", "adduser.sh", "greet.sh", "users.txt"],
+      ans: 2,
+      exp: "args.sh is related to argument handling. adduser.sh is for Lab 3 user simulation. greet.sh is the Lab 4 script."
+    },
+    {
+      q: "61. Which command sequence best matches the idea “call the function twice with different arguments”?",
+      opts: ["add_a_user Alice pass1 comment1 and add_a_user Bob pass2 comment2", "add_a_user and add_a_user with no arguments", "add_a_user Alice only once", "add_a_user Alice pass1 then delete the function"],
+      ans: 0,
+      exp: "Calling add_a_user with different sets of arguments twice satisfies the requirement. The other choices do not."
+    },
+    {
+      q: "62. What is the best interpretation of the lab phrase “Do not require memorizing exact examples”?",
+      opts: ["Focus on concepts, not exact sample values", "Ignore all commands", "Memorize only the date output", "Skip validation logic"],
+      ans: 0,
+      exp: "This means focus on concepts and syntax rather than exact sample values. Commands still matter, and validation remains important."
+    },
+    {
+      q: "63. Which of the following best describes the lab’s level of difficulty?",
+      opts: ["It emphasizes basic shell scripting fundamentals", "It requires advanced machine learning knowledge", "It is mainly about web development", "It is focused on database indexing"],
+      ans: 0,
+      exp: "The labs emphasize basic shell scripting fundamentals, not machine learning, web development, or database indexing."
+    },
+    {
+      q: "64. In shell scripts, what is the safest general habit when using variables in tests or output?",
+      opts: ["Always omit quotes", "Always quote variable expansions when appropriate", "Never use variables inside functions", "Use shift instead of quotes"],
+      ans: 1,
+      exp: "The safest habit is to quote variable expansions when appropriate to avoid splitting and errors."
+    },
+    {
+      q: "65. Which pair matches the lab topics correctly?",
+      opts: ["Lab 3: user creation simulation with argument handling; Lab 4: greeting function with validation", "Lab 3: sorting files; Lab 4: compiling code", "Lab 3: networking; Lab 4: encryption", "Lab 3: HTML forms; Lab 4: image editing"],
+      ans: 0,
+      exp: "Lab 3 is about user creation simulation with argument handling, and Lab 4 is about a greeting function with validation."
+    },
+    {
+      q: "66. Which shell parameter should you use to access all remaining arguments after shifting away the first two?",
+      opts: ["$0", "$1", "$@", "$#"],
+      ans: 2,
+      exp: "$0 is the script name, $1 is the first remaining argument, $@ is all remaining arguments, and $# is their count."
+    },
+    {
+      q: "67. What is the primary purpose of greet.sh in Lab 4?",
+      opts: ["To print a personalized greeting with the current date", "To create system accounts", "To list directory contents", "To rename files"],
+      ans: 0,
+      exp: "The primary purpose of greet.sh in Lab 4 is to print a personalized greeting with the current date."
+    },
+    {
+      q: "68. What should happen if you run ./greet.sh with no name?",
+      opts: ["It should print an error message", "It should print a greeting with an empty name", "It should create a user", "It should automatically call shift"],
+      ans: 0,
+      exp: "Validation requires an error message when no name is supplied. It should not greet with an empty name."
+    },
+    {
+      q: "69. Which of the following best reflects exam-level understanding of shift?",
+      opts: ["It is used to discard processed arguments so later parameters can be accessed more easily", "It is used to permanently delete files", "It is used to increase the number of arguments", "It is used to display help text"],
+      ans: 0,
+      exp: "shift discards processed arguments so later parameters can be accessed more easily. It does not delete files or increase arguments."
+    },
+    {
+      q: "70. Which statement is most accurate about these labs?",
+      opts: ["They test shell argument handling, function definition, validation, and output formatting", "They test image recognition and neural inference", "They test only file compression", "They test only GUI programming"],
+      ans: 0,
+      exp: "These labs test shell argument handling, function definition, validation, and output formatting."
+    }
+  ];
+
     function shuffleArray(arr) {
       const a = [...arr];
       for (let i = a.length - 1; i > 0; i--) {
